@@ -1329,7 +1329,7 @@ void View3DInventorViewer::setRenderType(const RenderType type)
             int width = size[0];
             int height = size[1];
 
-            QtGLWidget* gl = static_cast<QtGLWidget*>(this->viewport());
+            QtGLWidget* gl = static_cast<QtGLWidget*>(this->getGLWidget());
             gl->makeCurrent();
 #if !defined(HAVE_QT5_OPENGL)
             framebuffer = new QtGLFramebufferObject(width, height, QtGLFramebufferObject::Depth);
@@ -1355,7 +1355,16 @@ void View3DInventorViewer::setRenderType(const RenderType type)
         break;
     case Image:
         {
-            glImage = grabFramebuffer();
+            const SbViewportRegion vp = this->getSoRenderManager()->getViewportRegion();
+            SbVec2s size = vp.getViewportSizePixels();
+
+            QtGLWidget* gl = static_cast<QtGLWidget*>(this->getGLWidget());
+            gl->makeCurrent();
+            int w = gl->width();
+            int h = gl->height();
+            QImage img(QSize(w,h), QImage::Format_RGB32);
+            glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, img.bits());
+            glImage = img;
         }
         break;
     }
@@ -1410,7 +1419,7 @@ QImage View3DInventorViewer::grabFramebuffer()
 
 void View3DInventorViewer::renderToFramebuffer(QtGLFramebufferObject* fbo)
 {
-    static_cast<QtGLWidget*>(this->viewport())->makeCurrent();
+    static_cast<QtGLWidget*>(this->getGLWidget())->makeCurrent();
     fbo->bind();
     int width = fbo->size().width();
     int height = fbo->size().height();

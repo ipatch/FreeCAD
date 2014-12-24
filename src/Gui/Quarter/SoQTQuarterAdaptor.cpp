@@ -170,31 +170,6 @@ void SIM::Coin3D::Quarter::SoQTQuarterAdaptor::init()
     getSoEventManager()->setNavigationState(SoEventManager::NO_NAVIGATION);
 }
 
-
-QWidget* SIM::Coin3D::Quarter::SoQTQuarterAdaptor::getWidget()
-{
-    //we keep the function from SoQt as we want to introduce the QGraphicsView and then the GLWidget
-    //is separated from the Widget used in layouts again
-    return this;
-}
-
-QWidget* SIM::Coin3D::Quarter::SoQTQuarterAdaptor::getGLWidget()
-{
-    return viewport();
-}
-
-QWidget* SIM::Coin3D::Quarter::SoQTQuarterAdaptor::getWidget() const
-{
-    //we keep the function from SoQt as we want to introduce the QGraphicsView and then the GLWidget
-    //is separated from the Widget used in layouts again
-    return const_cast<SoQTQuarterAdaptor*>(this);
-}
-
-QWidget* SIM::Coin3D::Quarter::SoQTQuarterAdaptor::getGLWidget() const
-{
-    return const_cast<QWidget*>(viewport());
-}
-
 void SIM::Coin3D::Quarter::SoQTQuarterAdaptor::setCameraType(SoType type)
 {
     if(!getSoRenderManager()->getCamera()->isOfType(SoPerspectiveCamera::getClassTypeId()) &&

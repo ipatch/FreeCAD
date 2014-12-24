@@ -52,11 +52,6 @@ public:
     virtual ~SoQTQuarterAdaptor();
 
     //the functions available in soqtviewer but missing in quarter
-    QWidget* getWidget();
-    QWidget* getGLWidget();
-    QWidget* getWidget() const;
-    QWidget* getGLWidget() const;
-
     virtual void setCameraType(SoType type);
     SoCamera * getCamera(void) const;
 

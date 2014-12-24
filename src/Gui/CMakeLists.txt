@@ -1193,6 +1193,19 @@ target_link_libraries(FreeCADGui ${FreeCADGui_LIBS})
 
 SET_BIN_DIR(FreeCADGui FreeCADGui)
 
+SET(QML
+    MainLayout.qml
+    MdiView.qml
+)
+fc_copy_sources(FreeCADGui "${CMAKE_BINARY_DIR}/data/Qml" ${QML})
+
+INSTALL(
+    FILES
+        ${QML}
+    DESTINATION
+        data/Qml
+)
+
 if(WIN32)
     INSTALL(TARGETS FreeCADGui
         RUNTIME DESTINATION bin

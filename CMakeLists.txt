@@ -725,6 +725,7 @@ endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
             set(QT_USE_QTSVG TRUE)
             set(QT_USE_QTUITOOLS TRUE)
             set(QT_USE_QTWEBKIT TRUE)
+            set(QT_USE_QTDECLARATIVE TRUE)
         endif(BUILD_GUI)
 
         find_package(Qt4)# REQUIRED
@@ -779,6 +780,7 @@ endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
             find_package(Qt5UiTools)
             find_package(Qt5Network)
             find_package(Qt5Concurrent)
+            find_package(Qt5Declarative)
             if (NOT WIN32)
             # Disable for Windows for now since building the Qt sources always fails
             find_package(Qt5WebKitWidgets)
@@ -812,7 +814,6 @@ endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
             endforeach(it)
         endmacro(fc_wrap_cpp)
     endif (NOT BUILD_QT5)
-
 
 #--------------------FreeType-----------------------
 

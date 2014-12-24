@@ -100,6 +100,7 @@
 #include <QGuiApplication>
 #endif
 
+#include <iostream>
 
 using namespace SIM::Coin3D::Quarter;
 
@@ -217,7 +218,7 @@ public:
     CustomGLWidget(const QGLFormat& fo, QWidget* parent = 0, const QGLWidget* shareWidget = 0, Qt::WindowFlags f = 0)
      : QGLWidget(fo, parent, shareWidget, f)
     {
-         setAutoBufferSwap(false);
+         //setAutoBufferSwap(false);
     }
 };
 #endif
@@ -255,7 +256,6 @@ QuarterWidget::constructor(const QtGLFormat & format, const QtGLWidget * sharewi
   
   setFrameStyle(QFrame::NoFrame);
   setAutoFillBackground(false);
-  viewport()->setAutoFillBackground(false);
   setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     
@@ -299,6 +299,7 @@ QuarterWidget::constructor(const QtGLFormat & format, const QtGLWidget * sharewi
   this->installEventFilter(PRIVATE(this)->interactionmode);
   
   initialized = false;
+  m_externalViewport = NULL;
 }
 
 void
@@ -833,8 +834,12 @@ void QuarterWidget::resizeEvent(QResizeEvent* event)
 /*!
   Overridden from QGLWidget to render the scenegraph
 */
-void QuarterWidget::paintEvent(QPaintEvent* event)
+//void QuarterWidget::paintEvent(QPaintEvent* event)
+void QuarterWidget::drawBackground(QPainter* painter, const QRectF& rect)
 {
+
+    painter->beginNativePainting();
+    
     std::clock_t begin = std::clock();
 
     if(!initialized) {
@@ -852,7 +857,7 @@ void QuarterWidget::paintEvent(QPaintEvent* event)
 #endif
     glMatrixMode(GL_PROJECTION);
 
-    QtGLWidget* w = static_cast<QtGLWidget*>(this->viewport());
+    QtGLWidget* w = static_cast<QtGLWidget*>(this->getGLWidget());
     assert(w->isValid() && "No valid GL context found!");
     // We might have to process the delay queue here since we don't know
     // if paintGL() is called from Qt, and we might have some sensors
@@ -882,8 +887,9 @@ void QuarterWidget::paintEvent(QPaintEvent* event)
     // Causes an OpenGL error on resize
     //glDrawBuffer(w->format().swapBehavior() == QSurfaceFormat::DoubleBuffer ? GL_BACK : GL_FRONT);
 #else
-    glDrawBuffer(w->doubleBuffer() ? GL_BACK : GL_FRONT);
+    //glDrawBuffer(w->doubleBuffer() ? GL_BACK : GL_FRONT);
 #endif
+
 
     w->makeCurrent();
     this->actualRedraw();
@@ -891,16 +897,16 @@ void QuarterWidget::paintEvent(QPaintEvent* event)
     //start the standard graphics view processing for all widgets and graphic items. As 
     //QGraphicsView initaliizes a QPainter which changes the Opengl context in an unpredictable 
     //manner we need to store the context and recreate it after Qt is done.
-    glPushAttrib(GL_MULTISAMPLE_BIT_EXT);
-    inherited::paintEvent(event);
-    glPopAttrib();
+//     glPushAttrib(GL_MULTISAMPLE_BIT_EXT);
+//     inherited::paintEvent(event);
+//     glPopAttrib();
 
 #if defined(HAVE_QT5_OPENGL)
     // Causes an OpenGL error on resize
     //if (w->format().swapBehavior() == QSurfaceFormat::DoubleBuffer)
     //    w->context()->swapBuffers(w->context()->surface());
 #else
-    if (w->doubleBuffer()) { w->swapBuffers(); }
+ //   if (w->doubleBuffer()) { w->swapBuffers(); }
 #endif
 
     PRIVATE(this)->autoredrawenabled = true;
@@ -911,6 +917,8 @@ void QuarterWidget::paintEvent(QPaintEvent* event)
 
     std::clock_t end = std::clock();
     renderTime = double(double(end-begin)/CLOCKS_PER_SEC)*1000.0;
+    
+    painter->endNativePainting();
 }
 
 bool QuarterWidget::viewportEvent(QEvent* event)
@@ -1298,6 +1306,44 @@ const QUrl &
 QuarterWidget::navigationModeFile(void) const
 {
   return PRIVATE(this)->navigationModeFile;
+}
+
+
+QWidget* QuarterWidget::getWidget()
+{
+    //we keep the function from SoQt as we want to introduce the QGraphicsView and then the GLWidget
+    //is seperated from the Widget used in layouts again
+    return this;
+}
+
+QWidget* QuarterWidget::getGLWidget()
+{
+    //someone may have changed our viewport from outside
+    if(viewport()->inherits("QGLWidget")){
+        return viewport();
+    }
+    else {
+        assert(m_externalViewport);
+        return m_externalViewport;
+    }
+}
+
+void QuarterWidget::setExternGlViewport(QGLWidget* vp)
+{
+     m_externalViewport = vp;
+}
+
+
+QWidget* QuarterWidget::getWidget() const
+{
+    //we keep the function from SoQt as we want to introduce the QGraphicsView and then the GLWidget
+    //is seperated from the Widget used in layouts again
+    return const_cast<QuarterWidget*>(this);
+}
+
+QWidget* QuarterWidget::getGLWidget() const
+{
+    return const_cast<QWidget*>(getGLWidget());
 }
 
 #undef PRIVATE

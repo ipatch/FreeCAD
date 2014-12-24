@@ -1823,18 +1823,19 @@ void Application::runApplication(void)
 
     hGrp = App::GetApplication().GetParameterGroupByPath("User parameter:BaseApp/Preferences/MainWindow");
     QMdiArea* mdi = mw.findChild<QMdiArea*>();
-    mdi->setProperty("showImage", hGrp->GetBool("TiledBackground", false));
+    if(mdi) {
+        mdi->setProperty("showImage", hGrp->GetBool("TiledBackground", false));
 
-    std::string style = hGrp->GetASCII("StyleSheet");
-    if (!style.empty()) {
-        QFile f(QLatin1String(style.c_str()));
-        if (f.open(QFile::ReadOnly)) {
-            mdi->setBackground(QBrush(Qt::NoBrush));
-            QTextStream str(&f);
-            qApp->setStyleSheet(str.readAll());
+        std::string style = hGrp->GetASCII("StyleSheet");
+        if (!style.empty()) {
+            QFile f(QLatin1String(style.c_str()));
+            if (f.open(QFile::ReadOnly)) {
+                mdi->setBackground(QBrush(Qt::NoBrush));
+                QTextStream str(&f);
+                qApp->setStyleSheet(str.readAll());
 
-            ActionStyleEvent e(ActionStyleEvent::Clear);
-            qApp->sendEvent(&mw, &e);
+                ActionStyleEvent e(ActionStyleEvent::Clear);
+                qApp->sendEvent(&mw, &e);
         }
     }
 #if QT_VERSION == 0x050600 && defined(Q_OS_WIN32)

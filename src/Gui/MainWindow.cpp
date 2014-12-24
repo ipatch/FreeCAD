@@ -49,6 +49,9 @@
 # include <QUrlQuery>
 #endif
 # include <QWhatsThis>
+# include <qdeclarative.h>
+# include <qdeclarativecomponent.h>
+# include <qdeclarativeitem.h>
 #endif
 
 #include <boost/signals.hpp>
@@ -140,6 +143,9 @@ struct MainWindowP
     QTimer* activityTimer;
     QTimer* visibleTimer;
     QMdiArea* mdiArea;
+    QDeclarativeView* declarativeView;
+    QTabBar* tabs;
+
     QPointer<MDIView> activeView;
     QSignalMapper* windowMapper;
     QSplashScreen* splashscreen;
@@ -148,6 +154,11 @@ struct MainWindowP
     QString whatstext;
     Assistant* assistant;
 };
+
+QmlProxy::QmlProxy(QGraphicsProxyWidget* parent): QGraphicsProxyWidget(parent)
+{
+}
+
 
 class MDITabbar : public QTabBar
 {
@@ -251,28 +262,42 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
     instance = this;
 
     // Create the layout containing the workspace and a tab bar
-    d->mdiArea = new QMdiArea();
+    if(0) {
+        d->declarativeView = NULL;
+        d->mdiArea = new QMdiArea();
+        setCentralWidget(d->mdiArea);
+        
 #if QT_VERSION >= 0x040500
-    d->mdiArea->setTabPosition(QTabWidget::South);
-    d->mdiArea->setViewMode(QMdiArea::TabbedView);
-    QTabBar* tab = d->mdiArea->findChild<QTabBar*>();
-    if (tab) {
-        // 0000636: Two documents close
+        d->mdiArea->setTabPosition(QTabWidget::South);
+        d->mdiArea->setViewMode(QMdiArea::TabbedView);
+        QTabBar* tab = d->mdiArea->findChild<QTabBar*>();
+        if (tab) {
+            // 0000636: Two documents close
 #if QT_VERSION < 0x040800
-        connect(tab, SIGNAL(tabCloseRequested(int)),
-                this, SLOT(tabCloseRequested(int)));
+            connect(tab, SIGNAL(tabCloseRequested(int)),
+                    this, SLOT(tabCloseRequested(int)));
 #endif
-        tab->setTabsClosable(true);
-        // The tabs might be very wide
-        tab->setExpanding(false);
+            tab->setTabsClosable(true);
+            // The tabs might be very wide
+            tab->setExpanding(false);
+        }
+#endif    
+        d->mdiArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+        d->mdiArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+        d->mdiArea->setOption(QMdiArea::DontMaximizeSubWindowOnActivation, false);
+        d->mdiArea->setActivationOrder(QMdiArea::ActivationHistoryOrder);
+        d->mdiArea->setBackground(QBrush(QColor(160,160,160)));
     }
-#endif
-    d->mdiArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    d->mdiArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    d->mdiArea->setOption(QMdiArea::DontMaximizeSubWindowOnActivation, false);
-    d->mdiArea->setActivationOrder(QMdiArea::ActivationHistoryOrder);
-    d->mdiArea->setBackground(QBrush(QColor(160,160,160)));
-    setCentralWidget(d->mdiArea);
+    else {
+        qmlRegisterType<QmlProxy>("FreeCADLib", 1, 0, "Proxy");
+        d->declarativeView = new QDeclarativeView(this);
+        d->declarativeView->setViewport(new QGLWidget);
+        d->declarativeView->setSource(QString::fromAscii("/home/stefan/Projects/FreeCAD_sf_master/src/Gui/MainLayout.qml"));
+        setCentralWidget(d->declarativeView);
+        
+        d->mdiArea = NULL;
+    };
+
 
     // labels and progressbar
     d->status = new StatusBarObserver();
@@ -308,8 +333,13 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
     // connection between workspace, window menu and tab bar
     connect(d->windowMapper, SIGNAL(mapped(QWidget *)),
             this, SLOT(onSetActiveSubWindow(QWidget*)));
-    connect(d->mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)),
-            this, SLOT(onWindowActivated(QMdiSubWindow* )));
+
+    if(d->mdiArea) {
+        connect(d->mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)),
+                this, SLOT(onWindowActivated(QMdiSubWindow* )));
+
+    connect(d->tabs, SIGNAL(currentChanged(int)),
+            this, SLOT(onTabSelected(int)));
 
     DockWindowManager* pDockMgr = DockWindowManager::instance();
 
@@ -463,37 +493,91 @@ QMenu* MainWindow::createPopupMenu ()
 
 void MainWindow::arrangeIcons()
 {
-    d->mdiArea->tileSubWindows();
+    if(d->mdiArea)
+        d->mdiArea->tileSubWindows();
 }
 
 void MainWindow::tile()
 {
-    d->mdiArea->tileSubWindows();
+// Warn about limitation in Qt4.8 involving multiple OpenGL widgets with Cocoa.
+#if defined(__APPLE__)
+    ParameterGrp::handle hGrp = App::GetApplication().GetUserParameter().
+        GetGroup("BaseApp")->GetGroup("Preferences")->GetGroup("MainWindow");
+
+    if(hGrp->GetBool("ShowAppleMdiWarning", true)) {
+        QMessageBox mb(this);
+        mb.setIcon(QMessageBox::Warning);
+        mb.setTextFormat(Qt::RichText);
+        mb.setText(tr("There is a rendering issue on MacOS."));
+        mb.setInformativeText(tr("See <a href=\"http://www.freecadweb.org/wiki/index.php?title=OpenGL_on_MacOS\"> the wiki</a> for more information"));
+
+        QAbstractButton *suppressBtn;
+        suppressBtn = mb.addButton(tr("Don't show again"), QMessageBox::DestructiveRole);
+        mb.addButton(QMessageBox::Ok);
+
+        mb.exec();
+        if(mb.clickedButton() == suppressBtn) {
+            hGrp->SetBool("ShowAppleMdiWarning", false);
+        }
+    }
+#endif // defined(__APPLE__)
+
+    if(d->mdiArea)
+        d->mdiArea->tileSubWindows();
 }
 
 void MainWindow::cascade()
 {
-    d->mdiArea->cascadeSubWindows();
+
+    if(d->mdiArea)
+        d->mdiArea->cascadeSubWindows();
+
+// See above in MainWindow::tile()
+#if defined(__APPLE__)
+    ParameterGrp::handle hGrp = App::GetApplication().GetUserParameter().
+        GetGroup("BaseApp")->GetGroup("Preferences")->GetGroup("MainWindow");
+
+    if(hGrp->GetBool("ShowAppleMdiWarning", true)) {
+        QMessageBox mb(this);
+        mb.setIcon(QMessageBox::Warning);
+        mb.setTextFormat(Qt::RichText);
+        mb.setText(tr("There is a rendering issue on MacOS."));
+        mb.setInformativeText(tr("See <a href=\"http://www.freecadweb.org/wiki/index.php?title=OpenGL_on_MacOS\"> the wiki</a> for more information"));
+
+        QAbstractButton *suppressBtn;
+        suppressBtn = mb.addButton(tr("Don't show again"), QMessageBox::DestructiveRole);
+        mb.addButton(QMessageBox::Ok);
+
+        mb.exec();
+        if(mb.clickedButton() == suppressBtn) {
+            hGrp->SetBool("ShowAppleMdiWarning", false);
+        }
+    }
+#endif // defined(__APPLE__)
 }
 
 void MainWindow::closeActiveWindow ()
 {
-    d->mdiArea->closeActiveSubWindow();
+    if(d->mdiArea)
+        d->mdiArea->closeActiveSubWindow();
 }
 
 void MainWindow::closeAllWindows ()
 {
-    d->mdiArea->closeAllSubWindows();
+    if(d->mdiArea)
+        d->mdiArea->closeAllSubWindows();
 }
 
 void MainWindow::activateNextWindow ()
 {
-    d->mdiArea->activateNextSubWindow();
+    if(d->mdiArea)
+        d->mdiArea->activateNextSubWindow();
 }
 
 void MainWindow::activatePreviousWindow ()
 {
-    d->mdiArea->activatePreviousSubWindow();
+    if(d->mdiArea)
+        d->mdiArea->activatePreviousSubWindow();
 }
 
 void MainWindow::activateWorkbench(const QString& name)
@@ -679,26 +763,62 @@ bool MainWindow::eventFilter(QObject* o, QEvent* e)
 
 void MainWindow::addWindow(MDIView* view)
 {
-    // make workspace parent of view
-    bool isempty = d->mdiArea->subWindowList().isEmpty();
-    QMdiSubWindow* child = new QMdiSubWindow(d->mdiArea->viewport());
-    child->setAttribute(Qt::WA_DeleteOnClose);
-    child->setWidget(view);
-    child->setWindowIcon(view->windowIcon());
-    QMenu* menu = child->systemMenu();
-
-    // See StdCmdCloseActiveWindow (#0002631)
-    QList<QAction*> acts = menu->actions();
-    for (QList<QAction*>::iterator it = acts.begin(); it != acts.end(); ++it) {
-        if ((*it)->shortcut() == QKeySequence(QKeySequence::Close)) {
-            (*it)->setShortcuts(QList<QKeySequence>());
-            break;
+    bool isempty = false;
+    if(d->mdiArea) {
+        isempty = d->mdiArea->subWindowList().isEmpty();
+        QMdiSubWindow* child = new QMdiSubWindow(d->mdiArea->viewport());
+        child->setAttribute(Qt::WA_DeleteOnClose);
+        child->setWidget(view);
+        child->setWindowIcon(view->windowIcon());
+        QMenu* menu = child->systemMenu();
+        QAction* action = menu->addAction(tr("Close All"));
+        connect(action, SIGNAL(triggered()), d->mdiArea, SLOT(closeAllSubWindows()));
+        d->mdiArea->addSubWindow(child);
+    }
+    else {
+        QDeclarativeComponent component(d->declarativeView->engine(), 
+                                        QString::fromAscii("/home/stefan/Projects/FreeCAD_sf_master/src/Gui/MdiView.qml"));
+        QDeclarativeItem* item = qobject_cast<QDeclarativeItem*>(component.create());
+        
+        //ensure that we all use only one opengl viewport. This means all QGraphicsViews with their own
+        //opengl viewport need to have this viewport removed and replaced by a normal QWidget. This is then
+        //still drawn with opengl via the main opengl viewport
+        QList<QGraphicsView*> gviews = view->findChildren<QGraphicsView*>();
+        if(!gviews.empty()) {
+            for(QList<QGraphicsView*>::iterator it = gviews.begin(); it != gviews.end(); it++) {
+                (*it)->setViewport(NULL);
+                Base::Console().Message("change viewport to NULL\n");
+                //if((*it)->inherits("View3DInventorViewer")) {
+                //    Base::Console().Message("set external gl viewport\n");
+                QGLWidget* glw = static_cast<QGLWidget*>(d->declarativeView->viewport());
+                if(!glw)
+                    Base::Console().Message("no gl viewport found\n");
+                else
+                    Base::Console().Message("gl viewport found\n");
+                
+                static_cast<View3DInventorViewer*>(*it)->setExternGlViewport(glw);
+                //}
+            }
         }
+        
+        QObject* proxy = item->findChild<QObject*>(QString::fromAscii("proxy"));
+        if(proxy)
+            qobject_cast<QmlProxy*>(proxy)->setWidget(view);
+        else
+            Base::Console().Error("No proxy found, view can not be added to layout");
+        
+        item->setParentItem(qobject_cast<QDeclarativeItem*>(d->declarativeView->rootObject()));        
+        //d->declarativeView->scene()->addItem(item);
     }
 
-    QAction* action = menu->addAction(tr("Close All"));
-    connect(action, SIGNAL(triggered()), d->mdiArea, SLOT(closeAllSubWindows()));
-    d->mdiArea->addSubWindow(child);
+#if defined(Q_OS_WIN32)
+    // avoid dragging problem with not maximized mdi childs which have embedded a GL window
+    QWidget* p = view->parentWidget();
+    if (p) {
+        QWidgetResizeHandler* handler = p->findChild<QWidgetResizeHandler*>();
+        if (handler) handler->setMovingEnabled(false);
+    }
+#endif
 
     connect(view, SIGNAL(message(const QString&, int)),
             this, SLOT(showMessage(const QString&, int)));
@@ -749,7 +869,11 @@ void MainWindow::removeWindow(Gui::MDIView* view)
     // of other mdi windows to get maximized if this window is maximized will fail.
     // However, we must let it here otherwise deleting MDI child views directly can
     // cause other problems.
-    d->mdiArea->removeSubWindow(parent);
+    if(d->mdiArea)
+        d->mdiArea->removeSubWindow(parent);
+    else {
+        Base::Console().Message("remove Windwow\n");
+    }
     parent->deleteLater();
 }
 
@@ -760,23 +884,27 @@ void MainWindow::tabChanged(MDIView* view)
 
 void MainWindow::tabCloseRequested(int index)
 {
-    QTabBar* tab = d->mdiArea->findChild<QTabBar*>();
-    if (index < 0 || index >= tab->count())
-        return;
+    if(d->mdiArea) {
+        QTabBar* tab = d->mdiArea->findChild<QTabBar*>();
+        if (index < 0 || index >= tab->count())
+            return;
 
-    const QList<QMdiSubWindow *> subWindows = d->mdiArea->subWindowList();
-    Q_ASSERT(index < subWindows.size());
+        const QList<QMdiSubWindow *> subWindows = d->mdiArea->subWindowList();
+        Q_ASSERT(index < subWindows.size());
 
-    QMdiSubWindow *subWindow = d->mdiArea->subWindowList().at(index);
-    Q_ASSERT(subWindow);
-    subWindow->close();
+        QMdiSubWindow *subWindow = d->mdiArea->subWindowList().at(index);
+        Q_ASSERT(subWindow);
+        subWindow->close();
+    }
 }
 
 void MainWindow::onSetActiveSubWindow(QWidget *window)
 {
     if (!window)
         return;
-    d->mdiArea->setActiveSubWindow(qobject_cast<QMdiSubWindow *>(window));
+    
+    if(d->mdiArea)
+        d->mdiArea->setActiveSubWindow(qobject_cast<QMdiSubWindow *>(window));
 }
 
 void MainWindow::setActiveWindow(MDIView* view)
@@ -811,9 +939,9 @@ void MainWindow::onWindowActivated(QMdiSubWindow* w)
 
 void MainWindow::onWindowsMenuAboutToShow()
 {
-    QList<QMdiSubWindow*> windows = d->mdiArea->subWindowList(QMdiArea::CreationOrder);
-    QWidget* active = d->mdiArea->activeSubWindow();
-
+    QList<QMdiSubWindow*> windows = windows();
+    QWidget* active = activeWindow();
+    
     // We search for the 'Std_WindowsMenu' command that provides the list of actions
     CommandManager& cMgr = Application::Instance->commandManager();
     Command* cmd = cMgr.getCommandByName("Std_WindowsMenu");
@@ -831,9 +959,9 @@ void MainWindow::onWindowsMenuAboutToShow()
         }
     }
 
-    int numWindows = std::min<int>(actions.count()-1, windows.count());
+    int numWindows = std::min<int>(actions.count()-1, _windows.count());
     for (int index = 0; index < numWindows; index++) {
-        QWidget* child = windows.at(index);
+        QWidget* child = _windows.at(index);
         QAction* action = actions.at(index);
         QString text;
         QString title = child->windowTitle();
@@ -894,12 +1022,21 @@ void MainWindow::onDockWindowMenuAboutToShow()
 QList<QWidget*> MainWindow::windows(QMdiArea::WindowOrder order) const
 {
     QList<QWidget*> mdis;
-    QList<QMdiSubWindow*> wnds = d->mdiArea->subWindowList(order);
-    for (QList<QMdiSubWindow*>::iterator it = wnds.begin(); it != wnds.end(); ++it) {
-        mdis << (*it)->widget();
-    }
+    if(d->mdiArea) {
+        QList<QMdiSubWindow*> wnds = d->mdiArea->subWindowList(order);
+        for (QList<QMdiSubWindow*>::iterator it = wnds.begin(); it != wnds.end(); ++it) {
+            mdis << (*it)->widget();
+        }
+    }    
     return mdis;
 }
+
+#if !defined (NO_USE_QT_MDI_AREA)
+QMdiArea* MainWindow::getMdiArea()
+{
+    return d->mdiArea;
+}
+#endif
 
 // set text to the pane
 void MainWindow::setPaneText(int i, QString text)
@@ -936,9 +1073,9 @@ void MainWindow::closeEvent (QCloseEvent * e)
             if (!(*it).isNull())
                 (*it)->close();
         }
-        QList<MDIView*> mdis = this->findChildren<MDIView*>();
+        QList<QWidget*> mdis = this->windows();
         // Force to close any remaining (passive) MDI child views
-        for (QList<MDIView*>::iterator it = mdis.begin(); it != mdis.end(); ++it) {
+        for (QList<QWidget*>::iterator it = mdis.begin(); it != mdis.end(); ++it) {
             (*it)->hide();
             (*it)->deleteLater();
         }
@@ -1485,8 +1622,8 @@ void MainWindow::changeEvent(QEvent *e)
         if (wb) wb->retranslate();
     }
     else if (e->type() == QEvent::ActivationChange) {
-        if (isActiveWindow()) {
-            QMdiSubWindow* mdi = d->mdiArea->currentSubWindow();
+        if (isActiveWindow() && getMdiArea()) {
+            QMdiSubWindow* mdi = d->mdiArea->activeSubWindow();
             if (mdi) {
                 MDIView* view = dynamic_cast<MDIView*>(mdi->widget());
                 if (view && getMainWindow()->activeWindow() != view) {
