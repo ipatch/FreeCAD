@@ -144,11 +144,13 @@
 #include <Inventor/SoDB.h>
 #include <Inventor/nodekits/SoNodeKit.h>
 #include <Inventor/SoInteraction.h>
+#include <qdeclarative.h>
 
 #include <Quarter/Quarter.h>
 #include "SensorManager.h"
 
 #include "QuarterP.h"
+#include "QuarterWidget.h"
 
 using namespace SIM::Coin3D::Quarter;
 
@@ -176,6 +178,9 @@ Quarter::init(bool initCoin)
   self = new QuarterP;
   self->initCoin = initCoin;
 
+  //init the quarterwidgets qml viewer
+  qmlRegisterType<QuarterDrawDeclarativeItem> ("QuarterLib", 1, 0, "Scene3D");
+  qmlRegisterType<QuarterInteractionDeclarativeItem>("QuarterLib", 1, 0, "Interaction3D");
 }
 
 /*!

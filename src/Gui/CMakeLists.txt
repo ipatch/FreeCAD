@@ -1196,6 +1196,7 @@ SET_BIN_DIR(FreeCADGui FreeCADGui)
 SET(QML
     MainLayout.qml
     MdiView.qml
+    Quarter/View3D.qml
 )
 fc_copy_sources(FreeCADGui "${CMAKE_BINARY_DIR}/data/Qml" ${QML})
 

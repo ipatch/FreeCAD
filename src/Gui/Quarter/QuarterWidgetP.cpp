@@ -88,6 +88,7 @@ QuarterWidgetP::QuarterWidgetP(QuarterWidget * masterptr, const QtGLWidget * sha
   addactions(true),
   device_pixel_ratio(1.0),
   contextmenu(NULL)
+  externalViewport(NULL)
 {
   this->cachecontext = findCacheContext(masterptr, sharewidget);
 
@@ -100,10 +101,12 @@ QuarterWidgetP::QuarterWidgetP(QuarterWidget * masterptr, const QtGLWidget * sha
 
 QuarterWidgetP::~QuarterWidgetP()
 {
-  QtGLWidget* glMaster = static_cast<QtGLWidget*>(this->master->viewport());
-  removeFromCacheContext(this->cachecontext, glMaster);
-  if (this->contextmenu) {
-    delete this->contextmenu;
+  if(!externalViewport) {
+      QtGLWidget* glMaster = static_cast<QtGLWidget*>(this->master->viewport());
+      removeFromCacheContext(this->cachecontext, glMaster);
+      if (this->contextmenu) {
+          delete this->contextmenu;
+      }
   }
 }
 
@@ -343,5 +346,12 @@ QuarterWidgetP::nativeEventFilter(void * message, long * result)
 #endif // HAVE_SPACENAV_LIB
 
   return false;
+}
+
+void QuarterWidgetP::switchToExternalGLViewport()
+{
+    assert(!externalViewport);
+    QGLWidget* glMaster = static_cast<QGLWidget*>(this->master->viewport());
+    removeFromCacheContext(this->cachecontext, glMaster);
 }
 

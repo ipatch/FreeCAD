@@ -59,7 +59,6 @@ public:
   void setOn(bool on);
   bool on(void) const;
 
-protected:
   virtual bool eventFilter(QObject *, QEvent * event);
 
 private:

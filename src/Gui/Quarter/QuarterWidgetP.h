@@ -108,6 +108,10 @@ public:
   mutable QActionGroup * rendermodegroup;
 
   mutable ContextMenu * contextmenu;
+  
+  //external viewport
+  QGLWidget* externalViewport;
+  void switchToExternalGLViewport();
 
   static bool nativeEventFilter(void * message, long * result);
   void replaceGLWidget(const QtGLWidget * newviewport);

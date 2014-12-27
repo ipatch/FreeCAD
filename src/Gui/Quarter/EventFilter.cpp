@@ -61,20 +61,31 @@ public:
   QPoint globalmousepos;
   SbVec2s windowsize;
 
-  void trackWindowSize(QResizeEvent * event)
+  void trackWindowSize(QGraphicsSceneResizeEvent * event)
   {
-    this->windowsize = SbVec2s(event->size().width(),
-                               event->size().height());
+    this->windowsize = SbVec2s(event->newSize().width(),
+                               event->newSize().height());
 
     foreach(InputDevice * device, this->devices) {
       device->setWindowSize(this->windowsize);
     }
   }
 
-  void trackPointerPosition(QMouseEvent * event)
+  void trackPointerPosition(QGraphicsSceneMouseEvent * event)
   {
     assert(this->windowsize[1] != -1);
-    this->globalmousepos = event->globalPos();
+    this->globalmousepos = event->screenPos();
+
+    SbVec2s mousepos(event->pos().x(), this->windowsize[1] - event->pos().y() - 1);
+    foreach(InputDevice * device, this->devices) {
+      device->setMousePosition(mousepos);
+    }
+  }
+  
+  void trackPointerPosition(QGraphicsSceneHoverEvent * event)
+  {
+    assert(this->windowsize[1] != -1);
+    this->globalmousepos = event->screenPos();
 
     SbVec2s mousepos(event->pos().x(), this->windowsize[1] - event->pos().y() - 1);
     // the following corrects for high-dpi displays (e.g. mac retina)
@@ -152,14 +163,17 @@ EventFilter::eventFilter(QObject * obj, QEvent * qevent)
   // make sure every device has updated screen size and mouse position
   // before translating events
   switch (qevent->type()) {
-  case QEvent::MouseMove:
-  case QEvent::MouseButtonPress:
-  case QEvent::MouseButtonRelease:
-  case QEvent::MouseButtonDblClick:
-    PRIVATE(this)->trackPointerPosition(dynamic_cast<QMouseEvent *>(qevent));
+  case QEvent::GraphicsSceneHoverMove:
+      PRIVATE(this)->trackPointerPosition(dynamic_cast<QGraphicsSceneHoverEvent *>(qevent));
+      break;
+  case QEvent::GraphicsSceneMouseMove:
+  case QEvent::GraphicsSceneMousePress:
+  case QEvent::GraphicsSceneMouseRelease:
+  case QEvent::GraphicsSceneMouseDoubleClick:
+    PRIVATE(this)->trackPointerPosition(dynamic_cast<QGraphicsSceneMouseEvent *>(qevent));
     break;
-  case QEvent::Resize:
-    PRIVATE(this)->trackWindowSize(dynamic_cast<QResizeEvent *>(qevent));
+  case QEvent::GraphicsSceneResize:
+    PRIVATE(this)->trackWindowSize(dynamic_cast<QGraphicsSceneResizeEvent *>(qevent));
     break;
   default:
     break;

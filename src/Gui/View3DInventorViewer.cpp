@@ -1560,19 +1560,6 @@ void View3DInventorViewer::renderGLImage()
 // upon spin.
 void View3DInventorViewer::renderScene(void)
 {
-    // Must set up the OpenGL viewport manually, as upon resize
-    // operations, Coin won't set it up until the SoGLRenderAction is
-    // applied again. And since we need to do glClear() before applying
-    // the action..
-    const SbViewportRegion vp = this->getSoRenderManager()->getViewportRegion();
-    SbVec2s origin = vp.getViewportOriginPixels();
-    SbVec2s size = vp.getViewportSizePixels();
-    glViewport(origin[0], origin[1], size[0], size[1]);
-
-    const QColor col = this->backgroundColor();
-    glClearColor(col.redF(), col.greenF(), col.blueF(), 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
 
 #if defined(ENABLE_GL_DEPTH_RANGE)
     // using 90% of the z-buffer for the background and the main node
@@ -2469,7 +2456,8 @@ void View3DInventorViewer::drawAxisCross(void)
     SbVec2s origin(view[0]/2 - pixelarea/2, view[1]/2 - pixelarea/2);
 #endif // middle of canvas
 #if 1 // lower right of canvas
-    SbVec2s origin(view[0] - pixelarea, 0);
+    SbVec2s vporigin = getSoRenderManager()->getViewportRegion().getViewportOriginPixels();
+    SbVec2s origin(view[0] - pixelarea + vporigin[0], vporigin[1]);
 #endif // lower right of canvas
     glViewport(origin[0], origin[1], pixelarea, pixelarea);
 

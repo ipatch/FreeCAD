@@ -292,6 +292,8 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
         qmlRegisterType<QmlProxy>("FreeCADLib", 1, 0, "Proxy");
         d->declarativeView = new QDeclarativeView(this);
         d->declarativeView->setViewport(new QGLWidget);
+        d->declarativeView->setAutoFillBackground(false);
+        d->declarativeView->viewport()->setAutoFillBackground(false);
         d->declarativeView->setSource(QString::fromAscii("/home/stefan/Projects/FreeCAD_sf_master/src/Gui/MainLayout.qml"));
         setCentralWidget(d->declarativeView);
         
@@ -780,24 +782,15 @@ void MainWindow::addWindow(MDIView* view)
                                         QString::fromAscii("/home/stefan/Projects/FreeCAD_sf_master/src/Gui/MdiView.qml"));
         QDeclarativeItem* item = qobject_cast<QDeclarativeItem*>(component.create());
         
-        //ensure that we all use only one opengl viewport. This means all QGraphicsViews with their own
-        //opengl viewport need to have this viewport removed and replaced by a normal QWidget. This is then
-        //still drawn with opengl via the main opengl viewport
-        QList<QGraphicsView*> gviews = view->findChildren<QGraphicsView*>();
+        //ensure that we all use only one opengl viewport. This means all View3DInventorViewer with their 
+        //own opengl viewport need to have this viewport removed and replaced by a normal QWidget. This is
+        //then still drawn with opengl via the main opengl viewport
+        QList<View3DInventorViewer*> gviews = view->findChildren<View3DInventorViewer*>();
         if(!gviews.empty()) {
-            for(QList<QGraphicsView*>::iterator it = gviews.begin(); it != gviews.end(); it++) {
-                (*it)->setViewport(NULL);
+            for(QList<View3DInventorViewer*>::iterator it = gviews.begin(); it != gviews.end(); it++) {
                 Base::Console().Message("change viewport to NULL\n");
-                //if((*it)->inherits("View3DInventorViewer")) {
-                //    Base::Console().Message("set external gl viewport\n");
                 QGLWidget* glw = static_cast<QGLWidget*>(d->declarativeView->viewport());
-                if(!glw)
-                    Base::Console().Message("no gl viewport found\n");
-                else
-                    Base::Console().Message("gl viewport found\n");
-                
-                static_cast<View3DInventorViewer*>(*it)->setExternGlViewport(glw);
-                //}
+                (*it)->setExternGlViewport(glw);
             }
         }
         

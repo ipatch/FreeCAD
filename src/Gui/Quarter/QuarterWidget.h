@@ -38,9 +38,10 @@
 #include <Inventor/actions/SoGLRenderAction.h>
 
 #include <QtGui/QColor>
-#include <QGraphicsView>
 #include <QtCore/QUrl>
 #include <QtOpenGL.h>
+#include <QDeclarativeView>
+#include <qdeclarativeitem.h>
 #include "Gui/Quarter/Basic.h"
 
 class QMenu;
@@ -55,10 +56,12 @@ class SoScXMLStateMachine;
 namespace SIM { namespace Coin3D { namespace Quarter {
 
 class EventFilter;
+class InteractionMode;
+
 const char DEFAULT_NAVIGATIONFILE []  = "coin:///scxml/navigation/examiner.xml";
 
-class QUARTER_DLL_API QuarterWidget : public QGraphicsView {
-  typedef QGraphicsView inherited;
+class QUARTER_DLL_API QuarterWidget : public QDeclarativeView {
+  typedef QDeclarativeView inherited;
   Q_OBJECT
 
   Q_PROPERTY(QUrl navigationModeFile READ navigationModeFile WRITE setNavigationModeFile RESET resetNavigationModeFile)
@@ -201,20 +204,57 @@ private Q_SLOTS:
 protected:
   //virtual void paintEvent(QPaintEvent*);
   virtual void resizeEvent(QResizeEvent*);
-  virtual bool viewportEvent(QEvent* event);
   virtual void actualRedraw(void);
   virtual bool updateDevicePixelRatio(void);
   virtual void drawBackground(QPainter* painter, const QRectF& rect);
+
   
   double renderTime;
 
 private:
   void constructor(const QtGLFormat& format, const QtGLWidget* sharewidget);
   friend class QuarterWidgetP;
+  friend class QuarterDrawDeclarativeItem;
   class QuarterWidgetP * pimpl;
-  bool initialized;  
-  //external viewport
-  QGLWidget* m_externalViewport; //TODO: move this to the pimpl
+};
+
+//declarative item which draws the 3d content. Having an extra item for this prevents to draw on
+//the background and also prevents for relying on viewportevents. Both fails when we use an external
+//opengl viewport
+class QuarterDrawDeclarativeItem : public QDeclarativeItem {
+    
+public:
+    QuarterDrawDeclarativeItem(QDeclarativeItem* parent = NULL);
+    
+    virtual void paint(QPainter*, const QStyleOptionGraphicsItem*, QWidget*);
+    
+protected:
+    void setRenderContext(QuarterWidget* w, QuarterWidgetP* wp);
+    
+    friend class QuarterWidget;
+private:
+    class QuarterWidget*  quarterwidget; 
+    class QuarterWidgetP* pimpl;
+    
+    bool initialized;  
+};
+
+//declarative item which receives the events and forwards them to the 3d scene
+class QuarterInteractionDeclarativeItem : public QDeclarativeItem {
+    
+    Q_OBJECT
+public:
+    QuarterInteractionDeclarativeItem(QDeclarativeItem *parent = 0);
+ 
+    virtual bool sceneEvent(QEvent*); 
+    virtual void geometryChanged(const QRectF& newGeometry, const QRectF& oldGeometry);
+    virtual void keyPressEvent(QKeyEvent* event);
+    virtual void keyReleaseEvent(QKeyEvent* event);
+    void setEventContext(EventFilter* filter, InteractionMode* mode);
+   
+private:
+    EventFilter*        m_eventfilter;
+    InteractionMode*    m_interactionMode;
 };
 
 }}} // namespace

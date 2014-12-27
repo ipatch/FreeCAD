@@ -74,8 +74,6 @@ InteractionMode::eventFilter(QObject * obj, QEvent * event)
     return false;
   }
 
-  assert(obj == this->quarterwidget);
-
   switch (event->type()) {
   case QEvent::KeyPress:
     return this->keyPressEvent(dynamic_cast<QKeyEvent *>(event));

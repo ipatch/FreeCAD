@@ -35,10 +35,12 @@
 
 #include <Quarter/Basic.h>
 #include <Inventor/SbVec2s.h>
+#include <Qt>
 
 class QEvent;
 class SoEvent;
 class QInputEvent;
+class QGraphicsSceneMouseEvent;
 
 namespace SIM { namespace Coin3D { namespace Quarter {
 
@@ -56,6 +58,7 @@ public:
   void setMousePosition(const SbVec2s & pos);
   void setWindowSize(const SbVec2s & size);
   void setModifiers(SoEvent * soevent, const QInputEvent * qevent);
+  void setModifiers(SoEvent* soevent, QFlags<Qt::KeyboardModifiers> modifiers);
 
 protected:
   SbVec2s mousepos;
