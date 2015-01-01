@@ -50,8 +50,9 @@
 #endif
 # include <QWhatsThis>
 # include <qdeclarative.h>
-# include <qdeclarativecomponent.h>
-# include <qdeclarativeitem.h>
+# include <QDeclarativeComponent>
+# include <QDeclarativeItem>
+# include <QDeclarativeContext>
 #endif
 
 #include <boost/signals.hpp>
@@ -129,7 +130,6 @@ using namespace Gui;
 using namespace Gui::DockWnd;
 using namespace std;
 
-
 MainWindow* MainWindow::instance = 0L;
 
 namespace Gui {
@@ -143,7 +143,9 @@ struct MainWindowP
     QTimer* activityTimer;
     QTimer* visibleTimer;
     QMdiArea* mdiArea;
+    //dynamic layout members
     QDeclarativeView* declarativeView;
+    QList<QObject*>   views;
     QTabBar* tabs;
 
     QPointer<MDIView> activeView;
@@ -290,13 +292,15 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
     }
     else {
         qmlRegisterType<QmlProxy>("FreeCADLib", 1, 0, "Proxy");
+        
         d->declarativeView = new QDeclarativeView(this);
         d->declarativeView->setViewport(new QGLWidget);
         d->declarativeView->setAutoFillBackground(false);
         d->declarativeView->viewport()->setAutoFillBackground(false);
-        d->declarativeView->setSource(QString::fromAscii("/home/stefan/Projects/FreeCAD_sf_master/src/Gui/MainLayout.qml"));
+        d->declarativeView->setResizeMode(QDeclarativeView::SizeRootObjectToView);
+        d->declarativeView->setSource(QString::fromAscii("/home/stefan/Projects/FreeCAD_sf_master/src/Gui/Qml/MainLayout.qml"));
         setCentralWidget(d->declarativeView);
-        
+                 
         d->mdiArea = NULL;
     };
 
@@ -777,11 +781,7 @@ void MainWindow::addWindow(MDIView* view)
         connect(action, SIGNAL(triggered()), d->mdiArea, SLOT(closeAllSubWindows()));
         d->mdiArea->addSubWindow(child);
     }
-    else {
-        QDeclarativeComponent component(d->declarativeView->engine(), 
-                                        QString::fromAscii("/home/stefan/Projects/FreeCAD_sf_master/src/Gui/MdiView.qml"));
-        QDeclarativeItem* item = qobject_cast<QDeclarativeItem*>(component.create());
-        
+    else {     
         //ensure that we all use only one opengl viewport. This means all View3DInventorViewer with their 
         //own opengl viewport need to have this viewport removed and replaced by a normal QWidget. This is
         //then still drawn with opengl via the main opengl viewport
@@ -794,14 +794,20 @@ void MainWindow::addWindow(MDIView* view)
             }
         }
         
-        QObject* proxy = item->findChild<QObject*>(QString::fromAscii("proxy"));
-        if(proxy)
-            qobject_cast<QmlProxy*>(proxy)->setWidget(view);
-        else
-            Base::Console().Error("No proxy found, view can not be added to layout");
+        //create the component and set the view proxy
+        QDeclarativeComponent component(d->declarativeView->engine(), 
+                                         QString::fromAscii("/home/stefan/Projects/FreeCAD_sf_master/src/Gui/Qml/MDIView.qml"));
+        QDeclarativeItem* item = qobject_cast<QDeclarativeItem*>(component.create());
+        item->setProperty("proxy", QVariant::fromValue(static_cast<QWidget*>(view)));
         
-        item->setParentItem(qobject_cast<QDeclarativeItem*>(d->declarativeView->rootObject()));        
-        //d->declarativeView->scene()->addItem(item);
+        //add it to the scene
+        QObject* mdiview = d->declarativeView->rootObject()->findChild<QObject*>(QString::fromAscii("mdiarea"));
+        if(mdiview)
+            item->setParentItem(qobject_cast<QDeclarativeItem*>(mdiview)); 
+        else {
+            Base::Console().Error("No mdiview found, view can not be added to layout");
+            return;
+        } 
     }
 
 #if defined(Q_OS_WIN32)
