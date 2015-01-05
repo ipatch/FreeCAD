@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (c) 2014 StefanTroeger <stefantroeger@gmx.net>              *
+ *   Copyright (c) 2015 Stefan Tröger <stefantroeger@gmx.net>              *
  *                                                                         *
  *   This file is part of the FreeCAD CAx development system.              *
  *                                                                         *
@@ -20,54 +20,30 @@
  *                                                                         *
  ***************************************************************************/
 
-import QtQuick 1.1
+#include "QmlTypes.h"
 
-Item {
-    id: navigator
-    default property alias model: list.model
-    property int  tabwidth: 120
-    property Item mdiArea
-        
-    height: 20
-    width:  3*tabwidth
-   
-    anchors.bottom: parent.bottom
-    anchors.horizontalCenter: parent.horizontalCenter
-    
-    ListView {
-        id: list
-        highlightFollowsCurrentItem: true
-        orientation: ListView.Horizontal 
-        anchors.fill: parent
-        highlight: Rectangle {
-            width:  tabwidth
-            height: 20
-            color: "#60FF0000"
-        }
-        delegate: Rectangle {
-            width:  tabwidth
-            height: 20
-            color: "#600000FF"
+using namespace Gui;
 
-            Text {
-                width:  tabwidth
-                height: 20
-                elide: Text.ElideRight
-                text: model.modelData.proxy.windowTitle
-            }
-            MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        mdiArea.current = index
-                        list.currentIndex = index;
-                    }
-            }
-        }
-    }
-    
-    onModelChanged: {
-        mdiArea.current = list.model.length-1
-        list.currentIndex = list.model.length-1
-        console.debug("Mdi ListView model changed, count: ", list.model.length)
-    }
+QmlProxy::QmlProxy(QDeclarativeItem* parent): QDeclarativeItem(parent)
+{
+    m_proxy = new QGraphicsProxyWidget(this);
 }
+
+QWidget* QmlProxy::proxy()
+{
+    return m_proxy->widget();
+}
+
+void QmlProxy::setProxy(QWidget* w)
+{
+    m_proxy->setWidget(w);
+}
+
+void QmlProxy::geometryChanged(const QRectF& newGeometry, const QRectF& oldGeometry)
+{
+    m_proxy->setGeometry(newGeometry);
+    QDeclarativeItem::geometryChanged(newGeometry, oldGeometry);
+}
+
+
+#include "moc_QmlTypes.cpp"

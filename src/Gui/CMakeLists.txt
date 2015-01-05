@@ -283,6 +283,7 @@ set(Gui_MOC_HDRS
     View3DInventor.h
     WidgetFactory.h
     Widgets.h
+    QmlTypes.h
     Language/Translator.h
     propertyeditor/PropertyEditor.h
     propertyeditor/PropertyItem.h
@@ -821,6 +822,7 @@ SET(View3D_CPP_SRCS
     CoinRiftWidget.cpp
     View3DPy.cpp
     View3DViewerPy.cpp
+    QmlTypes.cpp
 )
 SET(View3D_SRCS
     ${View3D_CPP_SRCS}
@@ -837,6 +839,7 @@ SET(View3D_SRCS
     View3DInventorRiftViewer.h
     CoinRiftWidget.h
     View3DViewerPy.h
+    QmlTypes.h
 )
 SOURCE_GROUP("View3D" FILES ${View3D_SRCS})
 

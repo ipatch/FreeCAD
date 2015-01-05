@@ -41,7 +41,7 @@
 #include <QtCore/QUrl>
 #include <QtOpenGL.h>
 #include <QDeclarativeView>
-#include <qdeclarativeitem.h>
+#include <QDeclarativeItem>
 #include "Gui/Quarter/Basic.h"
 
 class QMenu;

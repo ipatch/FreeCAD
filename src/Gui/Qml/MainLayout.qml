@@ -35,6 +35,7 @@ Rectangle {
     }
     
     MDINavigator {
+        id: navigator
         model: viewManager.children
         mdiArea: viewManager
     }

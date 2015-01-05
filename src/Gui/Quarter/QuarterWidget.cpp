@@ -251,8 +251,6 @@ QuarterWidget::QuarterWidget(QtGLContext * context, QWidget * parent, const QtGL
 void
 QuarterWidget::constructor(const QtGLFormat & format, const QtGLWidget * sharewidget)
 {
-  QGraphicsScene* scene = new QGraphicsScene;
-  setScene(scene);
   setViewport(new QGLWidget(format, this, sharewidget)); 
   setSource(QString::fromAscii("/home/stefan/Projects/FreeCAD_sf_master/src/Gui/Quarter/View3D.qml"));
   
@@ -304,8 +302,10 @@ QuarterWidget::constructor(const QtGLFormat & format, const QtGLWidget * sharewi
   //install the event filters to our scene mouse item
   QObject* mouseitem = rootObject()->findChild<QObject*>("interaction3d");
   if(mouseitem)
-      static_cast<QuarterInteractionDeclarativeItem*>(mouseitem)->setEventContext(PRIVATE(this)->eventfilter, 
+     static_cast<QuarterInteractionDeclarativeItem*>(mouseitem)->setEventContext(PRIVATE(this)->eventfilter, 
                                                                         PRIVATE(this)->interactionmode);
+  else 
+     qWarning() << "No Interaction3D element found, mouse handling disabled";
   
   PRIVATE(this)->externalViewport = NULL;
 }

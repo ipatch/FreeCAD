@@ -463,6 +463,7 @@ void View3DInventorViewer::init()
 
     // Set our own render action which show a bounding box if
     // the SoFCSelection::BOX style is set
+
     //
     // Important note:
     // When creating a new GL render action we have to copy over the cache context id

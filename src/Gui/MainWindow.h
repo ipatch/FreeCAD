@@ -55,15 +55,6 @@ namespace DockWnd {
     class HelpView;
 } //namespace DockWnd
 
-class QmlProxy : public QGraphicsProxyWidget {
-    
-    Q_OBJECT;
-    Q_PROPERTY(QWidget* proxy READ widget WRITE setWidget)
-  
-public:
-    QmlProxy(QGraphicsProxyWidget* parent = 0);
-};
-
 /** 
  * The MainWindow class provides a main window with menu bar, toolbars, dockable windows,
  * a status bar and mainly a workspace for the MDI windows.

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (c) 2014 StefanTroeger <stefantroeger@gmx.net>              *
+ *   Copyright (c) 2015 Stefan Tröger <stefantroeger@gmx.net>              *
  *                                                                         *
  *   This file is part of the FreeCAD CAx development system.              *
  *                                                                         *
@@ -20,54 +20,35 @@
  *                                                                         *
  ***************************************************************************/
 
-import QtQuick 1.1
 
-Item {
-    id: navigator
-    default property alias model: list.model
-    property int  tabwidth: 120
-    property Item mdiArea
-        
-    height: 20
-    width:  3*tabwidth
-   
-    anchors.bottom: parent.bottom
-    anchors.horizontalCenter: parent.horizontalCenter
-    
-    ListView {
-        id: list
-        highlightFollowsCurrentItem: true
-        orientation: ListView.Horizontal 
-        anchors.fill: parent
-        highlight: Rectangle {
-            width:  tabwidth
-            height: 20
-            color: "#60FF0000"
-        }
-        delegate: Rectangle {
-            width:  tabwidth
-            height: 20
-            color: "#600000FF"
+#ifndef GUI_QML_TYPES_H
+#define GUI_QML_TYPES_H
 
-            Text {
-                width:  tabwidth
-                height: 20
-                elide: Text.ElideRight
-                text: model.modelData.proxy.windowTitle
-            }
-            MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        mdiArea.current = index
-                        list.currentIndex = index;
-                    }
-            }
-        }
-    }
+#include "PreCompiled.h"
+#include <QGraphicsProxyWidget>
+#include <QDeclarativeItem>
+
+namespace Gui {
+
+class GuiExport QmlProxy : public QDeclarativeItem {
     
-    onModelChanged: {
-        mdiArea.current = list.model.length-1
-        list.currentIndex = list.model.length-1
-        console.debug("Mdi ListView model changed, count: ", list.model.length)
-    }
-}
+    Q_OBJECT;
+    Q_PROPERTY(QWidget* proxy READ proxy WRITE setProxy)
+  
+public:
+    QmlProxy(QDeclarativeItem* parent = 0);
+    
+    QWidget* proxy();
+    void setProxy(QWidget*);
+    
+protected:
+    virtual void geometryChanged(const QRectF& newGeometry, const QRectF& oldGeometry);
+    
+private:
+    QGraphicsProxyWidget* m_proxy;
+};
+
+
+} // namespace Gui
+
+#endif // GUI_MAINWINDOW_H

@@ -76,6 +76,7 @@
 #include "Assistant.h"
 #include "DownloadManager.h"
 #include "WaitCursor.h"
+#include "QmlTypes.h"
 
 #include "Action.h"
 #include "Command.h"
@@ -156,11 +157,6 @@ struct MainWindowP
     QString whatstext;
     Assistant* assistant;
 };
-
-QmlProxy::QmlProxy(QGraphicsProxyWidget* parent): QGraphicsProxyWidget(parent)
-{
-}
-
 
 class MDITabbar : public QTabBar
 {
@@ -802,8 +798,9 @@ void MainWindow::addWindow(MDIView* view)
         
         //add it to the scene
         QObject* mdiview = d->declarativeView->rootObject()->findChild<QObject*>(QString::fromAscii("mdiarea"));
-        if(mdiview)
+        if(mdiview) {
             item->setParentItem(qobject_cast<QDeclarativeItem*>(mdiview)); 
+        }
         else {
             Base::Console().Error("No mdiview found, view can not be added to layout");
             return;

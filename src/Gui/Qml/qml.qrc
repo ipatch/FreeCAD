@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/qml">
+        <file>MainLayout.qml</file>
+        <file>MDIArea.qml</file>
+        <file>MDINavigator.qml</file>
+        <file>MDIView.qml</file>
+    </qresource>
+</RCC>
