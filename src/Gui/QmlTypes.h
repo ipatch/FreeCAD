@@ -25,14 +25,24 @@
 #define GUI_QML_TYPES_H
 
 #include "PreCompiled.h"
+#include <QObject>
 #include <QGraphicsProxyWidget>
 #include <QDeclarativeItem>
+#include <QAbstractButton>
 
 namespace Gui {
-
+   
+/**
+ * @brief Proxy type to add arbitrary qwidgets to the interface
+ * 
+ * Normally QML components can only be initialized through the qml engine. This forbids to add already
+ * created widgets to the interface, as they would need to be wrapped as a qml component. To allow adding
+ * already initialized widgets to the scene this QmlProxy can be used. Once added it exposes a proxy 
+ * proeprty to which the widget can be assigned from c++. It is then displayed in the Qml scene.
+ */
 class GuiExport QmlProxy : public QDeclarativeItem {
     
-    Q_OBJECT;
+    Q_OBJECT
     Q_PROPERTY(QWidget* proxy READ proxy WRITE setProxy)
   
 public:
@@ -46,6 +56,76 @@ protected:
     
 private:
     QGraphicsProxyWidget* m_proxy;
+};
+
+class GuiExport QmlButton : public QDeclarativeItem {
+  
+    Q_OBJECT
+    Q_PROPERTY(int margin READ margin WRITE setMargin)
+    Q_PROPERTY(QString icon READ icon WRITE setIcon )
+    
+public:
+    QmlButton(QDeclarativeItem* parent = NULL);
+    
+    bool isHoverd();
+    bool isPressed();
+    
+    int margin() {return m_margin;}
+    void setMargin(int m) {m_margin = m;}
+    
+    QString icon() {return m_icon;}
+    void setIcon(QString i) {m_icon = i;}
+    
+Q_SIGNALS:
+    void activated();
+    
+protected:
+    virtual void paint(QPainter*, const QStyleOptionGraphicsItem*, QWidget*); 
+    
+    virtual void hoverEnterEvent(QGraphicsSceneHoverEvent* event);
+    virtual void hoverLeaveEvent(QGraphicsSceneHoverEvent* event);
+    virtual void mousePressEvent(QGraphicsSceneMouseEvent* event);
+    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
+    
+protected:
+    bool pressed, hovered;
+    int m_margin;
+    QString m_icon;
+};
+
+class GuiExport QmlTitleButton : public QmlButton {
+    
+    Q_OBJECT
+    
+public:    
+    QmlTitleButton(QDeclarativeItem* parent = NULL);
+    
+    virtual void paint(QPainter*, const QStyleOptionGraphicsItem*, QWidget*);
+};
+
+class GuiExport QmlIcon : public QDeclarativeItem {
+  
+    Q_OBJECT
+    Q_PROPERTY(QIcon icon READ icon WRITE setIcon )
+    
+public:
+    QmlIcon(QDeclarativeItem* parent = NULL);
+   
+    QIcon icon() {return m_icon;}
+    void setIcon(QIcon i) {m_icon = i;}
+    
+protected:
+    virtual void paint(QPainter* p, const QStyleOptionGraphicsItem* op, QWidget* w); 
+     
+protected:
+    QIcon m_icon;
+};
+
+static void init_qml_types() {
+    qmlRegisterType<QmlProxy>      ("FreeCADLib", 1, 0, "Proxy");
+    qmlRegisterType<QmlIcon>       ("FreeCADLib", 1, 0, "Icon");
+    qmlRegisterType<QmlButton>     ("FreeCADLib", 1, 0, "Button");
+    qmlRegisterType<QmlTitleButton>("FreeCADLib", 1, 0, "TitleButton");
 };
 
 

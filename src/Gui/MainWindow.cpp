@@ -53,6 +53,7 @@
 # include <QDeclarativeComponent>
 # include <QDeclarativeItem>
 # include <QDeclarativeContext>
+#include <QDeclarativeEngine>
 #endif
 
 #include <boost/signals.hpp>
@@ -287,7 +288,7 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
         d->mdiArea->setBackground(QBrush(QColor(160,160,160)));
     }
     else {
-        qmlRegisterType<QmlProxy>("FreeCADLib", 1, 0, "Proxy");
+        init_qml_types();
         
         d->declarativeView = new QDeclarativeView(this);
         d->declarativeView->setViewport(new QGLWidget);
@@ -795,6 +796,9 @@ void MainWindow::addWindow(MDIView* view)
                                          QString::fromAscii("/home/stefan/Projects/FreeCAD_sf_master/src/Gui/Qml/MDIView.qml"));
         QDeclarativeItem* item = qobject_cast<QDeclarativeItem*>(component.create());
         item->setProperty("proxy", QVariant::fromValue(static_cast<QWidget*>(view)));
+        
+        //make sure we can destroy it from within qml 
+        d->declarativeView->engine()->setObjectOwnership(item, QDeclarativeEngine::JavaScriptOwnership);
         
         //add it to the scene
         QObject* mdiview = d->declarativeView->rootObject()->findChild<QObject*>(QString::fromAscii("mdiarea"));

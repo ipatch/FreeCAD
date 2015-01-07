@@ -23,28 +23,7 @@
 import QtQuick 1.1
 import FreeCADLib 1.0
 
-Rectangle {
-    id:root
-    property int currentIndex: 0
-    anchors.fill: parent
-
-    MDIArea {
-        id: viewManager
-        objectName: "mdiarea"
-        anchors.fill: parent
-    }
- 
-    InterfaceArea {
-        id: interfaceArea
-        objectName: "interfacearea"
-        anchors.fill:parent
-        
-        InterfaceItem {
-            id: navigator
-            title: "Navigator"  
-            MDINavigator {
-                mdiArea: viewManager
-            }
-        }
-    }    
+Item {
+    id: interfaceArea
+    anchors.margins: 4
 }

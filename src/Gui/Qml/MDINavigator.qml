@@ -21,53 +21,92 @@
  ***************************************************************************/
 
 import QtQuick 1.1
+import FreeCADLib 1.0
 
 Item {
     id: navigator
-    default property alias model: list.model
     property int  tabwidth: 120
     property Item mdiArea
         
     height: 20
-    width:  3*tabwidth
-   
-    anchors.bottom: parent.bottom
-    anchors.horizontalCenter: parent.horizontalCenter
+    width:  3*tabwidth + 3*list.spacing
+    anchors.fill: parent
     
     ListView {
         id: list
+        model: mdiArea.children
+        
         highlightFollowsCurrentItem: true
         orientation: ListView.Horizontal 
         anchors.fill: parent
+        highlightMoveSpeed: 800
+        spacing: 4
+             
         highlight: Rectangle {
             width:  tabwidth
             height: 20
+            radius: 4
             color: "#60FF0000"
         }
         delegate: Rectangle {
             width:  tabwidth
             height: 20
+            radius: 4
             color: "#600000FF"
 
-            Text {
-                width:  tabwidth
+            Icon {
+                id:image
+                width: 20
                 height: 20
+                icon: model.modelData.proxy.windowIcon
+            }
+            Text {
+                id: text
+                width:  tabwidth-42
+                height: 20
+                anchors.left: image.right
+                anchors.leftMargin: 2
                 elide: Text.ElideRight
                 text: model.modelData.proxy.windowTitle
             }
             MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        mdiArea.current = index
-                        list.currentIndex = index;
-                    }
+                width:tabwidth-20
+                height: 20
+                anchors.left: parent.left
+                onClicked: {
+                    mdiArea.current = index
+                    list.currentIndex = index;
+                }
             }
+            Button {
+                width: 20
+                height: 20
+                margin: 1
+                icon: ":/icons/delete.svg"
+                anchors.left: text.right
+                onActivated: closeView(index)
+            }
+        }
+        
+        onModelChanged: {
+            console.debug("modelchange")
+            mdiArea.current = list.model.length-1
+            list.currentIndex = list.model.length-1
         }
     }
     
-    onModelChanged: {
-        mdiArea.current = list.model.length-1
-        list.currentIndex = list.model.length-1
-        console.debug("Mdi ListView model changed, count: ", list.model.length)
+    //needed to reparent a view before deletion
+    Item {
+        id: dummy
+    }
+    
+    function closeView(id) {
+        var next = (list.currentIndex == id ? list.currentIndex - 1 : list.currentIndex)
+        next = (next<0) ? 0 : next
+        mdiArea.current = next
+        list.currentIndex = next
+        var item = mdiArea.children[id]
+        item.parent = dummy
+        item.destroy()
     }
 }

@@ -822,7 +822,6 @@ SET(View3D_CPP_SRCS
     CoinRiftWidget.cpp
     View3DPy.cpp
     View3DViewerPy.cpp
-    QmlTypes.cpp
 )
 SET(View3D_SRCS
     ${View3D_CPP_SRCS}
@@ -995,6 +994,7 @@ SET(Widget_CPP_SRCS
     WidgetFactory.cpp
     Widgets.cpp
     Window.cpp
+    QmlTypes.cpp
 )
 SET(Widget_HPP_SRCS
     FileDialog.h
