@@ -20,166 +20,109 @@
  *                                                                         *
  ***************************************************************************/
 
-var top;
-var bottom;
-var verticalCenter;
-var activeYAnchor;
+//settings
+var sr = 8;    //snap radius around the items
+var reset = 50; //reset radius 
 
-var left;
-var right;
-var horizontalCenter;
-var activeXAnchor;
+//used to store the x and y anchor list
+var anchors;
 
+//object to store all hitpoint arrays
+var hitPoints;
+
+//current drag data
 var dragItem;
 var initMousePos;
 
 function setupHitPositions(item, mouse) {
     
-    top = new Array();
-    bottom = new Array();
-    verticalCenter = new Array();
+    hitPoints = new Object();
+    hitPoints.top = new Array();
+    hitPoints.bottom = new Array();
+    hitPoints.verticalCenter = new Array();
     
-    left = new Array();
-    right = new Array();
-    horizontalCenter = new Array();
+    hitPoints.left = new Array();
+    hitPoints.right = new Array();
+    hitPoints.horizontalCenter = new Array();
     
     //the frame anchors have priority so add them first
-    top[top.length] = {item:item.parent, pos:0};
-    bottom[bottom.length] = {item:item.parent, pos:item.parent.height};
-    verticalCenter[verticalCenter.length] = {item:item.parent, pos:item.parent.height/2};
+    hitPoints.top[hitPoints.top.length] = {item:item.parent, rect:Qt.rect(0,0,item.parent.width, sr)};
+    hitPoints.bottom[hitPoints.bottom.length] = {item:item.parent, rect:Qt.rect(0,item.parent.height-sr, item.parent.width, sr)};
+    hitPoints.verticalCenter[hitPoints.verticalCenter.length] = {item:item.parent, rect:Qt.rect(0,item.parent.height/2-sr/2, 2*sr, sr)};
+    hitPoints.verticalCenter[hitPoints.verticalCenter.length] = {item:item.parent, rect:Qt.rect(item.parent.width-2*sr,item.parent.height/2-sr/2, 2*sr, sr)};
     
-    left[left.length] = {item:item.parent, pos:0};
-    right[right.length] = {item:item.parent, pos:item.parent.width};
-    horizontalCenter[horizontalCenter.length] = {item:item.parent, pos:item.parent.width/2};
+    hitPoints.left[hitPoints.left.length] = {item:item.parent, rect: Qt.rect(0, 0, sr, item.parent.height)};
+    hitPoints.right[hitPoints.right.length] = {item:item.parent, rect: Qt.rect(item.parent.width-sr, 0, sr, item.parent.height)};
+    hitPoints.horizontalCenter[hitPoints.horizontalCenter.length] = {item:item.parent, rect: Qt.rect(item.parent.width/2-sr/2, 0, sr, sr)};
+    hitPoints.horizontalCenter[hitPoints.horizontalCenter.length] = {item:item.parent, rect: Qt.rect(item.parent.width/2-sr/2, item.parent.height-sr, sr, sr)};
     
     //now add all posible child hitpoints
     for (var i = 0; i < item.parent.children.length; ++i) {
         var cur = item.parent.children[i];
         if(cur != item) {
-            top[top.length] = {item:cur, pos:cur.y};
-            bottom[bottom.length] = {item:cur, pos:cur.y+cur.height};
-            verticalCenter[verticalCenter.length] = {item:cur, pos:cur.y+cur.height/2};
-            
-            left[left.length] = {item:cur, pos:cur.x};
-            right[right.length] = {item:cur, pos:cur.x+cur.width};
-            horizontalCenter[horizontalCenter.length] = {item:cur, pos:cur.x+cur.width/2};
+            hitPoints.top[hitPoints.top.length] = {item:cur, rect:Qt.rect(cur.x-sr, cur.y-sr, cur.width+2*sr, 2*sr)};
+            hitPoints.bottom[hitPoints.bottom.length] = {item:cur, rect:Qt.rect(cur.x-sr, cur.y+cur.height-sr, cur.width+2*sr, 2*sr)};
+                        
+            hitPoints.left[hitPoints.left.length] = {item:cur, rect: Qt.rect(cur.x-sr, cur.y-sr, 2*sr, cur.height+2*sr)};
+            hitPoints.right[hitPoints.right.length] = {item:cur, rect: Qt.rect(cur.x+cur.width+sr, cur.y-sr, 2*sr, cur.height+2*sr)};
         }
     }
     
     dragItem = item;
-    activeYAnchor = undefined;
-    activeXAnchor = undefined;
     initMousePos = {x:mouse.x, y:mouse.y};
 }
 
 function setAnchorsForPosition(mousePos) {
-    
-    if(activeYAnchor == undefined) {
+
+    if(anchors.anchorYlist.length == 0) {
         
         //search for a possible y anchor, start with top
-        if(setPossibleAnchor(dragItem.y, 'top')) {
-            activeYAnchor = 'top';
+        if( setPossibleAnchor(Qt.rect(dragItem.x-sr, dragItem.y-sr, dragItem.width+2*sr, 2*sr), 'top', ['top', 'bottom'])
+         || setPossibleAnchor(Qt.rect(dragItem.x-sr, dragItem.y+dragItem.height-sr, dragItem.width+2*sr, 2*sr), 'bottom', ['top', 'bottom'])
+         || setPossibleAnchor(Qt.rect(dragItem.x-sr, dragItem.y+dragItem.height/2-sr/2, 2*sr, sr), 'verticalCenter', ['verticalCenter'])
+         || setPossibleAnchor(Qt.rect(dragItem.x+dragItem.width-2*sr, dragItem.y+dragItem.height/2-sr/2, 2*sr, sr), 'verticalCenter', ['verticalCenter']))
             return;
-        }
-        if(setPossibleAnchor(dragItem.y+dragItem.height, 'bottom')) {
-            activeYAnchor = 'bottom';
-            return;
-        }
-        if(setPossibleAnchor(dragItem.y+dragItem.height/2, 'verticalCenter')) {
-            activeYAnchor = 'verticalCenter';
-            return;
-        }
+
     }
-    else if(Math.abs(initMousePos.y - mousePos.y) > 50) {
-        //clear the vertical anchor
-        if('top' == activeYAnchor) {
-            dragItem.anchors.top = undefined;
-            activeYAnchor = undefined;
-            return;
-        }
-        if('verticalCenter' == activeYAnchor) {
-            console.debug("set undefined")
-            dragItem.anchors.verticalCenter = undefined;
-            activeYAnchor = undefined;
-            return;
-        }
-        if('bottom' == activeYAnchor) {
-            dragItem.anchors.bottom = undefined;
-            activeYAnchor = undefined;
-            return;
-        }
+    else if(Math.abs(initMousePos.y - mousePos.y) > reset) {
+        dragItem.removeAnchors(true)
     }
     
-    if(activeXAnchor == undefined) {
+    if(anchors.anchorXlist.length == 0) {
         
-        //search for a possible y anchor, start with top
-        if(setPossibleAnchor(dragItem.x, 'left')) {
-            activeXAnchor = 'left';
+        //search for a possible x anchor, start with left
+        if(setPossibleAnchor(Qt.rect(dragItem.x-sr, dragItem.y-sr, 2*sr, dragItem.height+2*sr), 'left', ['left', 'right'])
+          || setPossibleAnchor(Qt.rect(dragItem.x+dragItem.width+sr, dragItem.y-sr, 2*sr, dragItem.height+2*sr), 'right', ['left', 'right'])
+          || setPossibleAnchor(Qt.rect(dragItem.x + dragItem.width/2-sr/2, dragItem.y-sr/2, sr, sr), 'horizontalCenter', ['horizontalCenter'])
+          || setPossibleAnchor(Qt.rect(dragItem.x + dragItem.width/2-sr/2, dragItem.y + dragItem.height-sr, sr, 2*sr), 'horizontalCenter', ['horizontalCenter']))
             return;
-        }
-        if(setPossibleAnchor(dragItem.x+dragItem.width, 'right')) {
-            activeXAnchor = 'right';
-            return;
-        }
-        if(setPossibleAnchor(dragItem.x+dragItem.width/2, 'horizontalCenter')) {
-            activeXAnchor = 'horizontalCenter';
-            return;
-        }
     }
-    else if(Math.abs(initMousePos.x - mousePos.x) > 50) {
-        //clear the vertical anchor
-        if('left' == activeXAnchor) {
-            dragItem.anchors.left = undefined;
-            activeXAnchor = undefined;
-            return;
-        }
-        if('horizontalCenter' == activeXAnchor) {
-            dragItem.anchors.horizontalCenter = undefined;
-            activeXAnchor = undefined;
-            return;
-        }
-        if('right' == activeXAnchor) {
-            dragItem.anchors.right = undefined;
-            activeXAnchor = undefined;
-            return;
-        }
+    else if(Math.abs(initMousePos.x - mousePos.x) > reset) {
+        dragItem.removeAnchors(false)
     }
 }
 
-function setPossibleAnchor(position, anchor) {
+function setPossibleAnchor(position, anchor, hitanchors) {
     
-    if(anchor == 'top' || anchor == 'bottom' || anchor == 'verticalCenter') {
-        if(singleAnchorHelper(top, position, anchor, 'top'))
-            return true;
+    for(var i=0; i<hitanchors.length; ++i) {
+                
+        var hitPos = hitPoints[hitanchors[i]];
+        var hitAnchor = hitanchors[i];
         
-        if(singleAnchorHelper(bottom, position, anchor, 'bottom')) 
-            return true;
-        
-        if(singleAnchorHelper(verticalCenter, position, anchor, 'verticalCenter'))
-            return true;
-    }
-    else {
-        if(singleAnchorHelper(left, position, anchor, 'left'))
-            return true;
-        
-        if(singleAnchorHelper(right, position, anchor, 'right')) 
-            return true;
-        
-        if(singleAnchorHelper(horizontalCenter, position, anchor, 'horizontalCenter'))
-            return true;
+        for (var j=0; j<hitPos.length; ++j) {
+
+            if(doRectsOverlap(hitPos[j].rect, position)) {
+
+                dragItem.setupAnchor(anchor, hitPos[j].item, hitAnchor);                
+                return true;
+            }
+        }
     }
     
     return false;
 }
 
-function singleAnchorHelper(hitPositions, position, anchorItem, anchorSecond) {
-    
-    for (var i = 0; i < hitPositions.length; ++i) {
-        
-         if(Math.abs(hitPositions[i].pos-position) < 10) {
-             dragItem.anchors[anchorItem] = hitPositions[i].item[anchorSecond];
-             return true;
-         }
-    }
-    return false;
+function doRectsOverlap(r1, r2) {
+
+    return !( (r1.y+r1.height) < r2.y || r1.y > (r2.y+r2.height) || (r1.x+r1.width) < r2.x || r1.x > (r2.x+r2.width) );
 }

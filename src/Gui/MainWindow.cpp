@@ -121,6 +121,7 @@
 #include "SpaceballEvent.h"
 #include "View3DInventor.h"
 #include "View3DInventorViewer.h"
+#include "DynamicInterfaceManager.h"
 
 #if defined(Q_OS_WIN32)
 #define slots
@@ -261,7 +262,8 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
     instance = this;
 
     // Create the layout containing the workspace and a tab bar
-    if(0) {
+    bool dynamicLayout = true;
+    if(!dynamicLayout) {
         d->declarativeView = NULL;
         d->mdiArea = new QMdiArea();
         setCentralWidget(d->mdiArea);
@@ -298,6 +300,7 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
         d->declarativeView->setSource(QString::fromAscii("/home/stefan/Projects/FreeCAD_sf_master/src/Gui/Qml/MainLayout.qml"));
         setCentralWidget(d->declarativeView);
                  
+        GlobalDynamicInterfaceManager::get()->setManagedView(d->declarativeView);
         d->mdiArea = NULL;
     };
 
@@ -366,41 +369,55 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
     tree->setObjectName
         (QString::fromLatin1(QT_TRANSLATE_NOOP("QDockWidget","Tree view")));
     tree->setMinimumWidth(210);
-    pDockMgr->registerDockWindow("Std_TreeView", tree);
+    if(!dynamicLayout)
+        pDockMgr->registerDockWindow("Std_TreeView", tree);   
+    else 
+        GlobalDynamicInterfaceManager::get()->addInterfaceItem(tree, true);
 
     // Property view
     PropertyDockView* pcPropView = new PropertyDockView(0, this);
     pcPropView->setObjectName
         (QString::fromLatin1(QT_TRANSLATE_NOOP("QDockWidget","Property view")));
     pcPropView->setMinimumWidth(210);
-    pDockMgr->registerDockWindow("Std_PropertyView", pcPropView);
+    if(!dynamicLayout)
+        pDockMgr->registerDockWindow("Std_PropertyView", pcPropView);
+    else 
+        GlobalDynamicInterfaceManager::get()->addInterfaceItem(pcPropView, true);
 
     // Selection view
     SelectionView* pcSelectionView = new SelectionView(0, this);
     pcSelectionView->setObjectName
         (QString::fromLatin1(QT_TRANSLATE_NOOP("QDockWidget","Selection view")));
     pcSelectionView->setMinimumWidth(210);
-    pDockMgr->registerDockWindow("Std_SelectionView", pcSelectionView);
-
+    if(!dynamicLayout)
+        pDockMgr->registerDockWindow("Std_SelectionView", pcSelectionView);
+    else 
+        GlobalDynamicInterfaceManager::get()->addInterfaceItem(pcSelectionView, true);
+/*
     // Combo view
     CombiView* pcCombiView = new CombiView(0, this);
     pcCombiView->setObjectName(QString::fromLatin1(QT_TRANSLATE_NOOP("QDockWidget","Combo View")));
     pcCombiView->setMinimumWidth(150);
-    pDockMgr->registerDockWindow("Std_CombiView", pcCombiView);
+    if(!dynamicLayout)
+        pDockMgr->registerDockWindow("Std_CombiView", pcCombiView);
+    else 
+        GlobalDynamicInterfaceManager::get()->addInterfaceItem(pcCombiView, true);*/
 
 #if QT_VERSION < 0x040500
     // Report view
     Gui::DockWnd::ReportView* pcReport = new Gui::DockWnd::ReportView(this);
-    pcReport->setObjectName
-        (QString::fromLatin1(QT_TRANSLATE_NOOP("QDockWidget","Report view")));
-    pDockMgr->registerDockWindow("Std_ReportView", pcReport);
+    pcReport->setObjectName(QString::fromLatin1(QT_TRANSLATE_NOOP("QDockWidget","Report view")));
+    if(!dynamicLayout)
+        pDockMgr->registerDockWindow("Std_ReportView", pcReport);
 #else
     // Report view (must be created before PythonConsole!)
     ReportOutput* pcReport = new ReportOutput(this);
     pcReport->setWindowIcon(BitmapFactory().pixmap("MacroEditor"));
-    pcReport->setObjectName
-        (QString::fromLatin1(QT_TRANSLATE_NOOP("QDockWidget","Report view")));
-    pDockMgr->registerDockWindow("Std_ReportView", pcReport);
+    pcReport->setObjectName(QString::fromLatin1(QT_TRANSLATE_NOOP("QDockWidget","Report view")));
+    if(!dynamicLayout)
+        pDockMgr->registerDockWindow("Std_ReportView", pcReport);
+    else 
+        GlobalDynamicInterfaceManager::get()->addInterfaceItem(pcReport, true);
 
     // Python console
     PythonConsole* pcPython = new PythonConsole(this);
@@ -414,9 +431,11 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
     }
 
     pcPython->setWindowIcon(Gui::BitmapFactory().iconFromTheme("applications-python"));
-    pcPython->setObjectName
-        (QString::fromLatin1(QT_TRANSLATE_NOOP("QDockWidget","Python console")));
-    pDockMgr->registerDockWindow("Std_PythonView", pcPython);
+    pcPython->setObjectName(QString::fromLatin1(QT_TRANSLATE_NOOP("QDockWidget","Python console")));
+    if(!dynamicLayout)
+        pDockMgr->registerDockWindow("Std_PythonView", pcPython);
+    else 
+        GlobalDynamicInterfaceManager::get()->addInterfaceItem(pcPython, true);
     
     //Dag View.
     //work through parameter.
@@ -791,24 +810,7 @@ void MainWindow::addWindow(MDIView* view)
             }
         }
         
-        //create the component and set the view proxy
-        QDeclarativeComponent component(d->declarativeView->engine(), 
-                                         QString::fromAscii("/home/stefan/Projects/FreeCAD_sf_master/src/Gui/Qml/MDIView.qml"));
-        QDeclarativeItem* item = qobject_cast<QDeclarativeItem*>(component.create());
-        item->setProperty("proxy", QVariant::fromValue(static_cast<QWidget*>(view)));
-        
-        //make sure we can destroy it from within qml 
-        d->declarativeView->engine()->setObjectOwnership(item, QDeclarativeEngine::JavaScriptOwnership);
-        
-        //add it to the scene
-        QObject* mdiview = d->declarativeView->rootObject()->findChild<QObject*>(QString::fromAscii("mdiarea"));
-        if(mdiview) {
-            item->setParentItem(qobject_cast<QDeclarativeItem*>(mdiview)); 
-        }
-        else {
-            Base::Console().Error("No mdiview found, view can not be added to layout");
-            return;
-        } 
+        GlobalDynamicInterfaceManager::get()->addView(view);
     }
 
 #if defined(Q_OS_WIN32)

@@ -822,6 +822,8 @@ SET(View3D_CPP_SRCS
     CoinRiftWidget.cpp
     View3DPy.cpp
     View3DViewerPy.cpp
+    DynamicInterfaceManager.cpp
+    QmlTypes.cpp
 )
 SET(View3D_SRCS
     ${View3D_CPP_SRCS}
@@ -838,6 +840,7 @@ SET(View3D_SRCS
     View3DInventorRiftViewer.h
     CoinRiftWidget.h
     View3DViewerPy.h
+    DynamicInterfaceManager.h
     QmlTypes.h
 )
 SOURCE_GROUP("View3D" FILES ${View3D_SRCS})
@@ -994,7 +997,6 @@ SET(Widget_CPP_SRCS
     WidgetFactory.cpp
     Widgets.cpp
     Window.cpp
-    QmlTypes.cpp
 )
 SET(Widget_HPP_SRCS
     FileDialog.h
