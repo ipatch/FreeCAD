@@ -121,13 +121,29 @@ protected:
     QIcon m_icon;
 };
 
+class GuiExport QmlMouseCursor : public QDeclarativeItem {
+    
+    Q_OBJECT
+    Q_ENUMS(Qt::CursorShape)
+    Q_PROPERTY(Qt::CursorShape cursor READ cursor WRITE setCursor)
+    
+public:    
+    QmlMouseCursor(QDeclarativeItem* parent = NULL);
+   
+    Qt::CursorShape cursor();
+    void setCursor(Qt::CursorShape c);
+    
+private:
+    Qt::CursorShape m_current;
+};
+
 static void init_qml_types() {
     qmlRegisterType<QmlProxy>      ("FreeCADLib", 1, 0, "Proxy");
     qmlRegisterType<QmlIcon>       ("FreeCADLib", 1, 0, "Icon");
     qmlRegisterType<QmlButton>     ("FreeCADLib", 1, 0, "Button");
     qmlRegisterType<QmlTitleButton>("FreeCADLib", 1, 0, "TitleButton");
+    qmlRegisterType<QmlMouseCursor>("FreeCADLib", 1, 0, "MouseCursor");
 };
-
 
 } // namespace Gui
 

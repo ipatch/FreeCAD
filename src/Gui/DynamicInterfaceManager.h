@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (c) 2014 StefanTroeger <stefantroeger@gmx.net>              *
+ *   Copyright (c) 2015 Stefan Troeger <stefantroeger@gmx.net>             *
  *                                                                         *
  *   This file is part of the FreeCAD CAx development system.              *
  *                                                                         *
@@ -20,44 +20,47 @@
  *                                                                         *
  ***************************************************************************/
 
-import QtQuick 1.1
-import FreeCADLib 1.0
+#ifndef GUI_DYNAMICINTERFACEMANAGER_H
+#define GUI_DYNAMICINTERFACEMANAGER_H
 
-Item {
-    id: interfaceArea
-    anchors.margins: 4
-    
-     Item {
-        id: fixItem 
-        width:  0
-        height: 0
-    }
-    
-    Item {
-        id: dragItem 
-        width:  0
-        height: 0
-    }
-    
-    function setupInterfaceItem(item) {
-        
-        item.resizeDragItem  = dragItem;
-    }
-    
-    function setupResize(xf, yf, fixedanchor, item, draganchor) {
+#include "PreCompiled.h"
 
-        fixItem.x = xf;
-        fixItem.y = yf;
-        //fixItem.anchors[fixedanchor] = item[fixedanchor];
-        //dragItem.anchors[draganchor] = item[draganchor];
-        
-        item.anchors[fixedanchor] = fixItem[fixedanchor];
-        item.anchors[draganchor] = dragItem[draganchor];
-    }
+#include "MDIView.h"
+#include <QDeclarativeView>
+
+namespace Gui {
     
-    function clearResize(item, fixed, drag) {
-        
-        item.anchors[drag] = undefined;
-        item.anchors[fixed] = undefined;
-    }
-}
+class GuiExport DynamicInterfaceManager
+{
+public:
+    DynamicInterfaceManager();
+    ~DynamicInterfaceManager();
+    
+    QDeclarativeView* managedView();
+    void setManagedView(QDeclarativeView* view);
+    
+    void addInterfaceItem(QWidget* widget, bool permanent = false);
+    
+protected:
+    QDeclarativeView* m_view;
+};
+
+//Singleton for the global user interface
+class GuiExport GlobalDynamicInterfaceManager : public DynamicInterfaceManager {
+  
+public:
+    static GlobalDynamicInterfaceManager* get();
+    
+    void addView(MDIView* view);
+    
+private:    
+    GlobalDynamicInterfaceManager();
+    ~GlobalDynamicInterfaceManager();
+    
+    static GlobalDynamicInterfaceManager* instance;
+    
+};
+
+}//Gui
+
+#endif // GUI_DYNAMICINTERFACEMANAGER_H

@@ -25,12 +25,23 @@ import FreeCADLib 1.0
 
 InterfaceItem {
  
-    property alias proxy: proxyitem.proxy
+    id: item 
+    
+    property alias proxy: proxyitem.proxy    
     property alias contentWidth:  proxyitem.width 
     property alias contentHeight: proxyitem.height
     
     Proxy {
         id: proxyitem
         objectName: "proxy"
-    }
+        anchors.fill: parent;
+    }    
+    
+//     proxyitem.onProxyChanged: {
+//         console.debug("proxy changed");
+//         minWidth  = proxyitem.proxy.minimumWidth;
+//         minHeight = proxyitem.proxy.minimumHeight;
+//         //force a parent recompute
+//         item.height = item.height;
+//     }
 }

@@ -363,7 +363,7 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
     HelpView* pcHelpView = new HelpView( home, this );
     pDockMgr->registerDockWindow("Std_HelpView", pcHelpView);
 #endif
-
+/*
     // Tree view
     TreeDockWidget* tree = new TreeDockWidget(0, this);
     tree->setObjectName
@@ -392,7 +392,7 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
     if(!dynamicLayout)
         pDockMgr->registerDockWindow("Std_SelectionView", pcSelectionView);
     else 
-        GlobalDynamicInterfaceManager::get()->addInterfaceItem(pcSelectionView, true);
+        GlobalDynamicInterfaceManager::get()->addInterfaceItem(pcSelectionView, true);*/
 /*
     // Combo view
     CombiView* pcCombiView = new CombiView(0, this);
@@ -418,7 +418,7 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
         pDockMgr->registerDockWindow("Std_ReportView", pcReport);
     else 
         GlobalDynamicInterfaceManager::get()->addInterfaceItem(pcReport, true);
-
+/*
     // Python console
     PythonConsole* pcPython = new PythonConsole(this);
     ParameterGrp::handle hGrp = App::GetApplication().GetUserParameter().
@@ -436,7 +436,8 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
         pDockMgr->registerDockWindow("Std_PythonView", pcPython);
     else 
         GlobalDynamicInterfaceManager::get()->addInterfaceItem(pcPython, true);
-    
+*/
+
     //Dag View.
     //work through parameter.
     ParameterGrp::handle group = App::GetApplication().GetUserParameter().
@@ -450,6 +451,7 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
           (QString::fromLatin1(QT_TRANSLATE_NOOP("QDockWidget","DAG View")));
       pDockMgr->registerDockWindow("Std_DAGView", dagDockWindow);
     }
+
 
 #if 0 //defined(Q_OS_WIN32) this portion of code is not able to run with a vanilla Qtlib build on Windows.
     // The MainWindowTabBar is used to show tabbed dock windows with icons

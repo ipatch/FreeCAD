@@ -89,7 +89,6 @@ Item {
         }
         
         onModelChanged: {
-            console.debug("modelchange")
             mdiArea.current = list.model.length-1
             list.currentIndex = list.model.length-1
         }

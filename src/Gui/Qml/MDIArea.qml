@@ -31,7 +31,6 @@ Rectangle {
     Component.onCompleted: setVisibilities()
 
     function setVisibilities() {
-        console.debug("setVisibilities")
         for (var i = 0; i < mdiarea.children.length; ++i) {
             mdiarea.children[i].visible = (i == current ? true : false)
         }

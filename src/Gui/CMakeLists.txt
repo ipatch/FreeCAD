@@ -1198,10 +1198,9 @@ target_link_libraries(FreeCADGui ${FreeCADGui_LIBS})
 
 SET_BIN_DIR(FreeCADGui FreeCADGui)
 
+FILE(GLOB_RECURSE Interface_QML_SRC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} Qml/*.qml)
 SET(QML
-    Qml/MainLayout.qml
-    Qml/MDIView.qml
-    Qml/MDIArea.qml
+    ${Interface_QML_SRC}
     Quarter/View3D.qml
 )
 fc_copy_sources(FreeCADGui "${CMAKE_BINARY_DIR}/data/Qml" ${QML})

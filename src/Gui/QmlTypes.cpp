@@ -27,6 +27,7 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QStyleOptionToolButton>
 #include <QPainter>
+#include <QApplication>
 
 using namespace Gui;
 
@@ -174,6 +175,22 @@ QmlIcon::QmlIcon(QDeclarativeItem* parent): QDeclarativeItem(parent)
 void QmlIcon::paint(QPainter* p, const QStyleOptionGraphicsItem* op, QWidget* w)
 {
     m_icon.paint(p, op->rect);
+}
+
+QmlMouseCursor::QmlMouseCursor(QDeclarativeItem* parent): QDeclarativeItem(parent)
+{
+
+}
+
+Qt::CursorShape QmlMouseCursor::cursor()
+{
+    return m_current;
+}
+
+void QmlMouseCursor::setCursor(Qt::CursorShape c)
+{
+    m_current = c;
+    QApplication::setOverrideCursor(QCursor(c));
 }
 
 

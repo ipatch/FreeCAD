@@ -26,23 +26,37 @@ import FreeCADLib 1.0
 import "InterfaceItemUtilities.js" as Util
 
 Item {
-   
+      
     id: interfaceitem
     //all children are added to the childarea by default
     default property alias content: childarea.children
+        
     property Item area: parent
+    property Item resizeDragItem
+    
+    //drag properties
+    property int dragframe: 5;    
+    property int minWidth:  150;
+    property int minHeight: 150;
+    property int totalMinHeight: minHeight + titlebar.height + 3;
+    
+    height: 200;
+    width:  200;
         
     property alias title: titleItem.text
-
-    width:  childrenRect.width
-    height: childrenRect.height
+       
+    MouseCursor {
+        id: cursorItem
+    }
        
     Rectangle {
         id: titlebar
         height:20
-        anchors.top: parent.top
-        anchors.left: parent.left
+        width: 150
+        anchors.top:   parent.top
+        anchors.left:  parent.left
         anchors.right: parent.right
+
         radius:3
         color: "#999999"
         
@@ -53,19 +67,24 @@ Item {
             anchors.leftMargin: 3
             anchors.left: parent.left
             elide: Text.ElideRight
-        }
+        }          
+        //This is our drag mouse area
         MouseArea {
+            id: dragArea
             anchors.left: titleItem.left
-            anchors.right: buttons.left
-            height: titleItem.height
+            anchors.right: buttons.right
+            height: titleItem.height - dragframe;
             drag.target: interfaceitem
             drag.minimumX: 0
             drag.maximumX: interfaceitem.parent.width - interfaceitem.width
             drag.minimumY: 0
             drag.maximumY: interfaceitem.parent.height - interfaceitem.height
             
+            drag.onActiveChanged: cursorItem.cursor = (drag.active) ? Qt.SizeAllCursor : Qt.ArrowCursor;
+            
+            
             onPressed: Util.setupHitPositions(interfaceitem, mouse);
-            onPositionChanged: Util.setAnchorsForPosition(mouse);
+            onPositionChanged: Util.setAnchorsForPosition(mouse);            
         }
         Row {
             id:buttons
@@ -92,10 +111,16 @@ Item {
        
         anchors.topMargin: 3
         anchors.top:    titlebar.bottom
-        
-        width:  childrenRect.width
-        height: childrenRect.height
+        anchors.bottom: parent.bottom
+        anchors.left:   parent.left
+        anchors.right:  parent.right
     }
+    
+    //add the resize areas
+    InterfaceItemResizer {
+        interfaceitem: interfaceitem;
+        anchors.fill: parent;   
+    }    
     
     //we need to setup the anchor object arrays
     Component.onCompleted: {
@@ -104,17 +129,21 @@ Item {
         Util.anchors.anchorYlist = new Array();
     }
     
+    onAreaChanged: {
+        area.setupInterfaceItem(interfaceitem);
+    }
+    
     anchors.onTopChanged: {
         if(!Util.anchors.controlledChange)
-            console.warning("Top anchor removed")
+            console.debug("Top anchor removed")
     }
     anchors.onBottomChanged: {
         if(!Util.anchors.controlledChange)
-            console.warning("Bottom anchor removed")
+            console.debug("Bottom anchor removed")
     }
     anchors.onVerticalCenterChanged: {
         if(!Util.anchors.controlledChange)
-            console.warning("Vertical Center anchor removed")
+            console.debug("Vertical Center anchor removed")
     }
     
     function setPassiveAnchor(anchorObject) {
@@ -182,5 +211,26 @@ Item {
             Util.anchors.anchorYlist = new Array();
         else
             Util.anchors.anchorXlist = new Array();
+    }
+    
+    //see if we can drag in the given anchor direction. 
+    //if we are the active item in a anchor of the given direction the draging would override this 
+    //anchor. this is not wanted. This function is used to check if we have an active anchor and 
+    //deny the drag is fo
+    function canDrag(dragAnchor) {
+        
+        for (var i=0; i<Util.anchors.anchorXlist.length; ++i) {
+            
+            var item = Util.anchors.anchorXlist[i];
+            if(item.active == interfaceitem && item.activeAnchor == dragAnchor)
+                return false;
+        }
+        for (var i=0; i<Util.anchors.anchorYlist.length; ++i) {
+            
+            var item = Util.anchors.anchorYlist[i];
+            if(item.active == interfaceitem && item.activeAnchor == dragAnchor)
+                return false;
+        }
+        return true;
     }
 }
