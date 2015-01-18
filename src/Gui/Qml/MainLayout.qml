@@ -41,8 +41,16 @@ Rectangle {
         
         InterfaceItem {
             id: navigator
-            title: "navigator"  
+            title: "Navigator"  
+            
+            height:    titleBar.height + tabnav.height + 3
+            minWidth:  120
+            minHeight: height
+            fixedHeight: true
+            
             MDINavigator {
+                id: tabnav
+                tabwidth: 120
                 mdiArea: viewManager
             }
         }

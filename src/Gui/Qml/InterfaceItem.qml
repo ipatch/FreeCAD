@@ -30,11 +30,20 @@ Item {
     id: interfaceitem
     //all children are added to the childarea by default
     default property alias content: childarea.children
-        
+    property alias titleBar: titlebar
+     
     property Item area: parent
     property Item resizeDragItem
+    property Item resizeFixItem
+    
+    //margins for nice looks
+    anchors.bottomMargin: 3
+    anchors.leftMargin: 3
+    anchors.rightMargin: 3
     
     //drag properties
+    property alias fixedWidth:  resizer.fixedWidth
+    property alias fixedHeight: resizer.fixedHeight
     property int dragframe: 5;    
     property int minWidth:  150;
     property int minHeight: 150;
@@ -62,7 +71,7 @@ Item {
         
         Text {
             id: titleItem
-            width: 150
+            width: parent.width - buttons.width
             height: parent.height
             anchors.leftMargin: 3
             anchors.left: parent.left
@@ -73,7 +82,7 @@ Item {
             id: dragArea
             anchors.left: titleItem.left
             anchors.right: buttons.right
-            height: titleItem.height - dragframe;
+            height: titleItem.height
             drag.target: interfaceitem
             drag.minimumX: 0
             drag.maximumX: interfaceitem.parent.width - interfaceitem.width
@@ -83,7 +92,7 @@ Item {
             drag.onActiveChanged: cursorItem.cursor = (drag.active) ? Qt.SizeAllCursor : Qt.ArrowCursor;
             
             
-            onPressed: Util.setupHitPositions(interfaceitem, mouse);
+            onPressed: Util.setupDrag(interfaceitem, mouse);
             onPositionChanged: Util.setAnchorsForPosition(mouse);            
         }
         Row {
@@ -106,7 +115,7 @@ Item {
     }
         
     //this item is used as placeholder for the interface item
-    Rectangle {
+    Item {
         id: childarea
        
         anchors.topMargin: 3
@@ -118,6 +127,7 @@ Item {
     
     //add the resize areas
     InterfaceItemResizer {
+        id: resizer
         interfaceitem: interfaceitem;
         anchors.fill: parent;   
     }    
@@ -219,18 +229,66 @@ Item {
     //deny the drag is fo
     function canDrag(dragAnchor) {
         
+        var i = getActiveAnchorObjectFor(dragAnchor);        
+        return (i==undefined) ? true : false;
+    }
+    
+    function getActiveAnchorObjectFor(anchor)  {
+        
         for (var i=0; i<Util.anchors.anchorXlist.length; ++i) {
             
             var item = Util.anchors.anchorXlist[i];
-            if(item.active == interfaceitem && item.activeAnchor == dragAnchor)
-                return false;
+            if(item.active == interfaceitem && item.activeAnchor == anchor)
+                return item;
         }
         for (var i=0; i<Util.anchors.anchorYlist.length; ++i) {
             
             var item = Util.anchors.anchorYlist[i];
-            if(item.active == interfaceitem && item.activeAnchor == dragAnchor)
-                return false;
+            if(item.active == interfaceitem && item.activeAnchor == anchor)
+                return item;
         }
-        return true;
+        return undefined;
+    }
+    
+    function setControlledChange(cc) {
+        Util.anchors.controlledChange = cc;
+    }
+    
+    function setupResize(xf, yf, fixedanchor, draganchor) {
+
+        //the fix item mused be anchored to the item with the item as active one,
+        //as the passive stays fixed and the active gets dragged. As this may override
+        //possible existing anchors we need to store them and reenable them when finished
+        Util.anchors.resizeAnchorCache = getActiveAnchorObjectFor(fixedanchor);        
+        
+        resizeFixItem.x = xf;
+        resizeFixItem.y = yf;
+
+        interfaceitem.setControlledChange(true)
+        interfaceitem.anchors[fixedanchor] = resizeFixItem[fixedanchor];
+        interfaceitem.anchors[draganchor]  = resizeDragItem[draganchor];
+        interfaceitem.setControlledChange(false)
+    }
+    
+    function clearResize(fixed, drag) {
+        
+        interfaceitem.setControlledChange(true)
+        interfaceitem.anchors[drag] = undefined;
+        interfaceitem.anchors[fixed] = undefined;
+        
+        if(Util.anchors.resizeAnchorCache != undefined) {
+            var obj = Util.anchors.resizeAnchorCache;
+            obj.active.anchors[obj.activeAnchor] = obj.passive[obj.passiveAnchor];
+        }
+            
+        interfaceitem.setControlledChange(false)
+    }
+    
+    function getPassiveYItemChain(list) {
+        Util.getPassiveYItemChain(list);
+    }
+    
+    function getPassiveXItemChain(list) {
+        Util.getPassiveXItemChain(list);
     }
 }

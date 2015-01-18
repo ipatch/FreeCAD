@@ -74,6 +74,12 @@ void DynamicInterfaceManager::addInterfaceItem(QWidget* widget, bool permanent)
     }
     item->setProperty("minWidth", widget->minimumSizeHint().width());
     item->setProperty("minHeight", widget->minimumSizeHint().height());
+    
+    //and set the view name
+    item->setProperty("title", widget->objectName());
+    
+    //and change some view properties
+    widget->setAttribute(Qt::WA_TranslucentBackground, true);
 }
 
 

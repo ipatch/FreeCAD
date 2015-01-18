@@ -36,6 +36,7 @@ Item {
         id: list
         model: mdiArea.children
         
+        boundsBehavior: Flickable.DragOverBounds
         highlightFollowsCurrentItem: true
         orientation: ListView.Horizontal 
         anchors.fill: parent

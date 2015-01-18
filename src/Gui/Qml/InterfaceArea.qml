@@ -25,9 +25,10 @@ import FreeCADLib 1.0
 
 Item {
     id: interfaceArea
-    anchors.margins: 4
     
-     Item {
+    anchors.topMargin: 3;
+    
+    Item {
         id: fixItem 
         width:  0
         height: 0
@@ -42,22 +43,6 @@ Item {
     function setupInterfaceItem(item) {
         
         item.resizeDragItem  = dragItem;
-    }
-    
-    function setupResize(xf, yf, fixedanchor, item, draganchor) {
-
-        fixItem.x = xf;
-        fixItem.y = yf;
-        //fixItem.anchors[fixedanchor] = item[fixedanchor];
-        //dragItem.anchors[draganchor] = item[draganchor];
-        
-        item.anchors[fixedanchor] = fixItem[fixedanchor];
-        item.anchors[draganchor] = dragItem[draganchor];
-    }
-    
-    function clearResize(item, fixed, drag) {
-        
-        item.anchors[drag] = undefined;
-        item.anchors[fixed] = undefined;
+        item.resizeFixItem   = fixItem;
     }
 }
