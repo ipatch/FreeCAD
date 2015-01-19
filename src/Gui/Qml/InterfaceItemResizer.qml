@@ -42,15 +42,12 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         height: interfaceitem.dragframe
-        
-        property bool draggable: true;
 
         enabled: !fixedHeight
         
         hoverEnabled: true
         onEntered: {
-            draggable = interfaceitem.canDrag('top');
-            if(draggable)
+            if(!fixedHeight)
                 cursorItem.cursor = Qt.SizeVerCursor
         }
         onExited:  {
@@ -58,6 +55,7 @@ Item {
         }
         
         onPressed: interfaceitem.resizeDragItem.y = interfaceitem.y;
+        onPositionChanged: if(drag.active) interfaceitem.resizeMove(mouse);
         
         drag.target: interfaceitem.resizeDragItem
         drag.axis: Drag.YAxis
@@ -65,11 +63,11 @@ Item {
         drag.maximumY: interfaceitem.y + interfaceitem.height - interfaceitem.totalMinHeight
         
         drag.onActiveChanged: {
-            if(drag.active && draggable) {
+            if(drag.active && !fixedHeight) {
                 var y_ = interfaceitem.y + interfaceitem.height;
-                interfaceitem.setupResize(0, y_, 'bottom', 'top');
+                interfaceitem.setupResize({x:mouseX, y:mouseY}, 0, y_, 'bottom', 'top', 5);
             }
-            else if(draggable) {
+            else if(!fixedHeight) {
                 interfaceitem.clearResize('bottom', 'top');
                 cursorItem.cursor = Qt.ArrowCursor
             }
@@ -84,15 +82,12 @@ Item {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         height: dragframe
-                
-        property bool draggable: true;
 
         enabled: !fixedHeight
         
         hoverEnabled: true
         onEntered: {
-            draggable = interfaceitem.canDrag('bottom');
-            if(draggable)
+            if(!fixedHeight)
                 cursorItem.cursor = Qt.SizeVerCursor
         }
         onExited:  {
@@ -100,18 +95,19 @@ Item {
         }
                 
         onPressed: interfaceitem.resizeDragItem.y = interfaceitem.y + interfaceitem.height;
+        onPositionChanged: if(drag.active) interfaceitem.resizeMove(mouse);
                 
         drag.target: interfaceitem.resizeDragItem
         drag.axis: Drag.YAxis
         drag.minimumY: interfaceitem.y + interfaceitem.totalMinHeight;
                 
         drag.onActiveChanged: {
-            if(drag.active && draggable) {
+            if(drag.active && !fixedHeight) {
                 drag.maximumY = interfaceitem.parent.height;
                 var y_ = interfaceitem.y;
-                interfaceitem.setupResize(0, y_, 'top', 'bottom');
+                interfaceitem.setupResize({x:mouseX, y:mouseY}, 0, y_, 'top', 'bottom', 5);
             }
-            else if(draggable) {
+            else if(!fixedHeight) {
                 interfaceitem.clearResize('top', 'bottom');
                 cursorItem.cursor = Qt.ArrowCursor
             }
@@ -125,15 +121,12 @@ Item {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         width: dragframe
-                
-        property bool draggable: true;
-        
+
         enabled: !fixedWidth
 
         hoverEnabled: true
         onEntered: {
-            draggable = interfaceitem.canDrag('left');
-            if(draggable)
+            if(!fixedWidth)
                 cursorItem.cursor = Qt.SizeHorCursor
         }
         onExited:  {
@@ -141,6 +134,7 @@ Item {
         }
                 
         onPressed: interfaceitem.resizeDragItem.x = interfaceitem.x;
+        onPositionChanged: if(drag.active) interfaceitem.resizeMove(mouse);
                 
         drag.target: interfaceitem.resizeDragItem
         drag.axis: Drag.XAxis
@@ -148,11 +142,11 @@ Item {
         drag.maximumX: interfaceitem.x + interfaceitem.width - interfaceitem.minWidth
                 
         drag.onActiveChanged: {
-            if(drag.active && draggable) {
+            if(drag.active && !fixedWidth) {
                 var x = interfaceitem.x + interfaceitem.width;
-                interfaceitem.setupResize(x, 0, 'right', 'left');
+                interfaceitem.setupResize({x:mouseX, y:mouseY}, x, 0, 'right', 'left',4);
             }
-            else if(draggable) {
+            else if(!fixedWidth) {
                 interfaceitem.clearResize('right', 'left');
                 cursorItem.cursor = Qt.ArrowCursor
             }
@@ -165,16 +159,13 @@ Item {
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        width: dragframe
-                
-        property bool draggable: true;
+        width: dragframe               
 
         enabled: !fixedWidth
         
         hoverEnabled: true
         onEntered: {
-            draggable = interfaceitem.canDrag('right');
-            if(draggable)
+            if(!fixedWidth)
                 cursorItem.cursor = Qt.SizeHorCursor
         }
         onExited:  {
@@ -182,18 +173,19 @@ Item {
         }
                 
         onPressed: interfaceitem.resizeDragItem.x = interfaceitem.x + interfaceitem.width;
+        onPositionChanged: if(drag.active) interfaceitem.resizeMove(mouse);
                 
         drag.target: interfaceitem.resizeDragItem
         drag.axis: Drag.XAxis
         drag.minimumX: interfaceitem.x + interfaceitem.minWidth;
                 
         drag.onActiveChanged: {
-            if(drag.active && draggable) {
+            if(drag.active && !fixedWidth) {
                 drag.maximumX = interfaceitem.parent.width; //parent is not defined on creation
                 var x = interfaceitem.x;
-                interfaceitem.setupResize(x, 0, 'left', 'right');
+                interfaceitem.setupResize({x:mouseX, y:mouseY}, x, 0, 'left', 'right', 4);
             }
-            else if(draggable) {
+            else if(!fixedWidth) {
                 interfaceitem.clearResize('left', 'right');
                 cursorItem.cursor = Qt.ArrowCursor
             }
@@ -211,17 +203,12 @@ Item {
         anchors.top: parent.top
         width:  dragframe
         height: dragframe
-                
-        property bool x_draggable: true;
-        property bool y_draggable: true;
 
         enabled: !fixedWidth || !fixedHeight
         
         hoverEnabled: true
         onEntered: {
-            x_draggable = interfaceitem.canDrag('right') && !fixedWidth;
-            y_draggable = interfaceitem.canDrag('top') && !fixedHeight;
-            if(x_draggable || y_draggable)
+            if(!(fixedWidth && fixedHeight))
                 cursorItem.cursor = Qt.SizeBDiagCursor
         }
         onExited:  {
@@ -232,6 +219,7 @@ Item {
             interfaceitem.resizeDragItem.x = interfaceitem.x + interfaceitem.width;
             interfaceitem.resizeDragItem.y = interfaceitem.y;
         }
+        onPositionChanged: if(drag.active) interfaceitem.resizeMove(mouse);
                 
         drag.target: interfaceitem.resizeDragItem
         drag.minimumX: interfaceitem.x + interfaceitem.minWidth;
@@ -239,18 +227,18 @@ Item {
         drag.maximumY: interfaceitem.y + interfaceitem.height - interfaceitem.totalMinHeight
                  
         drag.onActiveChanged: {
-            if(drag.active && (x_draggable || y_draggable)) {
+            if(drag.active && (!(fixedWidth && fixedHeight))) {
                 drag.maximumX = interfaceitem.parent.width; //parent is not defined on creation
                 var y = interfaceitem.y + interfaceitem.height;
-                if(x_draggable)
-                    interfaceitem.setupResize(interfaceitem.x, y, 'left', 'right');
-                if(y_draggable)
-                    interfaceitem.setupResize(interfaceitem.x, y, 'bottom', 'top')
+                if(!fixedWidth)
+                    interfaceitem.setupResize({x:mouseX, y:mouseY}, interfaceitem.x, y, 'left', 'right');
+                if(!fixedHeight)
+                    interfaceitem.setupResize({x:mouseX, y:mouseY}, interfaceitem.x, y, 'bottom', 'top')
             }
-            else if(x_draggable || y_draggable) {
-                if(x_draggable)
+            else if(!(fixedWidth && fixedHeight)) {
+                if(!fixedWidth)
                     interfaceitem.clearResize('left', 'right');
-                if(y_draggable)
+                if(!fixedHeight)
                     interfaceitem.clearResize('bottom', 'top');
                 
                 cursorItem.cursor = Qt.ArrowCursor
@@ -265,17 +253,12 @@ Item {
         anchors.bottom: parent.bottom
         width:  dragframe
         height: dragframe
-                
-        property bool x_draggable: true;
-        property bool y_draggable: true;
 
         enabled: !fixedWidth || !fixedHeight
         
         hoverEnabled: true
         onEntered: {
-            x_draggable = interfaceitem.canDrag('left') && !fixedWidth;
-            y_draggable = interfaceitem.canDrag('bottom') && !fixedHeight;
-            if(x_draggable || y_draggable)
+            if(!(fixedWidth && fixedHeight))
                 cursorItem.cursor = Qt.SizeBDiagCursor
         }
         onExited:  {
@@ -286,6 +269,7 @@ Item {
             interfaceitem.resizeDragItem.x = interfaceitem.x;
             interfaceitem.resizeDragItem.y = interfaceitem.y + interfaceitem.height;
         }
+        onPositionChanged: if(drag.active) interfaceitem.resizeMove(mouse);
                 
         drag.target: interfaceitem.resizeDragItem
         drag.minimumX: 0;
@@ -293,18 +277,18 @@ Item {
         drag.minimumY: interfaceitem.y + interfaceitem.totalMinHeight
                  
         drag.onActiveChanged: {
-            if(drag.active && (x_draggable || y_draggable)) {
+            if(drag.active && (!(fixedWidth && fixedHeight))) {
                 drag.maximumY = interfaceitem.parent.height; //parent is not defined on creation
                 var x = interfaceitem.x + interfaceitem.width;
-                if(x_draggable)
-                    interfaceitem.setupResize(x, interfaceitem.y, 'right', 'left');
-                if(y_draggable)
-                    interfaceitem.setupResize(x, interfaceitem.y, 'top', 'bottom')
+                if(!fixedWidth)
+                    interfaceitem.setupResize({x:mouseX, y:mouseY}, x, interfaceitem.y, 'right', 'left');
+                if(!fixedHeight)
+                    interfaceitem.setupResize({x:mouseX, y:mouseY}, x, interfaceitem.y, 'top', 'bottom')
             }
-            else if(x_draggable || y_draggable) {
-                if(x_draggable)
+            else if(!(fixedWidth && fixedHeight)) {
+                if(!fixedWidth)
                     interfaceitem.clearResize('right', 'left');
-                if(y_draggable)
+                if(!fixedHeight)
                     interfaceitem.clearResize('top', 'bottom');
                 
                 cursorItem.cursor = Qt.ArrowCursor
@@ -319,17 +303,12 @@ Item {
         anchors.top: parent.top
         width:  dragframe
         height: dragframe
-                
-        property bool x_draggable: true;
-        property bool y_draggable: true;
 
         enabled: !fixedWidth || !fixedHeight
         
         hoverEnabled: true
         onEntered: {
-            x_draggable = interfaceitem.canDrag('left') && !fixedWidth;
-            y_draggable = interfaceitem.canDrag('top') && !fixedHeight;
-            if(x_draggable || y_draggable)
+            if(!(fixedWidth && fixedHeight))
                 cursorItem.cursor = Qt.SizeFDiagCursor
         }
         onExited:  {
@@ -340,6 +319,7 @@ Item {
             interfaceitem.resizeDragItem.x = interfaceitem.x;
             interfaceitem.resizeDragItem.y = interfaceitem.y;
         }
+        onPositionChanged: if(drag.active) interfaceitem.resizeMove(mouse);
                 
         drag.target: interfaceitem.resizeDragItem
         drag.minimumX: 0;
@@ -348,19 +328,19 @@ Item {
         drag.maximumY: interfaceitem.y + interfaceitem.height - interfaceitem.totalMinHeight;
                  
         drag.onActiveChanged: {
-            if(drag.active && (x_draggable || y_draggable)) {
+            if(drag.active && (!(fixedWidth && fixedHeight))) {
                 var x = interfaceitem.x + interfaceitem.width;
                 var y = interfaceitem.y + interfaceitem.height;
-                if(x_draggable)
-                    interfaceitem.setupResize(x, y, 'right', 'left');
-                if(y_draggable)
-                    interfaceitem.setupResize(x, y, 'bottom', 'top')
+                if(!fixedWidth)
+                    interfaceitem.setupResize({x:mouseX, y:mouseY}, x, y, 'right', 'left');
+                if(!fixedHeight)
+                    interfaceitem.setupResize({x:mouseX, y:mouseY}, x, y, 'bottom', 'top')
             }
-            else if(x_draggable || y_draggable) {
-                if(x_draggable)
+            else if(!(fixedWidth && fixedHeight)) {
+                if(!fixedWidth)
                     interfaceitem.clearResize('right', 'left');
-                if(y_draggable)
-                    interfaceitem.clearResize('bottom', 'left');
+                if(!fixedHeight)
+                    interfaceitem.clearResize('bottom', 'top');
                 
                 cursorItem.cursor = Qt.ArrowCursor
             }
@@ -374,17 +354,12 @@ Item {
         anchors.bottom: parent.bottom
         width:  dragframe
         height: dragframe
-                
-        property bool x_draggable: true;
-        property bool y_draggable: true;
 
         enabled: !fixedWidth || !fixedHeight
         
         hoverEnabled: true
         onEntered: {
-            x_draggable = interfaceitem.canDrag('right') && !fixedWidth;
-            y_draggable = interfaceitem.canDrag('bottom') && !fixedHeight;
-            if(x_draggable || y_draggable)
+            if(!(fixedWidth && fixedHeight))
                 cursorItem.cursor = Qt.SizeFDiagCursor
         }
         onExited:  {
@@ -395,25 +370,29 @@ Item {
             interfaceitem.resizeDragItem.x = interfaceitem.x + interfaceitem.width;
             interfaceitem.resizeDragItem.y = interfaceitem.y + interfaceitem.height;
         }
+        onPositionChanged: if(drag.active) interfaceitem.resizeMove(mouse);
                 
         drag.target: interfaceitem.resizeDragItem
         drag.minimumX: interfaceitem.x + interfaceitem.minWidth;
         drag.minimumY: interfaceitem.y + interfaceitem.totalMinHeight;
                   
         drag.onActiveChanged: {
-            if(drag.active && (x_draggable || y_draggable)) {
+            if(drag.active && (!(fixedWidth && fixedHeight))) {
                 drag.maximumY = interfaceitem.parent.height;
                 drag.maximumX = interfaceitem.parent.width;
                 var y = interfaceitem.y;
-                if(x_draggable)
-                    interfaceitem.setupResize(interfaceitem.x, y, 'left', 'right');
-                if(y_draggable)
-                    interfaceitem.setupResize(interfaceitem.x, y, 'top', 'bottom')
+                if(!fixedWidth)
+                    if(!fixedHeight)
+                        interfaceitem.setupResize({x:mouseX, y:mouseY}, interfaceitem.x, y, 'left', 'right', 3);
+                    else
+                        interfaceitem.setupResize({x:mouseX, y:mouseY}, interfaceitem.x, y, 'left', 'right', 4);
+                if(!fixedHeight)
+                    interfaceitem.setupResize({x:mouseX, y:mouseY}, interfaceitem.x, y, 'top', 'bottom')
             }
-            else if(x_draggable || y_draggable) {
-                if(x_draggable)
+            else if(!(fixedWidth && fixedHeight)) {
+                if(!fixedWidth)
                     interfaceitem.clearResize('left', 'right');
-                if(y_draggable)
+                if(!fixedHeight)
                     interfaceitem.clearResize('top', 'bottom');
                 cursorItem.cursor = Qt.ArrowCursor
             }

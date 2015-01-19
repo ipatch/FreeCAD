@@ -24,7 +24,18 @@
 var sr = 8;    //snap radius around the items
 var reset = 50; //reset radius 
 
-//used to store the x and y anchor list
+//enumerations
+var DragMode = {
+    DragXY: 0,
+    DragX:  1,
+    DragY:  2,
+    SizeXY: 3,
+    SizeX:  4,
+    SizeY:  5,
+    Nonde:  6
+};
+
+//used to store the x and y anchor list and numerous anchor information
 var anchors;
 
 //object to store all hitpoint arrays
@@ -33,18 +44,23 @@ var hitPoints;
 //current drag data
 var dragItem;
 var initMousePos;
+var dragMode;
 
-function setupDrag(item, mouse) {
+function setupDrag(item, mouse, mode, resizeAnchor) {
     
     hitPoints = new Object();
     dragItem = item;
+    dragMode = mode;
     initMousePos = {x:mouse.x, y:mouse.y};
+    anchors.resizeAnchor = resizeAnchor;   //undefined for drag
     
     var ylist = [];
     var xlist = [];
     getPassiveYItemChain(ylist);
     getPassiveXItemChain(xlist);
     setupHitPositions(xlist, ylist);
+    
+    console.debug("setup drag mode: ", dragMode)
 }
 
 function setupHitPositions(xlist, ylist) {
@@ -102,30 +118,50 @@ function getPassiveXItemChain(list) {
 
 function setAnchorsForPosition(mousePos) {
 
-    if(anchors.anchorYlist.length == 0) {
-        
-        if( setPossibleAnchor(Qt.rect(dragItem.x-sr, dragItem.y-sr, dragItem.width+2*sr, 2*sr), 'top', ['top', 'bottom'])
-         || setPossibleAnchor(Qt.rect(dragItem.x-sr, dragItem.y+dragItem.height-sr, dragItem.width+2*sr, 2*sr), 'bottom', ['top', 'bottom'])
-         || setPossibleAnchor(Qt.rect(dragItem.x-sr, dragItem.y+dragItem.height/2-sr/2, 2*sr, sr), 'verticalCenter', ['verticalCenter'])
-         || setPossibleAnchor(Qt.rect(dragItem.x+dragItem.width-2*sr, dragItem.y+dragItem.height/2-sr/2, 2*sr, sr), 'verticalCenter', ['verticalCenter']))
-            return;
+    if(dragMode == DragMode.DragXY || dragMode == DragMode.DragY 
+         || dragMode == DragMode.SizeXY || dragMode == DragMode.SizeY) {
 
-    }
-    else if(Math.abs(initMousePos.y - mousePos.y) > reset) {
-        dragItem.removeAnchors(true)
+        if(getActiveAnchorObjectFor('top') == undefined) {
+            if(setPossibleAnchor(Qt.rect(dragItem.x-sr, dragItem.y-sr, dragItem.width+2*sr, 2*sr), 'top', ['top', 'bottom']))
+                return;
+        }
+        if(getActiveAnchorObjectFor('bottom') == undefined) {
+            if(setPossibleAnchor(Qt.rect(dragItem.x-sr, dragItem.y+dragItem.height-sr, dragItem.width+2*sr, 2*sr), 'bottom', ['top', 'bottom']))
+                return
+        }
+        if(getActiveAnchorObjectFor('verticalCenter') == undefined) {
+            if(setPossibleAnchor(Qt.rect(dragItem.x-sr, dragItem.y+dragItem.height/2-sr/2, 2*sr, sr), 'verticalCenter', ['verticalCenter']))
+                return; 
+            
+            if(setPossibleAnchor(Qt.rect(dragItem.x+dragItem.width-2*sr, dragItem.y+dragItem.height/2-sr/2, 2*sr, sr), 'verticalCenter', ['verticalCenter']))
+                return;   
+        }
+        if(Math.abs(initMousePos.y - mousePos.y) > reset) {
+            dragItem.removeAnchors(true, anchors.resizeAnchor)
+        }
     }
     
-    if(anchors.anchorXlist.length == 0) {
-        
-        //search for a possible x anchor, start with left
-        if(setPossibleAnchor(Qt.rect(dragItem.x-sr, dragItem.y-sr, 2*sr, dragItem.height+2*sr), 'left', ['left', 'right'])
-          || setPossibleAnchor(Qt.rect(dragItem.x+dragItem.width+sr, dragItem.y-sr, 2*sr, dragItem.height+2*sr), 'right', ['left', 'right'])
-          || setPossibleAnchor(Qt.rect(dragItem.x + dragItem.width/2-sr/2, dragItem.y-sr/2, sr, sr), 'horizontalCenter', ['horizontalCenter'])
-          || setPossibleAnchor(Qt.rect(dragItem.x + dragItem.width/2-sr/2, dragItem.y + dragItem.height-sr, sr, 2*sr), 'horizontalCenter', ['horizontalCenter']))
-            return;
-    }
-    else if(Math.abs(initMousePos.x - mousePos.x) > reset) {
-        dragItem.removeAnchors(false)
+    if(dragMode == DragMode.DragXY || dragMode == DragMode.DragX 
+         || dragMode == DragMode.SizeXY || dragMode == DragMode.SizeX) {
+
+        if(getActiveAnchorObjectFor('left') == undefined) {
+            if(setPossibleAnchor(Qt.rect(dragItem.x-sr, dragItem.y-sr, 2*sr, dragItem.height+2*sr), 'left', ['left', 'right']))
+                return;
+        }
+        if(getActiveAnchorObjectFor('right') == undefined) {
+            if(setPossibleAnchor(Qt.rect(dragItem.x+dragItem.width+sr, dragItem.y-sr, 2*sr, dragItem.height+2*sr), 'right', ['left', 'right']))
+                return;
+        }
+        if(getActiveAnchorObjectFor('horizontalCenter') == undefined) {
+            if(setPossibleAnchor(Qt.rect(dragItem.x + dragItem.width/2-sr/2, dragItem.y-sr/2, sr, sr), 'horizontalCenter', ['horizontalCenter']))
+                return;
+    
+            if(setPossibleAnchor(Qt.rect(dragItem.x + dragItem.width/2-sr/2, dragItem.y + dragItem.height-sr, sr, 2*sr), 'horizontalCenter', ['horizontalCenter']))
+                return;
+        }
+        if(Math.abs(initMousePos.x - mousePos.x) > reset) {
+            dragItem.removeAnchors(false, anchors.resizeAnchor)
+        }
     }
 }
 

@@ -89,10 +89,12 @@ Item {
             drag.minimumY: 0
             drag.maximumY: interfaceitem.parent.height - interfaceitem.height
             
-            drag.onActiveChanged: cursorItem.cursor = (drag.active) ? Qt.SizeAllCursor : Qt.ArrowCursor;
-            
-            
-            onPressed: Util.setupDrag(interfaceitem, mouse);
+            drag.onActiveChanged: {
+                cursorItem.cursor = (drag.active) ? Qt.SizeAllCursor : Qt.ArrowCursor;
+                if(!drag.active) Util.dragMode = Util.DragMode.None;                    
+            }
+
+            onPressed:  Util.setupDrag(interfaceitem, mouse, Util.DragMode.DragXY)
             onPositionChanged: Util.setAnchorsForPosition(mouse);            
         }
         Row {
@@ -174,11 +176,7 @@ Item {
     //if we set a anchor for this item we do not only need to set it but also to store the information
     //that we did. Furthermore this information needs to be stored in the passive element too.
     function setupAnchor(thisAnchor, item, itemAnchor) {
-        
-        //console.debug("setup anchor:")
-        //console.debug("X anchor length: ", Util.anchors.anchorXlist.length);
-        //console.debug("Y anchor length: ", Util.anchors.anchorYlist.length);
-        
+                
         Util.anchors.controlledChange = true;
         anchors[thisAnchor] = item[itemAnchor];
         Util.anchors.controlledChange = false;
@@ -186,51 +184,49 @@ Item {
         var anchorObject = {active: interfaceitem, passive: item, activeAnchor: thisAnchor, passiveAnchor: itemAnchor};        
         if(thisAnchor == 'top' || thisAnchor == 'bottom' || thisAnchor == 'verticalCenter') {
             anchorObject.isXtype = false;
-            Util.anchors.anchorYlist[Util.anchors.anchorYlist.length] = anchorObject;
+            Util.anchors.anchorYlist.push(anchorObject);
         }
         else {
-            anchorObject.isXtype = false;
-            Util.anchors.anchorXlist[Util.anchors.anchorXlist.length] = anchorObject;
+            anchorObject.isXtype = true;
+            Util.anchors.anchorXlist.push(anchorObject);
         }
        
         if('setPassiveAnchor' in item)
             item.setPassiveAnchor(anchorObject);
-        
-        //console.debug("done X anchor length: ", Util.anchors.anchorXlist.length);
-        //console.debug("done Y anchor length: ", Util.anchors.anchorYlist.length);
     }
     
-    function removeAnchors(vertical) {
-        
-        //console.debug("remove anchors")
+    function removeAnchors(vertical, resizeAnchor) {
         
         var list = vertical ? Util.anchors.anchorYlist : Util.anchors.anchorXlist;
         
-        for (var i=0; i < list.length; ++i) {
-            //reset the anchor
-            Util.anchors.controlledChange = true;
-            list[i].active.anchors[list[i].activeAnchor] = undefined;
-            Util.anchors.controlledChange = false;
+        for (var i=list.length-1; i>=0; --i) {
+            //reset the active anchors
+            if(list[i].active == interfaceitem && 
+                ( (Util.dragMode != Util.DragMode.SizeXY || Util.dragMode != Util.DragMode.SizeX 
+                    || Util.dragMode != Util.DragMode.SizeY)
+                    || list[i].activeAnchor==resizeAnchor)) {
+
+                Util.anchors.controlledChange = true;
+                list[i].active.anchors[list[i].activeAnchor] = undefined;
+                Util.anchors.controlledChange = false;
         
-            //inform the passive item that this anchor has gone
-            if('removePassiveAnchor' in list[i].passive)
-                list[i].passive.removePassiveAnchor(list[i]);
+                //inform the passive item that this anchor has gone
+                if('removePassiveAnchor' in list[i].passive)
+                    list[i].passive.removePassiveAnchor(list[i]);
+                
+                //remove the object from the list
+                list.splice(i, 1);
+                
+                //if we are resizing we need to setup the drag anchor again
+                if(Util.dragMode == Util.DragMode.SizeXY || Util.dragMode == Util.DragMode.SizeX
+                    || Util.dragMode == Util.DragMode.SizeY) {
+                    
+                    interfaceitem.setControlledChange(true)           
+                    interfaceitem.anchors[resizeAnchor]  = resizeDragItem[resizeAnchor];
+                    interfaceitem.setControlledChange(false)
+                }
+            }
         }
-        //clear the anchor list as all have been removed
-        if(vertical) 
-            Util.anchors.anchorYlist = new Array();
-        else
-            Util.anchors.anchorXlist = new Array();
-    }
-    
-    //see if we can drag in the given anchor direction. 
-    //if we are the active item in a anchor of the given direction the draging would override this 
-    //anchor. this is not wanted. This function is used to check if we have an active anchor and 
-    //deny the drag is fo
-    function canDrag(dragAnchor) {
-        
-        var i = getActiveAnchorObjectFor(dragAnchor);        
-        return (i==undefined) ? true : false;
     }
     
     function getActiveAnchorObjectFor(anchor)  {
@@ -254,20 +250,28 @@ Item {
         Util.anchors.controlledChange = cc;
     }
     
-    function setupResize(xf, yf, fixedanchor, draganchor) {
+    function setupResize(mouse, xf, yf, fixedanchor, draganchor, mode) {
 
         //the fix item mused be anchored to the item with the item as active one,
         //as the passive stays fixed and the active gets dragged. As this may override
         //possible existing anchors we need to store them and reenable them when finished
-        Util.anchors.resizeAnchorCache = getActiveAnchorObjectFor(fixedanchor);        
+        Util.anchors.resizeFixedAnchorCache = getActiveAnchorObjectFor(fixedanchor);    
+        Util.anchors.resizeDragAnchorCache = getActiveAnchorObjectFor(draganchor);   
         
         resizeFixItem.x = xf;
         resizeFixItem.y = yf;
 
         interfaceitem.setControlledChange(true)
         interfaceitem.anchors[fixedanchor] = resizeFixItem[fixedanchor];
-        interfaceitem.anchors[draganchor]  = resizeDragItem[draganchor];
+        if(Util.anchors.resizeDragAnchorCache == undefined)
+            interfaceitem.anchors[draganchor]  = resizeDragItem[draganchor];
         interfaceitem.setControlledChange(false)
+        
+        Util.setupDrag(interfaceitem, mouse, mode, draganchor);
+    }
+    
+    function resizeMove(mouse) {
+        Util.setAnchorsForPosition(mouse);     
     }
     
     function clearResize(fixed, drag) {
@@ -276,11 +280,12 @@ Item {
         interfaceitem.anchors[drag] = undefined;
         interfaceitem.anchors[fixed] = undefined;
         
-        if(Util.anchors.resizeAnchorCache != undefined) {
-            var obj = Util.anchors.resizeAnchorCache;
+        if(Util.anchors.resizeFixedAnchorCache != undefined) {
+            var obj = Util.anchors.resizeFixedAnchorCache;
             obj.active.anchors[obj.activeAnchor] = obj.passive[obj.passiveAnchor];
         }
             
+        Util.dragMode = Util.DragMode.None;
         interfaceitem.setControlledChange(false)
     }
     
