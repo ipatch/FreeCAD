@@ -107,6 +107,6 @@ Item {
         list.currentIndex = next
         var item = mdiArea.children[id]
         item.parent = dummy
-        item.destroy()
+        item.requestDestroy(item)
     }
 }

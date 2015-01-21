@@ -30,8 +30,10 @@
 
 namespace Gui {
     
-class GuiExport DynamicInterfaceManager
+class GuiExport DynamicInterfaceManager : public QObject
 {
+    Q_OBJECT
+    
 public:
     DynamicInterfaceManager();
     ~DynamicInterfaceManager();
@@ -48,10 +50,16 @@ protected:
 //Singleton for the global user interface
 class GuiExport GlobalDynamicInterfaceManager : public DynamicInterfaceManager {
   
+    Q_OBJECT
+    
 public:
     static GlobalDynamicInterfaceManager* get();
     
     void addView(MDIView* view);
+    
+public Q_SLOTS:
+    //destroy cpp items
+    void destroy(QVariant item);
     
 private:    
     GlobalDynamicInterfaceManager();

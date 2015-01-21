@@ -29,6 +29,7 @@
 #include <QGraphicsProxyWidget>
 #include <QDeclarativeItem>
 #include <QAbstractButton>
+#include <QStyle>
 
 namespace Gui {
    
@@ -95,12 +96,31 @@ protected:
 
 class GuiExport QmlTitleButton : public QmlButton {
     
+public:
+    enum TitleButtons {
+        Min = QStyle::SP_TitleBarMinButton,
+        Max = QStyle::SP_TitleBarMaxButton,
+        Menu = QStyle::SP_TitleBarMenuButton,
+        Close = QStyle::SP_TitleBarCloseButton,
+        Shade = QStyle::SP_TitleBarShadeButton,
+        Unshade = QStyle::SP_TitleBarUnshadeButton,
+        Help = QStyle::SP_TitleBarContextHelpButton
+    };
+    
     Q_OBJECT
+    Q_ENUMS(TitleButtons)
+    Q_PROPERTY(TitleButtons styleIcon READ styleIcon WRITE setStyleIcon)
     
 public:    
     QmlTitleButton(QDeclarativeItem* parent = NULL);
     
     virtual void paint(QPainter*, const QStyleOptionGraphicsItem*, QWidget*);
+    
+    void setStyleIcon(TitleButtons i) {m_styleIcon = i;}
+    TitleButtons styleIcon() {return m_styleIcon;}
+    
+protected:
+    TitleButtons m_styleIcon;
 };
 
 class GuiExport QmlIcon : public QDeclarativeItem {
@@ -136,6 +156,7 @@ public:
 private:
     Qt::CursorShape m_current;
 };
+
 
 static void init_qml_types() {
     qmlRegisterType<QmlProxy>      ("FreeCADLib", 1, 0, "Proxy");

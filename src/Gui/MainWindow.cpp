@@ -363,7 +363,7 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
     HelpView* pcHelpView = new HelpView( home, this );
     pDockMgr->registerDockWindow("Std_HelpView", pcHelpView);
 #endif
-/*
+
     // Tree view
     TreeDockWidget* tree = new TreeDockWidget(0, this);
     tree->setObjectName
@@ -373,7 +373,7 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
         pDockMgr->registerDockWindow("Std_TreeView", tree);   
     else 
         GlobalDynamicInterfaceManager::get()->addInterfaceItem(tree, true);
-
+/*
     // Property view
     PropertyDockView* pcPropView = new PropertyDockView(0, this);
     pcPropView->setObjectName
@@ -806,8 +806,7 @@ void MainWindow::addWindow(MDIView* view)
         QList<View3DInventorViewer*> gviews = view->findChildren<View3DInventorViewer*>();
         if(!gviews.empty()) {
             for(QList<View3DInventorViewer*>::iterator it = gviews.begin(); it != gviews.end(); it++) {
-                Base::Console().Message("change viewport to NULL\n");
-                QGLWidget* glw = static_cast<QGLWidget*>(d->declarativeView->viewport());
+                 QGLWidget* glw = static_cast<QGLWidget*>(d->declarativeView->viewport());
                 (*it)->setExternGlViewport(glw);
             }
         }

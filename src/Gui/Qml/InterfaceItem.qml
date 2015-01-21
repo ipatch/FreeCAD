@@ -31,16 +31,16 @@ Item {
     //all children are added to the childarea by default
     default property alias content: childarea.children
     property alias titleBar: titlebar
+    
+    property int margin: 3;
+    
+    property bool shade: false
+    property int  shadeSize
      
     property Item area: parent
     property Item resizeDragItem
     property Item resizeFixItem
-    
-    //margins for nice looks
-    anchors.bottomMargin: 3
-    anchors.leftMargin: 3
-    anchors.rightMargin: 3
-    
+        
     //drag properties
     property alias fixedWidth:  resizer.fixedWidth
     property alias fixedHeight: resizer.fixedHeight
@@ -66,8 +66,12 @@ Item {
         anchors.left:  parent.left
         anchors.right: parent.right
 
+        SystemPalette { 
+            id: palette
+        }
+        
         radius:3
-        color: "#999999"
+        color: palette.window
         
         Text {
             id: titleItem
@@ -91,7 +95,13 @@ Item {
             
             drag.onActiveChanged: {
                 cursorItem.cursor = (drag.active) ? Qt.SizeAllCursor : Qt.ArrowCursor;
-                if(!drag.active) Util.dragMode = Util.DragMode.None;                    
+                if(!drag.active) {
+                    setAnchorIndicator(false)
+                    Util.dragMode = Util.DragMode.None;                    
+                }
+                else {
+                    setAnchorIndicator(true)
+                }
             }
 
             onPressed:  Util.setupDrag(interfaceitem, mouse, Util.DragMode.DragXY)
@@ -106,12 +116,32 @@ Item {
             TitleButton{
                 width:  20
                 height: 20
-                id: shade
+                id: shadeButton
+                styleIcon: shade ? TitleButton.Unshade : TitleButton.Shade
+                
+                onActivated: {
+                    console.debug("shade animation start")
+                    if(!shade) {
+                        shadeSize = interfaceitem.height;
+                        console.debug("set hight: ", shadeSize, ', real: ',interfaceitem.height)
+                        shadeAnimation.to = titlebar.height
+                        shade = true;
+                    }
+                    else {
+                        console.debug("reset height: ",shadeSize)
+                        shadeAnimation.to = shadeSize
+                        shade = false;
+                    }
+                    
+                    shadeAnimation.start()
+                }
             }
             TitleButton{
                 width:  20
                 height: 20
-                id: close
+                id: closeButton
+                styleIcon: TitleButton.Close
+                
             }
         }
     }
@@ -143,6 +173,15 @@ Item {
     
     onAreaChanged: {
         area.setupInterfaceItem(interfaceitem);
+    }
+            
+    PropertyAnimation { 
+        id: shadeAnimation
+        target: interfaceitem
+        properties: 'height'
+        to: 0
+        duration: 200
+        easing.type: Easing.InOutCubic
     }
     
     anchors.onTopChanged: {
@@ -179,6 +218,11 @@ Item {
                 
         Util.anchors.controlledChange = true;
         anchors[thisAnchor] = item[itemAnchor];
+        if(thisAnchor != itemAnchor)
+            anchors[thisAnchor+'Margin'] = interfaceitem.margin;
+        else
+            anchors[thisAnchor+'Margin'] = 0;
+        
         Util.anchors.controlledChange = false;
         
         var anchorObject = {active: interfaceitem, passive: item, activeAnchor: thisAnchor, passiveAnchor: itemAnchor};        
@@ -193,6 +237,8 @@ Item {
        
         if('setPassiveAnchor' in item)
             item.setPassiveAnchor(anchorObject);
+        
+        setAnchorIndicator(true)
     }
     
     function removeAnchors(vertical, resizeAnchor) {
@@ -227,6 +273,8 @@ Item {
                 }
             }
         }
+        
+        setAnchorIndicator(true)
     }
     
     function getActiveAnchorObjectFor(anchor)  {
@@ -263,8 +311,11 @@ Item {
 
         interfaceitem.setControlledChange(true)
         interfaceitem.anchors[fixedanchor] = resizeFixItem[fixedanchor];
-        if(Util.anchors.resizeDragAnchorCache == undefined)
-            interfaceitem.anchors[draganchor]  = resizeDragItem[draganchor];
+        interfaceitem.anchors[fixedanchor+'Margin'] = 0;
+        if(Util.anchors.resizeDragAnchorCache == undefined) {
+            interfaceitem.anchors[draganchor] = resizeDragItem[draganchor];
+            interfaceitem.anchors[draganchor+'Margin'] = 0
+        }
         interfaceitem.setControlledChange(false)
         
         Util.setupDrag(interfaceitem, mouse, mode, draganchor);
@@ -295,5 +346,17 @@ Item {
     
     function getPassiveXItemChain(list) {
         Util.getPassiveXItemChain(list);
+    }
+    
+    function setAnchorIndicator(draw) {
+        var clist = parent.children;
+        for(var i=0; i<clist.length; ++i) {
+            if('drawAnchorIndicator' in clist[i]) 
+                clist[i].drawAnchorIndicator(draw);
+        }
+    }
+    
+    function drawAnchorIndicator(draw) {
+        resizer.drawAnchorIndicator(draw);
     }
 }

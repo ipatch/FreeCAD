@@ -41,17 +41,23 @@ Item {
         id: topResizeArea
         anchors.left: parent.left
         anchors.right: parent.right
+        anchors.top: parent.top
         height: interfaceitem.dragframe
 
         enabled: !fixedHeight
         
         hoverEnabled: true
         onEntered: {
-            if(!fixedHeight)
+            if(!fixedHeight) {
                 cursorItem.cursor = Qt.SizeVerCursor
+                //if(!drag.active) interfaceitem.setAnchorIndicator(true);
+            }
         }
         onExited:  {
-            if(!drag.active) cursorItem.cursor = Qt.ArrowCursor
+            if(!drag.active) {
+                cursorItem.cursor = Qt.ArrowCursor
+                interfaceitem.setAnchorIndicator(false);
+            }
         }
         
         onPressed: interfaceitem.resizeDragItem.y = interfaceitem.y;
@@ -65,13 +71,36 @@ Item {
         drag.onActiveChanged: {
             if(drag.active && !fixedHeight) {
                 var y_ = interfaceitem.y + interfaceitem.height;
+                interfaceitem.setAnchorIndicator(true);
                 interfaceitem.setupResize({x:mouseX, y:mouseY}, 0, y_, 'bottom', 'top', 5);
             }
             else if(!fixedHeight) {
                 interfaceitem.clearResize('bottom', 'top');
                 cursorItem.cursor = Qt.ArrowCursor
+                interfaceitem.setAnchorIndicator(false);
             }
             
+        }
+    }
+    //top arrow
+    Image {
+        id: indicatorTop
+        source: "qrc:/icons/button_up.svg"
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        height: Math.min(30, interfaceitem.height/2)
+        width: Math.min(30, interfaceitem.width/2)
+        visible:false
+        
+        onVisibleChanged: opacity=0;
+        
+        Behavior on visible {
+            PropertyAnimation{
+                target: indicatorTop
+                property: "opacity"
+                from: 0
+                to: 1
+            }
         }
     }
 
@@ -87,11 +116,16 @@ Item {
         
         hoverEnabled: true
         onEntered: {
-            if(!fixedHeight)
+            if(!fixedHeight) {
                 cursorItem.cursor = Qt.SizeVerCursor
+                //if(!drag.active) interfaceitem.setAnchorIndicator(true);
+            }
         }
         onExited:  {
-            if(!drag.active) cursorItem.cursor = Qt.ArrowCursor
+            if(!drag.active) {
+                cursorItem.cursor = Qt.ArrowCursor
+                //interfaceitem.setAnchorIndicator(false);
+            }
         }
                 
         onPressed: interfaceitem.resizeDragItem.y = interfaceitem.y + interfaceitem.height;
@@ -105,11 +139,35 @@ Item {
             if(drag.active && !fixedHeight) {
                 drag.maximumY = interfaceitem.parent.height;
                 var y_ = interfaceitem.y;
+                interfaceitem.setAnchorIndicator(true);
                 interfaceitem.setupResize({x:mouseX, y:mouseY}, 0, y_, 'top', 'bottom', 5);
             }
             else if(!fixedHeight) {
                 interfaceitem.clearResize('top', 'bottom');
                 cursorItem.cursor = Qt.ArrowCursor
+                interfaceitem.setAnchorIndicator(false);
+            }
+        }
+    }
+    
+    //bottom arrow
+    Image {
+        id: indicatorBottom
+        source: "qrc:/icons/button_down.svg"
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        width: Math.min(30, interfaceitem.width/2)
+        height: Math.min(30, interfaceitem.height/2)
+        visible:false
+        
+        onVisibleChanged: opacity=0;
+        
+        Behavior on visible {
+            PropertyAnimation{
+                target: indicatorBottom
+                property: "opacity"
+                from: 0
+                to: 1
             }
         }
     }
@@ -126,11 +184,16 @@ Item {
 
         hoverEnabled: true
         onEntered: {
-            if(!fixedWidth)
+            if(!fixedWidth) {
                 cursorItem.cursor = Qt.SizeHorCursor
+                //if(!drag.active) interfaceitem.setAnchorIndicator(true);
+            }
         }
         onExited:  {
-            if(!drag.active) cursorItem.cursor = Qt.ArrowCursor
+            if(!drag.active) {
+                cursorItem.cursor = Qt.ArrowCursor
+                //interfaceitem.setAnchorIndicator(false);
+            }
         }
                 
         onPressed: interfaceitem.resizeDragItem.x = interfaceitem.x;
@@ -143,12 +206,35 @@ Item {
                 
         drag.onActiveChanged: {
             if(drag.active && !fixedWidth) {
+                interfaceitem.setAnchorIndicator(true);
                 var x = interfaceitem.x + interfaceitem.width;
                 interfaceitem.setupResize({x:mouseX, y:mouseY}, x, 0, 'right', 'left',4);
             }
             else if(!fixedWidth) {
                 interfaceitem.clearResize('right', 'left');
                 cursorItem.cursor = Qt.ArrowCursor
+                interfaceitem.setAnchorIndicator(false);
+            }
+        }
+    }
+    //leftarrow
+    Image {
+        id: indicatorLeft
+        source: "qrc:/icons/button_left.svg"
+        anchors.left: parent.left
+        anchors.verticalCenter: parent.verticalCenter
+        width: Math.min(30, interfaceitem.width/2)
+        height: Math.min(30, interfaceitem.height/2)
+        visible:false
+        
+        onVisibleChanged: opacity=0;
+        
+        Behavior on visible {
+            PropertyAnimation{
+                target: indicatorLeft
+                property: "opacity"
+                from: 0
+                to: 1
             }
         }
     }
@@ -165,11 +251,16 @@ Item {
         
         hoverEnabled: true
         onEntered: {
-            if(!fixedWidth)
+            if(!fixedWidth) {
                 cursorItem.cursor = Qt.SizeHorCursor
+                //if(!drag.active) interfaceitem.setAnchorIndicator(true);
+            }
         }
         onExited:  {
-            if(!drag.active) cursorItem.cursor = Qt.ArrowCursor
+            if(!drag.active) {
+                cursorItem.cursor = Qt.ArrowCursor
+                //interfaceitem.setAnchorIndicator(false);
+            }
         }
                 
         onPressed: interfaceitem.resizeDragItem.x = interfaceitem.x + interfaceitem.width;
@@ -181,6 +272,7 @@ Item {
                 
         drag.onActiveChanged: {
             if(drag.active && !fixedWidth) {
+                interfaceitem.setAnchorIndicator(true);
                 drag.maximumX = interfaceitem.parent.width; //parent is not defined on creation
                 var x = interfaceitem.x;
                 interfaceitem.setupResize({x:mouseX, y:mouseY}, x, 0, 'left', 'right', 4);
@@ -188,6 +280,28 @@ Item {
             else if(!fixedWidth) {
                 interfaceitem.clearResize('left', 'right');
                 cursorItem.cursor = Qt.ArrowCursor
+                interfaceitem.setAnchorIndicator(false);
+            }
+        }
+    }
+    //right arrow
+    Image {
+        id: indicatorRight
+        source: "qrc:/icons/button_right.svg"
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.right: parent.right
+        width: Math.min(30, interfaceitem.width/2)
+        height: Math.min(30, interfaceitem.height/2)
+        visible:false
+        
+        onVisibleChanged: opacity=0;
+        
+        Behavior on visible {
+            PropertyAnimation{
+                target: indicatorRight
+                property: "opacity"
+                from: 0
+                to: 1
             }
         }
     }
@@ -208,11 +322,16 @@ Item {
         
         hoverEnabled: true
         onEntered: {
-            if(!(fixedWidth && fixedHeight))
+            if(!(fixedWidth && fixedHeight)) {
                 cursorItem.cursor = Qt.SizeBDiagCursor
+                //if(!drag.active) interfaceitem.setAnchorIndicator(true);
+            }
         }
         onExited:  {
-            if(!drag.active) cursorItem.cursor = Qt.ArrowCursor
+            if(!drag.active) {
+                cursorItem.cursor = Qt.ArrowCursor
+                //interfaceitem.setAnchorIndicator(false);
+            }
         }
                 
         onPressed: {
@@ -228,12 +347,14 @@ Item {
                  
         drag.onActiveChanged: {
             if(drag.active && (!(fixedWidth && fixedHeight))) {
+                interfaceitem.setAnchorIndicator(true);
                 drag.maximumX = interfaceitem.parent.width; //parent is not defined on creation
                 var y = interfaceitem.y + interfaceitem.height;
+                var mode = 5 - ((fixedWidth) ? 0 : ((fixedHeight) ? 1 : 2));
                 if(!fixedWidth)
-                    interfaceitem.setupResize({x:mouseX, y:mouseY}, interfaceitem.x, y, 'left', 'right');
+                    interfaceitem.setupResize({x:mouseX, y:mouseY}, interfaceitem.x, y, 'left', 'right', mode);
                 if(!fixedHeight)
-                    interfaceitem.setupResize({x:mouseX, y:mouseY}, interfaceitem.x, y, 'bottom', 'top')
+                    interfaceitem.setupResize({x:mouseX, y:mouseY}, interfaceitem.x, y, 'bottom', 'top', mode)
             }
             else if(!(fixedWidth && fixedHeight)) {
                 if(!fixedWidth)
@@ -242,6 +363,7 @@ Item {
                     interfaceitem.clearResize('bottom', 'top');
                 
                 cursorItem.cursor = Qt.ArrowCursor
+                interfaceitem.setAnchorIndicator(false);
             }
         }
     }
@@ -258,11 +380,16 @@ Item {
         
         hoverEnabled: true
         onEntered: {
-            if(!(fixedWidth && fixedHeight))
+            if(!(fixedWidth && fixedHeight)) {
                 cursorItem.cursor = Qt.SizeBDiagCursor
+                //if(!drag.active) interfaceitem.setAnchorIndicator(true);
+            }
         }
         onExited:  {
-            if(!drag.active) cursorItem.cursor = Qt.ArrowCursor
+            if(!drag.active) {
+                cursorItem.cursor = Qt.ArrowCursor
+                //interfaceitem.setAnchorIndicator(false);
+            }
         }
                 
         onPressed: {
@@ -278,12 +405,14 @@ Item {
                  
         drag.onActiveChanged: {
             if(drag.active && (!(fixedWidth && fixedHeight))) {
+                interfaceitem.setAnchorIndicator(true);
                 drag.maximumY = interfaceitem.parent.height; //parent is not defined on creation
                 var x = interfaceitem.x + interfaceitem.width;
+                var mode = 5 - ((fixedWidth) ? 0 : ((fixedHeight) ? 1 : 2));
                 if(!fixedWidth)
-                    interfaceitem.setupResize({x:mouseX, y:mouseY}, x, interfaceitem.y, 'right', 'left');
+                    interfaceitem.setupResize({x:mouseX, y:mouseY}, x, interfaceitem.y, 'right', 'left', mode);
                 if(!fixedHeight)
-                    interfaceitem.setupResize({x:mouseX, y:mouseY}, x, interfaceitem.y, 'top', 'bottom')
+                    interfaceitem.setupResize({x:mouseX, y:mouseY}, x, interfaceitem.y, 'top', 'bottom', mode)
             }
             else if(!(fixedWidth && fixedHeight)) {
                 if(!fixedWidth)
@@ -292,6 +421,7 @@ Item {
                     interfaceitem.clearResize('top', 'bottom');
                 
                 cursorItem.cursor = Qt.ArrowCursor
+                interfaceitem.setAnchorIndicator(false);
             }
         }
     }
@@ -308,11 +438,16 @@ Item {
         
         hoverEnabled: true
         onEntered: {
-            if(!(fixedWidth && fixedHeight))
+            if(!(fixedWidth && fixedHeight)) {
                 cursorItem.cursor = Qt.SizeFDiagCursor
+                //if(!drag.active) interfaceitem.setAnchorIndicator(true);
+            }
         }
         onExited:  {
-            if(!drag.active) cursorItem.cursor = Qt.ArrowCursor
+            if(!drag.active) {
+                cursorItem.cursor = Qt.ArrowCursor
+                //interfaceitem.setAnchorIndicator(false);
+            }
         }
                 
         onPressed: {
@@ -328,13 +463,15 @@ Item {
         drag.maximumY: interfaceitem.y + interfaceitem.height - interfaceitem.totalMinHeight;
                  
         drag.onActiveChanged: {
+            interfaceitem.setAnchorIndicator(true);
             if(drag.active && (!(fixedWidth && fixedHeight))) {
                 var x = interfaceitem.x + interfaceitem.width;
                 var y = interfaceitem.y + interfaceitem.height;
+                var mode = 5 - ((fixedWidth) ? 0 : ((fixedHeight) ? 1 : 2));
                 if(!fixedWidth)
-                    interfaceitem.setupResize({x:mouseX, y:mouseY}, x, y, 'right', 'left');
+                    interfaceitem.setupResize({x:mouseX, y:mouseY}, x, y, 'right', 'left', mode);
                 if(!fixedHeight)
-                    interfaceitem.setupResize({x:mouseX, y:mouseY}, x, y, 'bottom', 'top')
+                    interfaceitem.setupResize({x:mouseX, y:mouseY}, x, y, 'bottom', 'top', mode)
             }
             else if(!(fixedWidth && fixedHeight)) {
                 if(!fixedWidth)
@@ -343,6 +480,7 @@ Item {
                     interfaceitem.clearResize('bottom', 'top');
                 
                 cursorItem.cursor = Qt.ArrowCursor
+                interfaceitem.setAnchorIndicator(false);
             }
         }
     }
@@ -359,11 +497,16 @@ Item {
         
         hoverEnabled: true
         onEntered: {
-            if(!(fixedWidth && fixedHeight))
+            if(!(fixedWidth && fixedHeight)){
                 cursorItem.cursor = Qt.SizeFDiagCursor
+                //if(!drag.active) interfaceitem.setAnchorIndicator(true);
+            }
         }
         onExited:  {
-            if(!drag.active) cursorItem.cursor = Qt.ArrowCursor
+            if(!drag.active) {
+                cursorItem.cursor = Qt.ArrowCursor
+                //interfaceitem.setAnchorIndicator(false);
+            }
         }
                 
         onPressed: {
@@ -377,25 +520,61 @@ Item {
         drag.minimumY: interfaceitem.y + interfaceitem.totalMinHeight;
                   
         drag.onActiveChanged: {
+            interfaceitem.setAnchorIndicator(true);
             if(drag.active && (!(fixedWidth && fixedHeight))) {
                 drag.maximumY = interfaceitem.parent.height;
                 drag.maximumX = interfaceitem.parent.width;
                 var y = interfaceitem.y;
+                var mode = 5 - ((fixedWidth) ? 0 : ((fixedHeight) ? 1 : 2));
                 if(!fixedWidth)
-                    if(!fixedHeight)
-                        interfaceitem.setupResize({x:mouseX, y:mouseY}, interfaceitem.x, y, 'left', 'right', 3);
-                    else
-                        interfaceitem.setupResize({x:mouseX, y:mouseY}, interfaceitem.x, y, 'left', 'right', 4);
+                        interfaceitem.setupResize({x:mouseX, y:mouseY}, interfaceitem.x, y, 'left', 'right', mode);
                 if(!fixedHeight)
-                    interfaceitem.setupResize({x:mouseX, y:mouseY}, interfaceitem.x, y, 'top', 'bottom')
+                    interfaceitem.setupResize({x:mouseX, y:mouseY}, interfaceitem.x, y, 'top', 'bottom', mode)
             }
             else if(!(fixedWidth && fixedHeight)) {
                 if(!fixedWidth)
                     interfaceitem.clearResize('left', 'right');
                 if(!fixedHeight)
                     interfaceitem.clearResize('top', 'bottom');
+                
                 cursorItem.cursor = Qt.ArrowCursor
+                interfaceitem.setAnchorIndicator(false);
             }
+        }
+    }
+    
+    function drawAnchorIndicator(draw) {
+        
+        if(draw) {
+            if(interfaceitem.getActiveAnchorObjectFor('top') != undefined) {
+                if(!indicatorTop.visible) indicatorTop.visible = true;
+            }
+            else
+                indicatorTop.visible = false;
+            
+            if(interfaceitem.getActiveAnchorObjectFor('bottom') != undefined)  {
+                if(!indicatorBottom.visible) indicatorBottom.visible = true;
+            }
+            else
+                indicatorBottom.visible = false;
+            
+            if(interfaceitem.getActiveAnchorObjectFor('left') != undefined) {
+                if(!indicatorLeft.visible) indicatorLeft.visible = true;
+            }
+            else
+                indicatorLeft.visible = false;
+            
+            if(interfaceitem.getActiveAnchorObjectFor('right') != undefined) {
+                if(!indicatorRight.visible) indicatorRight.visible = true;
+            }
+            else
+                indicatorRight.visible = false;
+        }
+        else {
+            indicatorBottom.visible = false;
+            indicatorLeft.visible = false;
+            indicatorRight.visible = false;
+            indicatorTop.visible = false;
         }
     }
 }

@@ -45,13 +45,13 @@ void DynamicInterfaceManager::addInterfaceItem(QWidget* widget, bool permanent)
     widget->setParent(NULL);
     
     //create the component and set the view proxy
-    QDeclarativeComponent component(m_view->engine(), 
+    QDeclarativeComponent* component = new QDeclarativeComponent(m_view->engine(), 
                                     QString::fromAscii("/home/stefan/Projects/FreeCAD_sf_master/src/Gui/Qml/InterfaceProxyItem.qml"));
-    QDeclarativeItem* item = qobject_cast<QDeclarativeItem*>(component.create());
+    QDeclarativeItem* item = qobject_cast<QDeclarativeItem*>(component->create());
       
     //add proxy
     item->setProperty("proxy", QVariant::fromValue(widget));
-    
+
     //make sure we can destroy it from within qml 
     if(!permanent)
         m_view->engine()->setObjectOwnership(item, QDeclarativeEngine::JavaScriptOwnership);
@@ -82,7 +82,6 @@ void DynamicInterfaceManager::addInterfaceItem(QWidget* widget, bool permanent)
     widget->setAttribute(Qt::WA_TranslucentBackground, true);
 }
 
-
 GlobalDynamicInterfaceManager* GlobalDynamicInterfaceManager::instance = NULL;
 
 GlobalDynamicInterfaceManager::GlobalDynamicInterfaceManager(){}
@@ -99,13 +98,14 @@ GlobalDynamicInterfaceManager* GlobalDynamicInterfaceManager::get()
 void GlobalDynamicInterfaceManager::addView(MDIView* view)
 {
     //create the component and set the view proxy
-    QDeclarativeComponent component(m_view->engine(), 
+    QDeclarativeComponent* component = new QDeclarativeComponent(m_view->engine(), 
                                          QString::fromAscii("/home/stefan/Projects/FreeCAD_sf_master/src/Gui/Qml/MDIView.qml"));
-    QDeclarativeItem* item = qobject_cast<QDeclarativeItem*>(component.create());
+    QDeclarativeItem* item = qobject_cast<QDeclarativeItem*>(component->create());
     item->setProperty("proxy", QVariant::fromValue(static_cast<QWidget*>(view)));
         
-    //make sure we can destroy it from within qml 
-    m_view->engine()->setObjectOwnership(item, QDeclarativeEngine::JavaScriptOwnership);
+    //make sure we can destroy it from within qml. This is a workaround to giving the ownership to 
+    //javascript as this randomly destroyed the view when dragging interfaceitems.
+    connect(item, SIGNAL(requestDestroy(QVariant)), this, SLOT(destroy(QVariant)));
         
     //add it to the scene
     QObject* mdiview = m_view->rootObject()->findChild<QObject*>(QString::fromAscii("mdiarea"));
@@ -118,3 +118,9 @@ void GlobalDynamicInterfaceManager::addView(MDIView* view)
     } 
 }
 
+void GlobalDynamicInterfaceManager::destroy(QVariant item)
+{
+   item.value<QObject*>()->deleteLater();
+}
+
+#include "moc_DynamicInterfaceManager.cpp"

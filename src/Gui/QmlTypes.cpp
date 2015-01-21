@@ -23,7 +23,6 @@
 #include "QmlTypes.h"
 #include "BitmapFactory.h"
 
-#include <QStyle>
 #include <QGraphicsSceneMouseEvent>
 #include <QStyleOptionToolButton>
 #include <QPainter>
@@ -45,6 +44,7 @@ QWidget* QmlProxy::proxy()
 void QmlProxy::setProxy(QWidget* w)
 {
     m_proxy->setWidget(w);
+    m_proxy->setMinimumSize(QSize(0,0));
 }
 
 void QmlProxy::geometryChanged(const QRectF& newGeometry, const QRectF& oldGeometry)
@@ -157,11 +157,12 @@ void QmlTitleButton::paint(QPainter* p, const QStyleOptionGraphicsItem* op, QWid
         w->style()->drawPrimitive(QStyle::PE_PanelButtonTool, &opt, p, w);
     }
 
-    opt.icon = w->style()->standardIcon(QStyle::SP_TitleBarCloseButton);
+    opt.icon = w->style()->standardIcon(QStyle::StandardPixmap(m_styleIcon));
     opt.subControls = 0;
     opt.activeSubControls = 0;
     opt.features = QStyleOptionToolButton::None;
     opt.arrowType = Qt::NoArrow;
+    opt.toolButtonStyle = Qt::ToolButtonIconOnly;
     int size = w->style()->pixelMetric(QStyle::PM_SmallIconSize, 0, w);
     opt.iconSize = QSize(size, size);
     w->style()->drawComplexControl(QStyle::CC_ToolButton, &opt, p, w);

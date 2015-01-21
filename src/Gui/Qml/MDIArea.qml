@@ -22,7 +22,7 @@
 
 import QtQuick 1.0
 
-Rectangle {
+Item {
     id: mdiarea
         
     property int current: 0
