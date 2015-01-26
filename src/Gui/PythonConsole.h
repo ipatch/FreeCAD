@@ -163,6 +163,7 @@ private:
 private:
     PythonConsoleHighlighter* pythonSyntax;
     QString                 *_sourceDrain;
+    ParameterGrp::handle     _prefs;
 };
 
 /**

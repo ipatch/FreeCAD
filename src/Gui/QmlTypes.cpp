@@ -22,6 +22,7 @@
 
 #include "QmlTypes.h"
 #include "BitmapFactory.h"
+#include "MainWindow.h"
 
 #include <QGraphicsSceneMouseEvent>
 #include <QStyleOptionToolButton>
@@ -157,7 +158,7 @@ void QmlTitleButton::paint(QPainter* p, const QStyleOptionGraphicsItem* op, QWid
         w->style()->drawPrimitive(QStyle::PE_PanelButtonTool, &opt, p, w);
     }
 
-    opt.icon = w->style()->standardIcon(QStyle::StandardPixmap(m_styleIcon));
+    opt.icon = MainWindow::getInstance()->style()->standardIcon(QStyle::StandardPixmap(m_styleIcon));
     opt.subControls = 0;
     opt.activeSubControls = 0;
     opt.features = QStyleOptionToolButton::None;

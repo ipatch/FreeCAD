@@ -39,6 +39,7 @@
 #endif
 #include <Gui/Selection.h>
 #include "TaskWatcher.h"
+#include <Base/Parameter.h>
 
 namespace App {
 class Property;
@@ -168,7 +169,9 @@ public:
   * This elements get injected mostly by the ViewProvider classes of the selected
   * DocumentObjects. 
   */
-class GuiExport TaskView : public QScrollArea, public Gui::SelectionSingleton::ObserverType
+class GuiExport TaskView : public QScrollArea, 
+                           public Gui::SelectionSingleton::ObserverType, 
+                           public ParameterGrp::ObserverType
 {
     Q_OBJECT
 
@@ -179,6 +182,9 @@ public:
     /// Observer message from the Selection
     virtual void OnChange(Gui::SelectionSingleton::SubjectType &rCaller,
                           Gui::SelectionSingleton::MessageType Reason);
+    
+    /// Obeserver message from the parameter group
+    virtual void OnChange(Base::Subject< const char* >& rCaller, const char* rcReason);
 
     friend class Gui::DockWnd::CombiView;
     friend class Gui::ControlSingleton;
@@ -215,9 +221,12 @@ protected:
 
 #if !defined (QSINT_ACTIONPANEL)
     iisTaskPanel* taskPanel;
+    iisTaskPanelScheme* scheme;
 #else
     QSint::ActionPanel* taskPanel;
+    QSint::ActionPanelScheme* scheme;
 #endif
+    
     TaskDialog *ActiveDialog;
     TaskEditControl *ActiveCtrl;
 
@@ -225,6 +234,9 @@ protected:
     Connection connectApplicationDeleteDocument;
     Connection connectApplicationUndoDocument;
     Connection connectApplicationRedoDocument;
+    
+    //parameter handling
+    ParameterGrp::handle hGrp;
 };
 
 } //namespace TaskView

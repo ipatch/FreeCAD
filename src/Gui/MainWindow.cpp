@@ -262,7 +262,7 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
     instance = this;
 
     // Create the layout containing the workspace and a tab bar
-    bool dynamicLayout = true;
+    bool dynamicLayout = usesDynamicInterface();
     if(!dynamicLayout) {
         d->declarativeView = NULL;
         d->mdiArea = new QMdiArea();
@@ -373,7 +373,7 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
         pDockMgr->registerDockWindow("Std_TreeView", tree);   
     else 
         GlobalDynamicInterfaceManager::get()->addInterfaceItem(tree, true);
-/*
+
     // Property view
     PropertyDockView* pcPropView = new PropertyDockView(0, this);
     pcPropView->setObjectName
@@ -392,16 +392,21 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
     if(!dynamicLayout)
         pDockMgr->registerDockWindow("Std_SelectionView", pcSelectionView);
     else 
-        GlobalDynamicInterfaceManager::get()->addInterfaceItem(pcSelectionView, true);*/
-/*
+        GlobalDynamicInterfaceManager::get()->addInterfaceItem(pcSelectionView, true);
+
     // Combo view
-    CombiView* pcCombiView = new CombiView(0, this);
-    pcCombiView->setObjectName(QString::fromLatin1(QT_TRANSLATE_NOOP("QDockWidget","Combo View")));
-    pcCombiView->setMinimumWidth(150);
-    if(!dynamicLayout)
+
+    if(!dynamicLayout) {
+        CombiView* pcCombiView = new CombiView(0, this);
+        pcCombiView->setObjectName(QString::fromLatin1(QT_TRANSLATE_NOOP("QDockWidget","Combo View")));
+        pcCombiView->setMinimumWidth(150);
         pDockMgr->registerDockWindow("Std_CombiView", pcCombiView);
-    else 
-        GlobalDynamicInterfaceManager::get()->addInterfaceItem(pcCombiView, true);*/
+    }
+    else {
+        Gui::TaskView::TaskView* task = new Gui::TaskView::TaskView(this);
+        task->setObjectName(QString::fromLatin1(QT_TRANSLATE_NOOP("QDockWidget","Task View")));
+        GlobalDynamicInterfaceManager::get()->addInterfaceItem(task, true);
+    }
 
 #if QT_VERSION < 0x040500
     // Report view
@@ -418,7 +423,7 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
         pDockMgr->registerDockWindow("Std_ReportView", pcReport);
     else 
         GlobalDynamicInterfaceManager::get()->addInterfaceItem(pcReport, true);
-/*
+
     // Python console
     PythonConsole* pcPython = new PythonConsole(this);
     ParameterGrp::handle hGrp = App::GetApplication().GetUserParameter().
@@ -436,7 +441,6 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
         pDockMgr->registerDockWindow("Std_PythonView", pcPython);
     else 
         GlobalDynamicInterfaceManager::get()->addInterfaceItem(pcPython, true);
-*/
 
     //Dag View.
     //work through parameter.
@@ -1728,6 +1732,12 @@ void MainWindow::customEvent(QEvent* e)
         }
     }
 }
+
+bool MainWindow::usesDynamicInterface()
+{
+    return true;
+}
+
 
 // ----------------------------------------------------------
 

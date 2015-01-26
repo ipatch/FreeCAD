@@ -38,6 +38,7 @@
 # include <QTimer>
 # include <QToolTip>
 # include <QHeaderView>
+#include <QPainter>
 #endif
 
 #include <Base/Console.h>
@@ -61,6 +62,62 @@ using namespace Gui;
 QPixmap*  TreeWidget::documentPixmap = 0;
 const int TreeWidget::DocumentType = 1000;
 const int TreeWidget::ObjectType = 1001;
+
+DynamicItemDelegate::DynamicItemDelegate(): QStyledItemDelegate()
+{
+
+    //attach parameter Observer
+    hGrp = App::GetApplication().GetParameterGroupByPath("User parameter:BaseApp/Preferences/Interface");
+    hGrp->Attach(this);
+    
+    //and load the needed settings
+    OnChange(*hGrp,"BackgroundColor");
+    OnChange(*hGrp,"BackgroundAlpha");
+}
+
+DynamicItemDelegate::~DynamicItemDelegate()
+{
+    if(hGrp.isValid())
+        hGrp->Detach(this);
+}
+
+
+void DynamicItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    QStyleOptionViewItem opt(option);
+    opt.rect = QRect(option.rect.topLeft(), QSize(option.rect.width(), option.rect.height()-3));
+    
+    painter->setRenderHint(QPainter::Antialiasing);
+    painter->setBrush(QBrush(dynamicBackground));
+    painter->setPen(QPen(dynamicBackground));
+    painter->drawRoundedRect(opt.rect, 3,3);
+    QStyledItemDelegate::paint(painter, opt, index);
+}
+
+QSize DynamicItemDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    QSize s =  QStyledItemDelegate::sizeHint(option, index);
+    return QSize(s.width(), s.height()+3);
+}
+
+void DynamicItemDelegate::OnChange(Base::Subject< const char* >& rCaller, const char* rcReason)
+{
+    const ParameterGrp& rGrp = static_cast<ParameterGrp&>(rCaller);
+    if (strcmp(rcReason,"BackgroundColor") == 0) {
+        unsigned long background = rGrp.GetUnsigned("BackgroundColor",ULONG_MAX); // default color (white)
+        int r,g,b;
+        r = ((background >> 24) & 0xff);
+        g = ((background >> 16) & 0xff);
+        b = ((background >> 8) & 0xff);
+        dynamicBackground = QColor(r, g, b, dynamicBackground.alpha());
+    }
+    else if (strcmp(rcReason,"BackgroundAlpha") == 0) {
+        int alpha = rGrp.GetInt("BackgroundAlpha",255);
+        dynamicBackground.setAlpha(alpha);
+    }
+}
+
+
 
 
 /* TRANSLATOR Gui::TreeWidget */
@@ -149,6 +206,23 @@ TreeWidget::TreeWidget(QWidget* parent)
     this->statusTimer->setSingleShot(true);
     this->statusTimer->start(300);
     documentPixmap = new QPixmap(Gui::BitmapFactory().pixmap("Document"));
+    
+    Base::Console().Message("setup tree widget");
+    if(MainWindow::getInstance()->usesDynamicInterface()) {
+        this->setHeaderHidden(true);
+        setItemDelegate(new DynamicItemDelegate);
+        setFrameShape(QFrame::NoFrame);
+        setAttribute(Qt::WA_TranslucentBackground, true);
+        QPalette palette = this->palette();
+        palette.setColor(QPalette::Active, QPalette::Base, QColor(255,255,255,0));
+        palette.setColor(QPalette::Inactive, QPalette::Base, QColor(255,255,255,0));
+        palette.setColor(QPalette::Disabled, QPalette::Base, QColor(255,255,255,0));
+        setPalette(palette);
+        
+        header()->setStretchLastSection(true);
+        header()->setMinimumSectionSize(1);
+        header()->setResizeMode(QHeaderView::Stretch);  
+    }
 }
 
 TreeWidget::~TreeWidget()
@@ -909,6 +983,7 @@ void TreeWidget::setItemsSelected (const QList<QTreeWidgetItem *> items, bool se
         QItemSelectionModel::Deselect);
 }
 
+
 // ----------------------------------------------------------------------------
 
 /* TRANSLATOR Gui::TreeDockWidget */
@@ -996,6 +1071,12 @@ void DocumentItem::slotResetEdit(const Gui::ViewProviderDocumentObject& v)
 
 void DocumentItem::slotNewObject(const Gui::ViewProviderDocumentObject& obj) {
     createNewItem(obj);
+
+    std::string name (v.getObject()->getNameInDocument());
+    std::map<std::string, DocumentObjectItem*>::iterator it = ObjectMap.find(name);
+    if (it != ObjectMap.end()) {
+        it->second->setData(0, Qt::BackgroundColorRole,QVariant());
+    }
 }
 
 bool DocumentItem::createNewItem(const Gui::ViewProviderDocumentObject& obj,
@@ -1525,6 +1606,7 @@ void DocumentObjectItem::testStatus()
         // it can happen that a tree item is not attached to the tree widget (#0003025)
         if (this->treeWidget())
             opt.initFrom(this->treeWidget());
+
 #if QT_VERSION >= 0x040200
         this->setForeground(0, opt.palette.color(QPalette::Disabled,QPalette::Text));
 #else

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (c) 2014 StefanTroeger <stefantroeger@gmx.net>              *
+ *   Copyright (c) 2015 Stefan Tröger <stefantroeger@gmx.net>              *
  *                                                                         *
  *   This file is part of the FreeCAD CAx development system.              *
  *                                                                         *
@@ -20,33 +20,54 @@
  *                                                                         *
  ***************************************************************************/
 
-import QtQuick 1.1
-import FreeCADLib 1.0
 
-Item {
-    id: interfaceArea
-    
-    anchors.margins: 3;
-    
-    Item {
-        id: fixItem 
-        width:  0
-        height: 0
-    }
-    
-    Item {
-        id: dragItem 
-        width:  0
-        height: 0
-    }
-    
-    function setupInterfaceItem(item) {
-        
-        item.resizeDragItem  = dragItem;
-        item.resizeFixItem   = fixItem;
-    }
-    
-    function setSettingsMode(mode) {
-        
-    }
+#include "PreCompiled.h"
+
+#ifndef _PreComp_
+# include <QRegExp>
+# include <memory>
+#endif
+
+#include "DlgSettingsInterfaceImp.h"
+#include "PrefWidgets.h"
+
+using namespace Gui::Dialog;
+
+DlgSettingsInterfaceImp::DlgSettingsInterfaceImp(QWidget* parent)
+    : PreferencePage( parent )
+{
+    this->setupUi(this);
 }
+
+/** 
+ *  Destroys the object and frees any allocated resources
+ */
+DlgSettingsInterfaceImp::~DlgSettingsInterfaceImp()
+{
+    // no need to delete child widgets, Qt does it all for us
+}
+
+void DlgSettingsInterfaceImp::saveSettings()
+{
+    backgroundColor->onSave();
+    backgroundAlpha->onSave();
+    item3DView->onSave();
+    replaceDockers->onSave();
+}
+
+void DlgSettingsInterfaceImp::loadSettings()
+{
+    backgroundColor->onRestore();
+    backgroundAlpha->onRestore();
+    item3DView->onRestore();
+    replaceDockers->onRestore();
+}
+
+void DlgSettingsInterfaceImp::changeEvent(QEvent* e)
+{
+
+}
+
+
+#include "moc_DlgSettingsInterfaceImp.cpp"
+

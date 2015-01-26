@@ -28,7 +28,9 @@ using namespace Gui;
 
 DynamicInterfaceManager::DynamicInterfaceManager(){}
 
-DynamicInterfaceManager::~DynamicInterfaceManager(){}
+DynamicInterfaceManager::~DynamicInterfaceManager(){
+    
+}
 
 QDeclarativeView* DynamicInterfaceManager::managedView()
 {
@@ -42,6 +44,9 @@ void DynamicInterfaceManager::setManagedView(QDeclarativeView* view)
 
 void DynamicInterfaceManager::addInterfaceItem(QWidget* widget, bool permanent)
 {
+    if(!m_view)
+        return;
+    
     widget->setParent(NULL);
     
     //create the component and set the view proxy
@@ -77,10 +82,40 @@ void DynamicInterfaceManager::addInterfaceItem(QWidget* widget, bool permanent)
     
     //and set the view name
     item->setProperty("title", widget->objectName());
+    item->setObjectName(widget->objectName());
     
     //and change some view properties
     widget->setAttribute(Qt::WA_TranslucentBackground, true);
+    
+    m_interfaceitems.push_back(item);
+    Base::Console().Message("Add interface item with object name %s\n", item->objectName().toStdString().c_str());
 }
+
+QWidget* DynamicInterfaceManager::getInterfaceItem(QString objectname)
+{
+    if(!m_view)
+        return NULL;
+    
+    QDeclarativeItem* item = NULL;
+    for(QList<QDeclarativeItem*>::iterator it = m_interfaceitems.begin(); it!=m_interfaceitems.end(); ++it) {
+        if((*it)->objectName() == objectname)
+            item = *it;
+    }
+    
+    if(!item) {
+        Base::Console().Message("no item with name %s\n", objectname.toStdString().c_str());
+        return NULL;
+    }
+    
+    QVariant proxy = item->property("proxy");    
+    if(!proxy.isValid()) {
+        Base::Console().Message("no valid proxy\n");
+        return NULL;
+    }
+    
+    return proxy.value<QWidget*>();
+}
+
 
 GlobalDynamicInterfaceManager* GlobalDynamicInterfaceManager::instance = NULL;
 

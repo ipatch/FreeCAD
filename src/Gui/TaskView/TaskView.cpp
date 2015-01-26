@@ -40,6 +40,8 @@
 #include <Gui/Application.h>
 #include <Gui/ViewProvider.h>
 #include <Gui/Control.h>
+#include <MainWindow.h>
+#include <Tools/embedded/Qt/mainwindow.h>
 
 #if defined (QSINT_ACTIONPANEL)
 #include <Gui/QSint/actionpanel/taskgroup_p.h>
@@ -384,6 +386,7 @@ TaskView::TaskView(QWidget *parent)
     taskPanel->setSizePolicy(sizePolicy);
     taskPanel->setScheme(QSint::FreeCADPanelScheme::defaultScheme());
 #endif
+
     this->setWidget(taskPanel);
     setWidgetResizable(true);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -403,6 +406,28 @@ TaskView::TaskView(QWidget *parent)
     connectApplicationRedoDocument = 
     App::GetApplication().signalRedoDocument.connect
         (boost::bind(&Gui::TaskView::TaskView::slotRedoDocument, this, _1));
+        
+#if defined (QSINT_ACTIONPANEL)
+    scheme = QSint::ActionPanelScheme::defaultScheme();
+#else
+    scheme = iisFreeCADTaskPanelScheme::defaultScheme();
+#endif
+    
+    if(Gui::MainWindow::getInstance()->usesDynamicInterface()) {
+        setFrameShape(QFrame::NoFrame);
+        setAttribute(Qt::WA_TranslucentBackground, true);
+        scheme->panelBackground = QBrush(Qt::transparent);
+        
+        //attach parameter Observer
+        hGrp = App::GetApplication().GetParameterGroupByPath("User parameter:BaseApp/Preferences/Interface");
+        hGrp->Attach(this);
+        
+        //and load the needed settings
+        OnChange(*hGrp,"BackgroundColor");
+        OnChange(*hGrp,"BackgroundAlpha");
+    }
+
+    taskPanel->setScheme(scheme);
 }
 
 TaskView::~TaskView()
@@ -570,7 +595,7 @@ void TaskView::removeDialog(void)
 {
     if (ActiveCtrl) {
         taskPanel->removeWidget(ActiveCtrl);
-        delete ActiveCtrl;
+        ActiveCtrl->deleteLater();
         ActiveCtrl = 0;
     }
 
@@ -588,6 +613,9 @@ void TaskView::removeDialog(void)
         else {
             ActiveDialog->setProperty("taskview_remove_dialog", true);
         }
+
+        ActiveDialog->deleteLater();
+        ActiveDialog = 0;
     }
 
     taskPanel->removeStretch();
@@ -752,6 +780,26 @@ void TaskView::restoreActionStyle()
     static_cast<QSint::FreeCADPanelScheme*>(QSint::FreeCADPanelScheme::defaultScheme())->restoreActionStyle();
     taskPanel->setScheme(QSint::FreeCADPanelScheme::defaultScheme());
 #endif
+
+void TaskView::OnChange(Base::Subject< const char* >& rCaller, const char* rcReason)
+{
+    const ParameterGrp& rGrp = static_cast<ParameterGrp&>(rCaller);
+    if (strcmp(rcReason,"BackgroundColor") == 0) {
+        unsigned long background = rGrp.GetUnsigned("BackgroundColor",ULONG_MAX); // default color (white)
+        int r,g,b;
+        r = ((background >> 24) & 0xff);
+        g = ((background >> 16) & 0xff);
+        b = ((background >> 8) & 0xff);
+        scheme->groupBackground = QBrush(QColor(r, g, b, scheme->groupBackground.color().alpha()));
+        taskPanel->setScheme(scheme);
+    }
+    else if (strcmp(rcReason,"BackgroundAlpha") == 0) {
+        int alpha = rGrp.GetInt("BackgroundAlpha",255);
+        QColor gc = scheme->groupBackground.color();
+        gc.setAlpha(alpha);
+        scheme->groupBackground = QBrush(gc);
+        taskPanel->setScheme(scheme);
+    }
 }
 
 

@@ -54,7 +54,7 @@ class ViewProvider;
 
 /** The property view class.
  */
-class PropertyView : public QWidget, public Gui::SelectionObserver
+class PropertyView : public QWidget, public Gui::SelectionObserver, public ParameterGrp::ObserverType
 {
     Q_OBJECT
 
@@ -65,10 +65,12 @@ public:
     Gui::PropertyEditor::PropertyEditor* propertyEditorView;
     Gui::PropertyEditor::PropertyEditor* propertyEditorData;
 
+    virtual void OnChange(Base::Subject< const char* >& rCaller, const char* rcReason);
+        
 public Q_SLOTS:
     /// Stores a preference for the last tab selected
     void tabChanged(int index);
-
+    
 protected:
     void changeEvent(QEvent *e);
 
@@ -90,6 +92,7 @@ private:
     Connection connectPropRemove;
     Connection connectPropChange;
     QTabWidget* tabs;
+    ParameterGrp::handle _prefs;
 };
 
 namespace DockWnd {

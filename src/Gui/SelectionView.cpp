@@ -42,6 +42,7 @@
 #include "Document.h"
 #include "ViewProvider.h"
 #include "BitmapFactory.h"
+#include "MainWindow.h"
 
 
 
@@ -93,6 +94,13 @@ SelectionView::SelectionView(Gui::Document* pcDocument, QWidget *parent)
     connect(selectionView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(onItemContextMenu(QPoint)));
     
     Gui::Selection().Attach(this);
+    
+    if(MainWindow::getInstance()->usesDynamicInterface()) {
+        _prefs = App::GetApplication().GetParameterGroupByPath("User parameter:BaseApp/Preferences/Interface");
+        _prefs->Attach(this);
+        OnChange(*_prefs,"BackgroundColor");
+        OnChange(*_prefs,"BackgroundAlpha");
+    }
 }
 
 SelectionView::~SelectionView()
@@ -405,6 +413,31 @@ bool SelectionView::onMsg(const char* /*pMsg*/,const char** /*ppReturn*/)
 {
     return false;
 }
+
+void SelectionView::OnChange(Base::Subject< const char* >& rCaller, const char* rcReason)
+{
+
+    ParameterGrp& rclGrp = ((ParameterGrp&)rCaller);
+    if (strcmp(rcReason,"BackgroundColor") == 0) {
+        unsigned long background = rclGrp.GetUnsigned("BackgroundColor",ULONG_MAX); // default color (white)
+        int r,g,b;
+        r = ((background >> 24) & 0xff);
+        g = ((background >> 16) & 0xff);
+        b = ((background >> 8) & 0xff);
+        QPalette pal = palette();
+        pal.setColor(QPalette::Base, QColor(r, g, b, pal.color(QPalette::Base).alpha()));
+        setPalette(pal);
+    }
+    else if (strcmp(rcReason,"BackgroundAlpha") == 0) {
+        int alpha = rclGrp.GetInt("BackgroundAlpha",255);
+        QPalette pal = palette();
+        QColor ncol = pal.color(QPalette::Base);
+        ncol.setAlpha(alpha);
+        pal.setColor(QPalette::Base, ncol);
+        setPalette(pal);
+    }
+}
+
 /// @endcond
 
 #include "moc_SelectionView.cpp"

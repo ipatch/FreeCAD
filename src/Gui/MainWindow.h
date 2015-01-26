@@ -152,6 +152,12 @@ public:
      */
     void loadUrls(App::Document*, const QList<QUrl>&);
     //@}
+    
+    /**
+     * returns true if the dynamic interface layout is used, false if the classic docker-based one is in action 
+     */
+    bool usesDynamicInterface();
+    
 
 public Q_SLOTS:
     /**

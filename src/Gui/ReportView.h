@@ -183,7 +183,7 @@ private:
     Data* d;
     bool gotoEnd;
     ReportHighlighter* reportHl; /**< Syntax highlighter */
-    ParameterGrp::handle _prefs; 
+    ParameterGrp::handle _prefs, _dynamicPrefs; 
 };
 
 } // namespace DockWnd

@@ -25,6 +25,7 @@
 #define GUI_TREE_H
 
 #include <QTreeWidget>
+#include <QStyledItemDelegate>
 
 #include <App/Document.h>
 #include <App/Application.h>
@@ -136,6 +137,25 @@ private:
     std::map<const Gui::Document*,DocumentItem*> DocumentMap;
     bool fromOutside;
 };
+
+class DynamicItemDelegate : public QStyledItemDelegate, public ParameterGrp::ObserverType {
+ 
+public: 
+    DynamicItemDelegate();
+    virtual ~DynamicItemDelegate();
+    
+    virtual void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const;
+    virtual QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const;
+    
+    //parameters have changed 
+    virtual void OnChange(Base::Subject< const char* >& rCaller, const char* rcReason);
+    
+private:
+    //interface item stuff
+    ParameterGrp::handle hGrp;
+    QColor dynamicBackground;
+};
+ 
 
 /** The link between the tree and a document.
  * Every document in the application gets its associated DocumentItem which controls

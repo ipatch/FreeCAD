@@ -101,7 +101,7 @@ public:
         Min = QStyle::SP_TitleBarMinButton,
         Max = QStyle::SP_TitleBarMaxButton,
         Menu = QStyle::SP_TitleBarMenuButton,
-        Close = QStyle::SP_TitleBarCloseButton,
+        Close = QStyle::SP_DockWidgetCloseButton,
         Shade = QStyle::SP_TitleBarShadeButton,
         Unshade = QStyle::SP_TitleBarUnshadeButton,
         Help = QStyle::SP_TitleBarContextHelpButton

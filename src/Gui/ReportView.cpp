@@ -37,6 +37,8 @@
 #include "PythonConsole.h"
 #include "PythonConsolePy.h"
 #include "BitmapFactory.h"
+#include "Application.h"
+#include "MainWindow.h"
 
 using namespace Gui;
 using namespace Gui::DockWnd;
@@ -300,6 +302,13 @@ ReportOutput::ReportOutput(QWidget* parent)
     _prefs = WindowParameter::getDefaultParameter()->GetGroup("Editor");
     _prefs->Attach(this);
     _prefs->Notify("FontSize");
+    
+    if(MainWindow::getInstance()->usesDynamicInterface()) {
+        _dynamicPrefs = App::GetApplication().GetParameterGroupByPath("User parameter:BaseApp/Preferences/Interface");
+        _dynamicPrefs->Attach(this);
+        OnChange(*_dynamicPrefs,"BackgroundColor");
+        OnChange(*_dynamicPrefs,"BackgroundAlpha");
+    }
 
     // scroll to bottom at startup to make sure that last appended text is visible
     ensureCursorVisible();
@@ -312,6 +321,7 @@ ReportOutput::~ReportOutput()
 {
     getWindowParameter()->Detach(this);
     _prefs->Detach(this);
+    _dynamicPrefs->Detach(this);
     Base::Console().DetachObserver(this);
     delete reportHl;
     delete d;
@@ -569,6 +579,24 @@ void ReportOutput::OnChange(Base::Subject<const char*> &rCaller, const char * sR
         bool checked = rclGrp.GetBool(sReason, true);
         if (checked != d->redirected_stderr)
             onToggleRedirectPythonStderr();
+    }
+    else if (strcmp(sReason,"BackgroundColor") == 0) {
+        unsigned long background = rclGrp.GetUnsigned("BackgroundColor",ULONG_MAX); // default color (white)
+        int r,g,b;
+        r = ((background >> 24) & 0xff);
+        g = ((background >> 16) & 0xff);
+        b = ((background >> 8) & 0xff);
+        QPalette pal = palette();
+        pal.setColor(QPalette::Base, QColor(r, g, b, pal.color(QPalette::Base).alpha()));
+        setPalette(pal);
+    }
+    else if (strcmp(sReason,"BackgroundAlpha") == 0) {
+        int alpha = rclGrp.GetInt("BackgroundAlpha",255);
+        QPalette pal = palette();
+        QColor ncol = pal.color(QPalette::Base);
+        ncol.setAlpha(alpha);
+        pal.setColor(QPalette::Base, ncol);
+        setPalette(pal);
     }
 }
 

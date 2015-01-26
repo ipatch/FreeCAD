@@ -49,6 +49,7 @@
 #include "DlgCustomizeSpNavSettings.h"
 #include "InputField.h"
 #include "QuantitySpinBox.h"
+#include "DlgSettingsInterfaceImp.h"
 
 using namespace Gui;
 using namespace Gui::Dialog;
@@ -61,15 +62,16 @@ WidgetFactorySupplier::WidgetFactorySupplier()
     // ADD YOUR PREFERENCE PAGES HERE 
     //
     //
-    new PrefPageProducer<DlgGeneralImp>         ( QT_TRANSLATE_NOOP("QObject","General") );
-  //new PrefPageProducer<DlgOnlineHelpImp>      ( QT_TRANSLATE_NOOP("QObject","General") );
-    new PrefPageProducer<DlgSettingsDocumentImp>( QT_TRANSLATE_NOOP("QObject","General") );
-    new PrefPageProducer<DlgSettingsEditorImp>  ( QT_TRANSLATE_NOOP("QObject","General") );
-    new PrefPageProducer<DlgReportViewImp>      ( QT_TRANSLATE_NOOP("QObject","General") );
-    new PrefPageProducer<DlgSettingsMacroImp>   ( QT_TRANSLATE_NOOP("QObject","General") );
-    new PrefPageProducer<DlgSettingsUnitsImp>   ( QT_TRANSLATE_NOOP("QObject","General") );
-    new PrefPageProducer<DlgSettings3DViewImp>  ( QT_TRANSLATE_NOOP("QObject","Display") );
-    new PrefPageProducer<DlgSettingsViewColor>  ( QT_TRANSLATE_NOOP("QObject","Display") );
+    new PrefPageProducer<DlgGeneralImp>           ( QT_TRANSLATE_NOOP("QObject","General") );
+  //new PrefPageProducer<DlgOnlineHelpImp>        ( QT_TRANSLATE_NOOP("QObject","General") );
+    new PrefPageProducer<DlgSettingsDocumentImp>  ( QT_TRANSLATE_NOOP("QObject","General") );
+    new PrefPageProducer<DlgSettingsEditorImp>    ( QT_TRANSLATE_NOOP("QObject","General") );
+    new PrefPageProducer<DlgReportViewImp>        ( QT_TRANSLATE_NOOP("QObject","General") );
+    new PrefPageProducer<DlgSettingsMacroImp>     ( QT_TRANSLATE_NOOP("QObject","General") );
+    new PrefPageProducer<DlgSettingsUnitsImp>     ( QT_TRANSLATE_NOOP("QObject","General") );
+    new PrefPageProducer<DlgSettings3DViewImp>    ( QT_TRANSLATE_NOOP("QObject","Display") );
+    new PrefPageProducer<DlgSettingsViewColor>    ( QT_TRANSLATE_NOOP("QObject","Display") );
+    new PrefPageProducer<DlgSettingsInterfaceImp> ( QT_TRANSLATE_NOOP("QObject","Display") );
 
     // ADD YOUR CUSTOMIZE PAGES HERE
     //

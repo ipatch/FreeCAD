@@ -36,12 +36,4 @@ InterfaceItem {
         objectName: "proxy"
         anchors.fill: parent;
     }    
-    
-//     proxyitem.onProxyChanged: {
-//         console.debug("proxy changed");
-//         minWidth  = proxyitem.proxy.minimumWidth;
-//         minHeight = proxyitem.proxy.minimumHeight;
-//         //force a parent recompute
-//         item.height = item.height;
-//     }
 }

@@ -233,6 +233,7 @@ set(Gui_MOC_HDRS
     DlgSettingsMacroImp.h
     DlgSettingsUnitsImp.h
     DlgCheckableMessageBox.h
+    DlgSettingsInterfaceImp.h
     DlgToolbarsImp.h
     DlgWorkbenchesImp.h
     TaskDlgRelocation.h
@@ -352,6 +353,7 @@ SET(Gui_UIC_SRCS
     DlgSettingsImage.ui
     DlgSettingsMacro.ui
     DlgCheckableMessageBox.ui
+    DlgSettingsInterface.ui
     DlgToolbars.ui
     DlgWorkbenches.ui
     DlgTreeWidget.ui
@@ -557,6 +559,7 @@ SET(Dialog_Settings_CPP_SRCS
     DlgSettingsDocumentImp.cpp
     DlgSettingsImageImp.cpp
     DlgSettingsMacroImp.cpp
+    DlgSettingsInterfaceImp.cpp
 )
 SET(Dialog_Settings_HPP_SRCS
     DlgEditorImp.h
@@ -571,6 +574,7 @@ SET(Dialog_Settings_HPP_SRCS
     DlgSettingsDocumentImp.h
     DlgSettingsImageImp.h
     DlgSettingsMacroImp.h
+    DlgSettingsInterfaceImp.h
 )
 SET(Dialog_Settings_SRCS
     ${Dialog_Settings_CPP_SRCS}
@@ -587,6 +591,7 @@ SET(Dialog_Settings_SRCS
     DlgSettingsDocument.ui
     DlgSettingsImage.ui
     DlgSettingsMacro.ui
+    DlgSettingsInterface.ui
 )
 SOURCE_GROUP("Dialog\\Settings" FILES ${Dialog_Settings_SRCS})
 

@@ -38,6 +38,7 @@
 #include <Gui/MainWindow.h>
 #include <Gui/CombiView.h>
 #include <Gui/DockWindowManager.h>
+#include "DynamicInterfaceManager.h"
 
 
 using namespace Gui;
@@ -127,25 +128,39 @@ void ControlSingleton::showDialog(Gui::TaskView::TaskDialog *dlg)
         connect(dlg, SIGNAL(aboutToBeDestroyed()), this, SLOT(closedDialog()));
     }
     // not all workbenches have the combo view enabled
-    else if (!_taskPanel) {
-        QDockWidget* dw = new QDockWidget();
-        dw->setWindowTitle(tr("Task panel"));
-        dw->setFeatures(QDockWidget::DockWidgetMovable);
-        _taskPanel = new Gui::TaskView::TaskView(dw);
-        dw->setWidget(_taskPanel);
-        _taskPanel->showDialog(dlg);
-        getMainWindow()->addDockWidget(Qt::LeftDockWidgetArea, dw);
-        connect(dlg, SIGNAL(destroyed()), dw, SLOT(deleteLater()));
+    else {
+        if (!_taskPanel) {            
+            if(MainWindow::getInstance()->usesDynamicInterface()) {
+                
+                QWidget* w = GlobalDynamicInterfaceManager::get()->getInterfaceItem(QString::fromAscii("Task View"));
+                if(!w) 
+                    return;
+                _taskPanel = static_cast< Gui::TaskView::TaskView* >(w);          
+            }
+            else {
+                QDockWidget* dw = new QDockWidget();
+                dw->setWindowTitle(tr("Task panel"));
+                dw->setFeatures(QDockWidget::DockWidgetMovable);
+                _taskPanel = new Gui::TaskView::TaskView(dw);
+                dw->setWidget(_taskPanel);
+                
+                getMainWindow()->addDockWidget(Qt::LeftDockWidgetArea, dw);
+                connect(dlg, SIGNAL(destroyed()), dw, SLOT(deleteLater()));
 
-        // if we have the normal tree view available then just tabify with it
-        QWidget* treeView = Gui::DockWindowManager::instance()->getDockWindow("Tree view");
-        QDockWidget* par = treeView ? qobject_cast<QDockWidget*>(treeView->parent()) : 0;
-        if (par && par->isVisible()) {
-            getMainWindow()->tabifyDockWidget(par, dw);
-            qApp->processEvents(); // make sure that the task panel is tabified now
-            dw->show();
-            dw->raise();
+                // if we have the normal tree view available then just tabify with it
+                QWidget* treeView = Gui::DockWindowManager::instance()->getDockWindow("Tree view");
+                QDockWidget* par = treeView ? qobject_cast<QDockWidget*>(treeView->parent()) : 0;
+                if (par && par->isVisible()) {
+                    getMainWindow()->tabifyDockWidget(par, dw);
+                    qApp->processEvents(); // make sure that the task panel is tabified now
+                    dw->show();
+                    dw->raise();
+                }
+            }
         }
+        _taskPanel->showDialog(dlg);
+        ActiveDialog = dlg;
+        connect(dlg, SIGNAL(destroyed()), this, SLOT(closedDialog()));
     }
 }
 
@@ -212,12 +227,15 @@ void ControlSingleton::closedDialog()
     Gui::DockWnd::CombiView* pcCombiView = qobject_cast<Gui::DockWnd::CombiView*>
         (Gui::DockWindowManager::instance()->getDockWindow("Combo View"));
     // should return the pointer to combo view
-    assert(pcCombiView);
-    pcCombiView->closedDialog();
-    // make sure that the combo view is shown
-    QDockWidget* dw = qobject_cast<QDockWidget*>(pcCombiView->parentWidget());
-    if (dw)
-        dw->setFeatures(QDockWidget::AllDockWidgetFeatures);
+    if(pcCombiView) {
+        pcCombiView->closedDialog();
+        // make sure that the combo view is shown
+        QDockWidget* dw = qobject_cast<QDockWidget*>(pcCombiView->parentWidget());
+        if (dw)
+            dw->setFeatures(QDockWidget::AllDockWidgetFeatures);
+    }
+    else if(_taskPanel)
+        _taskPanel->removeDialog();
 }
 
 bool ControlSingleton::isAllowedAlterDocument(void) const

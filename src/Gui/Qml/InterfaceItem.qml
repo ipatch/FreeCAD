@@ -116,19 +116,24 @@ Item {
             TitleButton{
                 width:  20
                 height: 20
+                id: settingsButton
+                styleIcon: TitleButton.Menu
+                
+                onActivated: area.setSettingsMode(true);
+            }
+            TitleButton{
+                width:  20
+                height: 20
                 id: shadeButton
                 styleIcon: shade ? TitleButton.Unshade : TitleButton.Shade
                 
                 onActivated: {
-                    console.debug("shade animation start")
                     if(!shade) {
                         shadeSize = interfaceitem.height;
-                        console.debug("set hight: ", shadeSize, ', real: ',interfaceitem.height)
                         shadeAnimation.to = titlebar.height
                         shade = true;
                     }
                     else {
-                        console.debug("reset height: ",shadeSize)
                         shadeAnimation.to = shadeSize
                         shade = false;
                     }
@@ -215,7 +220,7 @@ Item {
     //if we set a anchor for this item we do not only need to set it but also to store the information
     //that we did. Furthermore this information needs to be stored in the passive element too.
     function setupAnchor(thisAnchor, item, itemAnchor) {
-                
+                          
         Util.anchors.controlledChange = true;
         anchors[thisAnchor] = item[itemAnchor];
         if(thisAnchor != itemAnchor)
@@ -238,6 +243,10 @@ Item {
         if('setPassiveAnchor' in item)
             item.setPassiveAnchor(anchorObject);
         
+        if(Util.dragMode == Util.DragMode.SizeXY || Util.dragMode == Util.DragMode.SizeX
+                    || Util.dragMode == Util.DragMode.SizeY) {
+            Util.anchors.resizeDragAnchorCache = anchorObject;
+        }
         setAnchorIndicator(true)
     }
     
@@ -269,6 +278,7 @@ Item {
                     
                     interfaceitem.setControlledChange(true)           
                     interfaceitem.anchors[resizeAnchor]  = resizeDragItem[resizeAnchor];
+                    Util.anchors.resizeDragAnchorCache = undefined;
                     interfaceitem.setControlledChange(false)
                 }
             }
@@ -330,6 +340,11 @@ Item {
         interfaceitem.setControlledChange(true)
         interfaceitem.anchors[drag] = undefined;
         interfaceitem.anchors[fixed] = undefined;
+        
+        if(Util.anchors.resizeDragAnchorCache != undefined) {
+            var obj = Util.anchors.resizeDragAnchorCache;
+            obj.active.anchors[obj.activeAnchor] = obj.passive[obj.passiveAnchor];
+        }
         
         if(Util.anchors.resizeFixedAnchorCache != undefined) {
             var obj = Util.anchors.resizeFixedAnchorCache;

@@ -553,7 +553,9 @@ Item {
                 indicatorTop.visible = false;
             
             if(interfaceitem.getActiveAnchorObjectFor('bottom') != undefined)  {
-                if(!indicatorBottom.visible) indicatorBottom.visible = true;
+                if(!indicatorBottom.visible) {
+                    indicatorBottom.visible = true;
+                 }
             }
             else
                 indicatorBottom.visible = false;

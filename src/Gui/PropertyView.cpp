@@ -46,6 +46,7 @@
 #include "ViewProvider.h"
 
 #include "propertyeditor/PropertyEditor.h"
+#include "MainWindow.h"
 
 using namespace std;
 using namespace Gui;
@@ -94,7 +95,6 @@ PropertyView::PropertyView(QWidget *parent)
 
     // connect after adding all tabs, so adding doesn't thrash the parameter
     connect(tabs, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)));
-
     this->connectPropData =
     App::GetApplication().signalChangedObject.connect(boost::bind
         (&PropertyView::slotChangePropertyData, this, _1, _2));
@@ -110,6 +110,13 @@ PropertyView::PropertyView(QWidget *parent)
     this->connectPropChange =
     App::GetApplication().signalChangePropertyEditor.connect(boost::bind
         (&PropertyView::slotChangePropertyEditor, this, _1));
+    
+    if(MainWindow::getInstance()->usesDynamicInterface()) {
+        _prefs = App::GetApplication().GetParameterGroupByPath("User parameter:BaseApp/Preferences/Interface");
+        _prefs->Attach(this);
+        OnChange(*_prefs,"BackgroundColor");
+        OnChange(*_prefs,"BackgroundAlpha");
+    }
 }
 
 PropertyView::~PropertyView()
@@ -295,6 +302,32 @@ void PropertyView::changeEvent(QEvent *e)
 
     QWidget::changeEvent(e);
 }
+
+void PropertyView::OnChange(Base::Subject< const char* >& rCaller, const char* rcReason)
+{
+    const ParameterGrp& rGrp = static_cast<ParameterGrp&>(rCaller);
+    if (strcmp(rcReason,"BackgroundColor") == 0) {
+        unsigned long background = rGrp.GetUnsigned("BackgroundColor",ULONG_MAX); // default color (white)
+        int r,g,b;
+        r = ((background >> 24) & 0xff);
+        g = ((background >> 16) & 0xff);
+        b = ((background >> 8) & 0xff);
+        QPalette pal = palette();
+        pal.setColor(QPalette::Base, QColor(r, g, b, pal.color(QPalette::Base).alpha()));
+        pal.setColor(QPalette::AlternateBase, pal.color(QPalette::Base));
+        setPalette(pal);
+    }
+    else if (strcmp(rcReason,"BackgroundAlpha") == 0) {
+        int alpha = rGrp.GetInt("BackgroundAlpha",255);
+        QPalette pal = palette();
+        QColor ncol = pal.color(QPalette::Base);
+        ncol.setAlpha(alpha);
+        pal.setColor(QPalette::Base, ncol);
+        pal.setColor(QPalette::AlternateBase, pal.color(QPalette::Base));
+        setPalette(pal);
+    }
+}
+
 
 /* TRANSLATOR Gui::DockWnd::PropertyDockView */
 

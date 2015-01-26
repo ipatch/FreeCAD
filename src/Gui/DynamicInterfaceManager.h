@@ -42,9 +42,11 @@ public:
     void setManagedView(QDeclarativeView* view);
     
     void addInterfaceItem(QWidget* widget, bool permanent = false);
+    QWidget* getInterfaceItem(QString objectname);
     
 protected:
     QDeclarativeView* m_view;
+    QList<QDeclarativeItem*> m_interfaceitems;
 };
 
 //Singleton for the global user interface
