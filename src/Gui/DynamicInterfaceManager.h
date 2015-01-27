@@ -43,6 +43,7 @@ public:
     
     void addInterfaceItem(QWidget* widget, bool permanent = false);
     QWidget* getInterfaceItem(QString objectname);
+    void setupInterfaceItems();
     
 protected:
     QDeclarativeView* m_view;

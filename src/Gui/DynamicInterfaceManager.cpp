@@ -62,9 +62,10 @@ void DynamicInterfaceManager::addInterfaceItem(QWidget* widget, bool permanent)
         m_view->engine()->setObjectOwnership(item, QDeclarativeEngine::JavaScriptOwnership);
         
     //add it to the scene
-    QObject* interface = m_view->rootObject()->findChild<QObject*>(QString::fromAscii("interfacearea"));
+    QObject* interface = m_view->rootObject()->findChild<QObject*>(QString::fromAscii("Area"));
     if(interface) {
         item->setParentItem(qobject_cast<QDeclarativeItem*>(interface)); 
+        item->setProperty("area", QVariant::fromValue(interface));
     }
     else {
         Base::Console().Error("No interface area found, item can not be added to layout");
@@ -88,7 +89,6 @@ void DynamicInterfaceManager::addInterfaceItem(QWidget* widget, bool permanent)
     widget->setAttribute(Qt::WA_TranslucentBackground, true);
     
     m_interfaceitems.push_back(item);
-    Base::Console().Message("Add interface item with object name %s\n", item->objectName().toStdString().c_str());
 }
 
 QWidget* DynamicInterfaceManager::getInterfaceItem(QString objectname)
@@ -115,6 +115,13 @@ QWidget* DynamicInterfaceManager::getInterfaceItem(QString objectname)
     
     return proxy.value<QWidget*>();
 }
+
+void DynamicInterfaceManager::setupInterfaceItems()
+{
+    QObject* interface = m_view->rootObject()->findChild<QObject*>(QString::fromAscii("Area"));
+    QMetaObject::invokeMethod(interface, "loadSettings");
+}
+
 
 
 GlobalDynamicInterfaceManager* GlobalDynamicInterfaceManager::instance = NULL;

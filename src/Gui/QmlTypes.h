@@ -25,6 +25,7 @@
 #define GUI_QML_TYPES_H
 
 #include "PreCompiled.h"
+#include <Base/Parameter.h>
 #include <QObject>
 #include <QGraphicsProxyWidget>
 #include <QDeclarativeItem>
@@ -157,6 +158,35 @@ private:
     Qt::CursorShape m_current;
 };
 
+class GuiExport QmlSettings : public QObject, public ParameterGrp::ObserverType {
+
+    Q_OBJECT
+    Q_PROPERTY(QString tracked READ trackedObject WRITE setTrackedObject)
+public:
+    
+    QmlSettings();
+    virtual ~QmlSettings();
+    
+    Q_INVOKABLE void setBool(QString Name, bool value);
+    Q_INVOKABLE bool getBool(QString Name, bool defaultvalue);
+    Q_INVOKABLE void setInt(QString Name, int value);
+    Q_INVOKABLE int getInt(QString Name, int defaultvalue);
+    Q_INVOKABLE void setString(QString Name, QString value);
+    Q_INVOKABLE QString getString(QString Name, QString defaultvalue);
+    
+    QString trackedObject();
+    void setTrackedObject(QString s);
+    
+    virtual void OnChange(Base::Subject< const char* >& rCaller, const char* rcReason);
+    
+public Q_SLOTS:
+    void valueChanged(QString name);
+    
+protected:
+    QString m_tracked;
+    ParameterGrp::handle m_grp;
+};
+
 
 static void init_qml_types() {
     qmlRegisterType<QmlProxy>      ("FreeCADLib", 1, 0, "Proxy");
@@ -164,6 +194,7 @@ static void init_qml_types() {
     qmlRegisterType<QmlButton>     ("FreeCADLib", 1, 0, "Button");
     qmlRegisterType<QmlTitleButton>("FreeCADLib", 1, 0, "TitleButton");
     qmlRegisterType<QmlMouseCursor>("FreeCADLib", 1, 0, "MouseCursor");
+    qmlRegisterType<QmlSettings>   ("FreeCADLib", 1, 0, "Settings");
 };
 
 } // namespace Gui

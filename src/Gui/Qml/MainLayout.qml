@@ -36,12 +36,13 @@ Rectangle {
  
     InterfaceArea {
         id: interfaceArea
-        objectName: "interfacearea"
+        objectName: "Area"
         anchors.fill:parent
         
         InterfaceItem {
             id: navigator
             title: "Navigator"  
+            objectName: "Navigator"
             
             height:    titleBar.height + tabnav.height + 3
             minWidth:  120

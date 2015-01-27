@@ -197,3 +197,38 @@ function contains(a, obj) {
     }
     return false;
 }
+
+function setupAnchorString(iitem) {
+    
+    var str = '';
+    for (var i=0; i<anchors.anchorYlist.length; ++i) {
+        var item = anchors.anchorYlist[i];
+        if(item.active == iitem)
+            str += item.activeAnchor + ':' + item.passiveName + ':' + item.passiveAnchor + ';';
+    }
+    for (var i=0; i<anchors.anchorXlist.length; ++i) {
+        var item = anchors.anchorXlist[i];
+        if(item.active == iitem)
+            str += item.activeAnchor + ':' + item.passiveName + ':' + item.passiveAnchor + ';';
+    }
+    return str;
+}
+
+function loadAnchorString(string, item, area) {
+    
+    var anch = string.split(';');
+    for(var i=0; i<anch.length; ++i) {
+        console.debug('build anchor ', anch[i]);
+        var parts = anch[i].split(':');
+        console.debug('build parts ', parts[0], ' ', parts[1], ' ', parts[2])
+        if(parts[1] == area.objectName) {
+            item.setupAnchor(parts[0], area, parts[2]);
+        }
+        else {
+            for(var j=0; j<area.children.length; ++j) {
+                if(area.children[j].objectName==parts[1])
+                    item.setupAnchor(parts[0], area.children[j], parts[2]);
+            }
+        }
+    }
+}

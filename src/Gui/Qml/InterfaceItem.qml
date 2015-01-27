@@ -128,6 +128,7 @@ Item {
                 styleIcon: shade ? TitleButton.Unshade : TitleButton.Shade
                 
                 onActivated: {
+                    shadeAnimation.stop()
                     if(!shade) {
                         shadeSize = interfaceitem.height;
                         shadeAnimation.to = titlebar.height
@@ -167,13 +168,45 @@ Item {
         id: resizer
         interfaceitem: interfaceitem;
         anchors.fill: parent;   
-    }    
+    }  
     
-    //we need to setup the anchor object arrays
+    Settings {
+        id: settings
+        tracked: interfaceitem.objectName
+    }
+    
+    //we need to setup the anchor object arrays and load all settings
     Component.onCompleted: {
         Util.anchors = new Object();
         Util.anchors.anchorXlist = new Array();
         Util.anchors.anchorYlist = new Array();
+    }
+    
+    //let's save everything
+    Component.onDestruction: {
+        settings.setBool('visible', interfaceitem.visible)        
+        settings.setBool('shade', interfaceitem.shade)
+        settings.setInt('shadeSize', interfaceitem.shadeSize)
+        settings.setInt('x', interfaceitem.x)
+        settings.setInt('y', interfaceitem.y)
+        settings.setInt('width', interfaceitem.width)
+        settings.setInt('height', interfaceitem.height)
+        settings.setString('anchors', Util.setupAnchorString(interfaceitem));
+    }
+    
+    function setup() {
+        //interfaceitem.visible = settings.getBool('visible', false);
+        interfaceitem.shade = settings.getBool('shade', false);
+        interfaceitem.shadeSize = settings.getInt('shadeSize', 150);
+        interfaceitem.x = settings.getInt('x', 0);
+        interfaceitem.y = settings.getInt('y', 0);
+        interfaceitem.width = settings.getInt('width', 150);
+        interfaceitem.height = settings.getInt('height', 150);
+    }
+    function setupAnchors() {
+        Util.dragMode = Util.DragMode.None;
+        Util.loadAnchorString(settings.getString('anchors', ''), interfaceitem, interfaceitem.area);
+        setAnchorIndicator(false);
     }
     
     onAreaChanged: {
@@ -230,7 +263,7 @@ Item {
         
         Util.anchors.controlledChange = false;
         
-        var anchorObject = {active: interfaceitem, passive: item, activeAnchor: thisAnchor, passiveAnchor: itemAnchor};        
+        var anchorObject = {active: interfaceitem, passive: item, activeAnchor: thisAnchor, passiveAnchor: itemAnchor, passiveName: item.objectName};        
         if(thisAnchor == 'top' || thisAnchor == 'bottom' || thisAnchor == 'verticalCenter') {
             anchorObject.isXtype = false;
             Util.anchors.anchorYlist.push(anchorObject);

@@ -23,6 +23,7 @@
 #include "QmlTypes.h"
 #include "BitmapFactory.h"
 #include "MainWindow.h"
+#include "Application.h"
 
 #include <QGraphicsSceneMouseEvent>
 #include <QStyleOptionToolButton>
@@ -194,6 +195,72 @@ void QmlMouseCursor::setCursor(Qt::CursorShape c)
     m_current = c;
     QApplication::setOverrideCursor(QCursor(c));
 }
+
+QmlSettings::QmlSettings(): QObject()
+{
+    m_grp = NULL;
+    m_tracked.clear();
+}
+
+QmlSettings::~QmlSettings()
+{
+    if(m_grp.isValid())
+        m_grp->Detach(this);
+}
+
+
+void QmlSettings::setTrackedObject(QString s)
+{
+    m_tracked = s;
+    if(m_grp.isValid())
+        m_grp->Detach(this);
+    
+    QString path = QString::fromAscii("User parameter:BaseApp/MainWindow/GlobalInterface/") + s;
+    m_grp = App::GetApplication().GetParameterGroupByPath(path.toStdString().c_str());
+    m_grp->Attach(this);
+}
+
+QString QmlSettings::trackedObject()
+{
+    return m_tracked;
+}
+
+void QmlSettings::OnChange(Base::Subject< const char* >& rCaller, const char* rcReason)
+{
+    valueChanged(QString::fromAscii(rcReason));
+}
+
+void QmlSettings::setBool(QString Name, bool value)
+{
+    m_grp->SetBool(Name.toStdString().c_str(), value);
+}
+
+bool QmlSettings::getBool(QString Name, bool defaultvalue)
+{
+    return m_grp->GetBool(Name.toStdString().c_str(), defaultvalue);
+}
+
+void QmlSettings::setInt(QString Name, int value)
+{
+    m_grp->SetInt(Name.toStdString().c_str(), value);
+}
+
+int QmlSettings::getInt(QString Name, int defaultvalue)
+{
+    return m_grp->GetInt(Name.toStdString().c_str(), defaultvalue);
+}
+
+void QmlSettings::setString(QString Name, QString value)
+{
+    m_grp->SetASCII(Name.toStdString().c_str(), value.toStdString().c_str());
+}
+
+QString QmlSettings::getString(QString Name, QString defaultvalue)
+{
+    return QString::fromStdString(m_grp->GetASCII(Name.toStdString().c_str(), defaultvalue.toStdString().c_str()));
+}
+
+void QmlSettings::valueChanged(QString name){}
 
 
 

@@ -49,4 +49,17 @@ Item {
     function setSettingsMode(mode) {
         
     }
+    
+    function loadSettings() {
+        
+        for(var i=0; i<interfaceArea.children.length; ++i) {
+            if('setup' in interfaceArea.children[i])
+                interfaceArea.children[i].setup();
+        }
+        for(var i=0; i<interfaceArea.children.length; ++i) {
+            if('setupAnchors' in interfaceArea.children[i]) {
+                interfaceArea.children[i].setupAnchors();
+            }
+        }
+    }
 }

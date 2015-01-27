@@ -441,6 +441,9 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
         pDockMgr->registerDockWindow("Std_PythonView", pcPython);
     else 
         GlobalDynamicInterfaceManager::get()->addInterfaceItem(pcPython, true);
+    
+    //all interface items are loaded, all anchors are valid now. lets setup the layout
+    GlobalDynamicInterfaceManager::get()->setupInterfaceItems();
 
     //Dag View.
     //work through parameter.
