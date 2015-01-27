@@ -135,7 +135,7 @@ function setAnchorsForPosition(mousePos) {
 //                return;   
 //         }
         if(Math.abs(initMousePos.y - mousePos.y) > reset) {
-            dragItem.removeAnchors(true, anchors.resizeAnchor)
+            dragItem.removeActiveAnchors(true, anchors.resizeAnchor)
         }
     }
     
@@ -158,7 +158,7 @@ function setAnchorsForPosition(mousePos) {
 //                 return;
 //         }
         if(Math.abs(initMousePos.x - mousePos.x) > reset) {
-            dragItem.removeAnchors(false, anchors.resizeAnchor)
+            dragItem.removeActiveAnchors(false, anchors.resizeAnchor)
         }
     }
 }

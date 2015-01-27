@@ -23,10 +23,14 @@
 #include "Base/Console.h"
 #include <QDeclarativeItem>
 #include <QDeclarativeEngine>
+#include <QMenu>
+#include <QApplication>
 
 using namespace Gui;
 
-DynamicInterfaceManager::DynamicInterfaceManager(){}
+DynamicInterfaceManager::DynamicInterfaceManager() {
+    m_view = NULL;
+}
 
 DynamicInterfaceManager::~DynamicInterfaceManager(){
     
@@ -39,7 +43,17 @@ QDeclarativeView* DynamicInterfaceManager::managedView()
 
 void DynamicInterfaceManager::setManagedView(QDeclarativeView* view)
 {
+    if(m_view)
+        return;
+    
     m_view = view;
+    
+    //some items are added to the qml files directly. process them here to ensure they work like
+    //c++ added items
+    QObject* nav = m_view->rootObject()->findChild<QObject*>(QString::fromAscii("Navigator"));
+    connect(nav, SIGNAL(contextMenu()), this, SLOT(interfaceitemContextMenu()));
+    m_interfaceitems.push_back(qobject_cast<QDeclarativeItem*>(nav));
+    
 }
 
 void DynamicInterfaceManager::addInterfaceItem(QWidget* widget, bool permanent)
@@ -81,9 +95,9 @@ void DynamicInterfaceManager::addInterfaceItem(QWidget* widget, bool permanent)
     item->setProperty("minWidth", widget->minimumSizeHint().width());
     item->setProperty("minHeight", widget->minimumSizeHint().height());
     
-    //and set the view name
     item->setProperty("title", widget->objectName());
     item->setObjectName(widget->objectName());
+    connect(item, SIGNAL(contextMenu()), this, SLOT(interfaceitemContextMenu()));
     
     //and change some view properties
     widget->setAttribute(Qt::WA_TranslucentBackground, true);
@@ -121,6 +135,45 @@ void DynamicInterfaceManager::setupInterfaceItems()
     QObject* interface = m_view->rootObject()->findChild<QObject*>(QString::fromAscii("Area"));
     QMetaObject::invokeMethod(interface, "loadSettings");
 }
+
+QList< QAction* > DynamicInterfaceManager::getInterfaceItemActions()
+{
+    QList< QAction* > list;
+    for(QList<QDeclarativeItem*>::iterator it = m_interfaceitems.begin(); it!=m_interfaceitems.end(); ++it) {
+
+        QAction* act = new QAction((*it)->objectName(), NULL);
+        act->setCheckable(true);
+        act->setChecked((*it)->property("visible").value<bool>());
+        connect(act, SIGNAL(toggled(bool)), *it, SLOT(show(bool)));
+        
+        act->setToolTip(tr("Toggles this interface item"));
+        act->setStatusTip(tr("Toggles this interface item"));
+        act->setWhatsThis(tr("Toggles this interface item"));
+        
+        list.push_back(act);
+    }
+    return list;
+}
+
+QMenu* DynamicInterfaceManager::getInterfaceItemMenu()
+{
+    QMenu* menu = new QMenu();
+    QList<QAction*> list = GlobalDynamicInterfaceManager::get()->getInterfaceItemActions();
+    Q_FOREACH(QAction* action, list) {
+        action->setParent(menu);
+        menu->addAction(action);
+    }
+    
+    return menu;
+}
+
+
+void DynamicInterfaceManager::interfaceitemContextMenu()
+{
+    QMenu* menu = getInterfaceItemMenu();
+    menu->exec(QCursor::pos());
+}
+
 
 
 

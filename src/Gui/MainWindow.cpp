@@ -1019,13 +1019,22 @@ void MainWindow::onDockWindowMenuAboutToShow()
 {
     QMenu* menu = static_cast<QMenu*>(sender());
     menu->clear();
-    QList<QDockWidget*> dock = this->findChildren<QDockWidget*>();
-    for (QList<QDockWidget*>::Iterator it = dock.begin(); it != dock.end(); ++it) {
-        QAction* action = (*it)->toggleViewAction();
-        action->setToolTip(tr("Toggles this dockable window"));
-        action->setStatusTip(tr("Toggles this dockable window"));
-        action->setWhatsThis(tr("Toggles this dockable window"));
-        menu->addAction(action);
+    if(!usesDynamicInterface()){
+        QList<QDockWidget*> dock = this->findChildren<QDockWidget*>();
+        for (QList<QDockWidget*>::Iterator it = dock.begin(); it != dock.end(); ++it) {
+            QAction* action = (*it)->toggleViewAction();
+            action->setToolTip(tr("Toggles this dockable window"));
+            action->setStatusTip(tr("Toggles this dockable window"));
+            action->setWhatsThis(tr("Toggles this dockable window"));
+            menu->addAction(action);
+        }
+    }
+    else {
+        QList<QAction*> list = GlobalDynamicInterfaceManager::get()->getInterfaceItemActions();
+        Q_FOREACH(QAction* action, list) {
+            action->setParent(menu);
+            menu->addAction(action);
+        }
     }
 }
 

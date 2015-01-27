@@ -84,6 +84,7 @@ Item {
         //This is our drag mouse area
         MouseArea {
             id: dragArea
+            acceptedButtons: Qt.LeftButton | Qt.RightButton;
             anchors.left: titleItem.left
             anchors.right: buttons.right
             height: titleItem.height
@@ -104,7 +105,12 @@ Item {
                 }
             }
 
-            onPressed:  Util.setupDrag(interfaceitem, mouse, Util.DragMode.DragXY)
+            onPressed:  {
+                if(mouse.buttons == Qt.LeftButton)
+                    Util.setupDrag(interfaceitem, mouse, Util.DragMode.DragXY)
+                else 
+                    interfaceitem.contextMenu()
+            }
             onPositionChanged: Util.setAnchorsForPosition(mouse);            
         }
         Row {
@@ -113,14 +119,6 @@ Item {
             anchors.right: titlebar.right
             width: childrenRect.width
             height: titlebar.height
-            TitleButton{
-                width:  20
-                height: 20
-                id: settingsButton
-                styleIcon: TitleButton.Menu
-                
-                onActivated: area.setSettingsMode(true);
-            }
             TitleButton{
                 width:  20
                 height: 20
@@ -148,6 +146,10 @@ Item {
                 id: closeButton
                 styleIcon: TitleButton.Close
                 
+                onActivated: {
+                    if(interfaceitem.visible)
+                        interfaceitem.show(false)
+                }
             }
         }
     }
@@ -194,14 +196,17 @@ Item {
         settings.setString('anchors', Util.setupAnchorString(interfaceitem));
     }
     
+    //signals that we want the interfaceiten context menu
+    signal contextMenu();
+    
     function setup() {
-        //interfaceitem.visible = settings.getBool('visible', false);
+        interfaceitem.visible = settings.getBool('visible', false);
         interfaceitem.shade = settings.getBool('shade', false);
         interfaceitem.shadeSize = settings.getInt('shadeSize', 150);
         interfaceitem.x = settings.getInt('x', 0);
         interfaceitem.y = settings.getInt('y', 0);
-        interfaceitem.width = settings.getInt('width', 150);
-        interfaceitem.height = settings.getInt('height', 150);
+        interfaceitem.width = settings.getInt('width', interfaceitem.minWidth);
+        interfaceitem.height = settings.getInt('height', interfaceitem.minHeight);
     }
     function setupAnchors() {
         Util.dragMode = Util.DragMode.None;
@@ -245,6 +250,23 @@ Item {
     
     function removePassiveAnchor(anchorObject) {
      
+        if(anchorObject.passive != interfaceitem)
+            return;
+        
+        var list = anchorObject.isXtype ? Util.anchors.anchorXlist : Util.anchors.anchorYlist;
+        var index = list.indexOf(anchorObject);
+        list.splice(index, 1);
+    }
+    
+    function removeActiveAnchor(anchorObject) {
+     
+        if(anchorObject.active != interfaceitem)
+            return;
+        
+        interfaceitem.setControlledChange(true) 
+        interfaceitem.anchors[anchorObject.activeAnchor] = undefined;
+        interfaceitem.setControlledChange(false) 
+        
         var list = anchorObject.isXtype ? Util.anchors.anchorXlist : Util.anchors.anchorYlist;
         var index = list.indexOf(anchorObject);
         list.splice(index, 1);
@@ -283,7 +305,7 @@ Item {
         setAnchorIndicator(true)
     }
     
-    function removeAnchors(vertical, resizeAnchor) {
+    function removeActiveAnchors(vertical, resizeAnchor) {
         
         var list = vertical ? Util.anchors.anchorYlist : Util.anchors.anchorXlist;
         
@@ -319,6 +341,20 @@ Item {
         
         setAnchorIndicator(true)
     }
+    
+    function removePassiveAnchors(vertical) {
+        
+        var list = vertical ? Util.anchors.anchorYlist : Util.anchors.anchorXlist;
+        
+        for (var i=list.length-1; i>=0; --i) {
+            if(list[i].passive == interfaceitem) {
+
+                list[i].active.removeActiveAnchor(list[i]);               
+                list.splice(i, 1);
+            }
+        }
+    }
+    
     
     function getActiveAnchorObjectFor(anchor)  {
         
@@ -406,5 +442,43 @@ Item {
     
     function drawAnchorIndicator(draw) {
         resizer.drawAnchorIndicator(draw);
+    }
+    
+    signal show(bool shw);
+    
+    SequentialAnimation {
+        id: showanimation;
+        property bool vis: true;
+        
+        PropertyAnimation {
+            target: interfaceitem;
+            property: "opacity";
+            from: showanimation.vis ? 0 : 1;
+            to: showanimation.vis ? 1 : 0;
+        }
+        PropertyAction {
+            target: interfaceitem;
+            property: "visible";
+            value: showanimation.vis;
+        }
+        PropertyAction {
+            target: interfaceitem;
+            properties: "x,y";
+            value: 300;
+        }
+    }        
+        
+    onShow: {
+        //reset anchor, position and size state
+        if(!shw) {
+            removeActiveAnchors(true);
+            removePassiveAnchors(true);
+            removeActiveAnchors(false);
+            removePassiveAnchors(false);
+            setAnchorIndicator(false);
+        }
+        
+        showanimation.vis = shw;
+        showanimation.start();
     }
 }
