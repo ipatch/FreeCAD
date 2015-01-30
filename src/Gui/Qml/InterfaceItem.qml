@@ -25,17 +25,29 @@ import FreeCADLib 1.0
 
 import "InterfaceItemUtilities.js" as Util
 
-Item {
+HoverItem {
       
     id: interfaceitem
     //all children are added to the childarea by default
     default property alias content: childarea.children
     property alias titleBar: titlebar
     
-    property int margin: 3;
+    property bool hideTitlebar: false
+    property bool overrideHideToolbar: false
     
+    //shade stuff
     property bool shade: false
-    property int  shadeSize
+    property int  hShadeSize:0
+    property int  wShadeSize: 0
+    property bool autoShade: false
+    property int  shadeDelay: 0
+    property int  unshadeDelay: 0
+    property bool shadeHor: false
+    property int  shadeWidth: 0
+    property bool shadeVer: true
+    property int  shadeHeight: 0
+    
+    property int margin: 3;
      
     property Item area: parent
     property Item resizeDragItem
@@ -65,7 +77,21 @@ Item {
         anchors.top:   parent.top
         anchors.left:  parent.left
         anchors.right: parent.right
+        visible: !hideTitlebar || overrideHideToolbar
 
+        onVisibleChanged: {
+            if(visible) {
+                interfaceitem.height = childarea.height + 23
+                titlebar.height = 20
+                childarea.anchors.topMargin = 3;              
+            }
+            else {
+                interfaceitem.height = interfaceitem.height - titlebar.height - childarea.anchors.topMargin;
+                titlebar.height = 0;                
+                childarea.anchors.topMargin = 0;
+            }
+        }
+        
         SystemPalette { 
             id: palette
         }
@@ -81,7 +107,7 @@ Item {
             anchors.left: parent.left
             elide: Text.ElideRight
         }          
-        //This is our drag mouse area
+        //This is our drag/menu/autoshade mouse area
         MouseArea {
             id: dragArea
             acceptedButtons: Qt.LeftButton | Qt.RightButton;
@@ -119,26 +145,21 @@ Item {
             anchors.right: titlebar.right
             width: childrenRect.width
             height: titlebar.height
+            Button {
+                width:  20
+                height: 20
+                id: menuButton
+                icon: ":/icons/preferences-system.svg"
+                
+                onActivated: area.setSettingsMode(interfaceitem);
+            }
             TitleButton{
                 width:  20
                 height: 20
                 id: shadeButton
                 styleIcon: shade ? TitleButton.Unshade : TitleButton.Shade
                 
-                onActivated: {
-                    shadeAnimation.stop()
-                    if(!shade) {
-                        shadeSize = interfaceitem.height;
-                        shadeAnimation.to = titlebar.height
-                        shade = true;
-                    }
-                    else {
-                        shadeAnimation.to = shadeSize
-                        shade = false;
-                    }
-                    
-                    shadeAnimation.start()
-                }
+                onActivated: toggleShade();
             }
             TitleButton{
                 width:  20
@@ -188,7 +209,13 @@ Item {
     Component.onDestruction: {
         settings.setBool('visible', interfaceitem.visible)        
         settings.setBool('shade', interfaceitem.shade)
-        settings.setInt('shadeSize', interfaceitem.shadeSize)
+        settings.setInt('hShadeSize', interfaceitem.hShadeSize)
+        settings.setInt('wShadeSize', interfaceitem.wShadeSize)
+        settings.setBool('shadeHor', interfaceitem.shadeHor)
+        settings.setBool('shadeVer', interfaceitem.shadeVer)
+        settings.setBool('autoShade', interfaceitem.autoShade)
+        settings.setInt('shadeDelay', interfaceitem.shadeDelay)
+        settings.setInt('unshadeDelay', interfaceitem.unshadeDelay)
         settings.setInt('x', interfaceitem.x)
         settings.setInt('y', interfaceitem.y)
         settings.setInt('width', interfaceitem.width)
@@ -202,7 +229,13 @@ Item {
     function setup() {
         interfaceitem.visible = settings.getBool('visible', false);
         interfaceitem.shade = settings.getBool('shade', false);
-        interfaceitem.shadeSize = settings.getInt('shadeSize', 150);
+        interfaceitem.hShadeSize = settings.getInt('hShadeSize', 0);
+        interfaceitem.wShadeSize = settings.getInt('wShadeSize', 0);
+        interfaceitem.shadeHor = settings.getBool('shadeHor', false)
+        interfaceitem.shadeVer = settings.getBool('shadeVer', true)
+        interfaceitem.autoShade = settings.getBool('autoShade', false)
+        interfaceitem.shadeDelay = settings.getInt('shadeDelay', 0)
+        interfaceitem.unshadeDelay = settings.getInt('unshadeDelay', 0)
         interfaceitem.x = settings.getInt('x', 0);
         interfaceitem.y = settings.getInt('y', 0);
         interfaceitem.width = settings.getInt('width', interfaceitem.minWidth);
@@ -217,15 +250,6 @@ Item {
     onAreaChanged: {
         area.setupInterfaceItem(interfaceitem);
     }
-            
-    PropertyAnimation { 
-        id: shadeAnimation
-        target: interfaceitem
-        properties: 'height'
-        to: 0
-        duration: 200
-        easing.type: Easing.InOutCubic
-    }
     
     anchors.onTopChanged: {
         if(!Util.anchors.controlledChange)
@@ -239,6 +263,91 @@ Item {
         if(!Util.anchors.controlledChange)
             console.debug("Vertical Center anchor removed")
     }
+    
+    /*******************************************************************************************
+     *                                          Shading
+     * *****************************************************************************************/
+    SequentialAnimation {
+        id: shadeAnimation
+        property alias toHeight: hanim.to
+        property alias toWidth: wanim.to
+        property alias delay: pause.duration;
+        
+        PauseAnimation { 
+            id: pause
+            duration: 0
+        }
+        ParallelAnimation {
+            PropertyAnimation { 
+                id:hanim            
+                target: interfaceitem
+                properties: 'height'
+                to: 0
+                duration: 200
+                easing.type: Easing.InOutCubic
+            }
+            PropertyAnimation { 
+                id:wanim            
+                target: interfaceitem
+                properties: 'width'
+                to: 0
+                duration: 200
+                easing.type: Easing.InOutCubic
+            }
+        }
+    }
+    
+    function setShade(sh) {
+        if(shade != sh) {
+            var running = shadeAnimation.running;
+            shadeAnimation.stop()
+            if(!shade) {
+                if(!running || hShadeSize==0)
+                    hShadeSize = interfaceitem.height;
+                
+                if(!running || wShadeSize==0)
+                    wShadeSize = interfaceitem.width;
+                
+                if(shadeVer)
+                    shadeAnimation.toHeight = titlebar.height + interfaceitem.shadeHeight
+                else
+                    shadeAnimation.toHeight = hShadeSize
+                        
+                if(shadeHor)
+                    shadeAnimation.toWidth  = buttons.width + interfaceitem.shadeWidth
+                else 
+                    shadeAnimation.toWidth = wShadeSize
+                
+                if(autoShade)
+                    shadeAnimation.delay = interfaceitem.shadeDelay
+                else
+                    shadeAnimation.delay = 0
+                        
+                shade = true;
+            }
+            else {
+                shadeAnimation.toHeight = hShadeSize
+                shadeAnimation.toWidth =  wShadeSize
+                
+                if(autoShade)
+                    shadeAnimation.delay = interfaceitem.unshadeDelay;
+                else
+                    shadeAnimation.delay = 0
+                shade = false;
+            }        
+            shadeAnimation.start()            
+        }
+    }
+    
+    function toggleShade() {
+        setShade(!shade);
+    }
+    
+    //auto shade stuff
+    onEnter: if(autoShade) setShade(false);
+    onLeave: if(autoShade) setShade(true);
+    
+    
     
     function setPassiveAnchor(anchorObject) {
         

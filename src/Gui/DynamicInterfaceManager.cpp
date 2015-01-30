@@ -136,7 +136,7 @@ void DynamicInterfaceManager::setupInterfaceItems()
     QMetaObject::invokeMethod(interface, "loadSettings");
 }
 
-QList< QAction* > DynamicInterfaceManager::getInterfaceItemActions()
+QList< QAction* > DynamicInterfaceManager::getInterfaceItemToggleActions()
 {
     QList< QAction* > list;
     for(QList<QDeclarativeItem*>::iterator it = m_interfaceitems.begin(); it!=m_interfaceitems.end(); ++it) {
@@ -149,16 +149,27 @@ QList< QAction* > DynamicInterfaceManager::getInterfaceItemActions()
         act->setToolTip(tr("Toggles this interface item"));
         act->setStatusTip(tr("Toggles this interface item"));
         act->setWhatsThis(tr("Toggles this interface item"));
+        act->setData(QVariant::fromValue(*it));
         
         list.push_back(act);
     }
+
+    QAction* act = new QAction(QString::fromAscii("Show all title bars"), NULL);
+    act->setToolTip(tr("Show all titlebars ignoring the individual setting"));    
+    QObject* interface = m_view->rootObject()->findChild<QObject*>(QString::fromAscii("Area"));
+    connect(act, SIGNAL(toggled(bool)), interface, SLOT(showAllTitlebars(bool)));
+    act->setCheckable(true);
+    act->setChecked(interface->property("allTitlebars").value<bool>());
+    
+    list.push_back(act);
+    
     return list;
 }
 
-QMenu* DynamicInterfaceManager::getInterfaceItemMenu()
+QMenu* DynamicInterfaceManager::getInterfaceItemContextMenu()
 {
     QMenu* menu = new QMenu();
-    QList<QAction*> list = GlobalDynamicInterfaceManager::get()->getInterfaceItemActions();
+    QList<QAction*> list = GlobalDynamicInterfaceManager::get()->getInterfaceItemToggleActions();
     Q_FOREACH(QAction* action, list) {
         action->setParent(menu);
         menu->addAction(action);
@@ -170,7 +181,7 @@ QMenu* DynamicInterfaceManager::getInterfaceItemMenu()
 
 void DynamicInterfaceManager::interfaceitemContextMenu()
 {
-    QMenu* menu = getInterfaceItemMenu();
+    QMenu* menu = getInterfaceItemContextMenu();
     menu->exec(QCursor::pos());
 }
 

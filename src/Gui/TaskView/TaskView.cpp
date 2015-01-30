@@ -425,6 +425,8 @@ TaskView::TaskView(QWidget *parent)
         //and load the needed settings
         OnChange(*hGrp,"BackgroundColor");
         OnChange(*hGrp,"BackgroundAlpha");
+        
+        taskPanel->setAttribute(Qt::WA_NoMousePropagation);
     }
 
     taskPanel->setScheme(scheme);

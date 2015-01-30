@@ -25,7 +25,7 @@ import FreeCADLib 1.0
 
 Item {
     id: interfaceArea
-    
+    property bool allTitlebars: false;
     anchors.margins: 3;
     
     Item {
@@ -40,14 +40,74 @@ Item {
         height: 0
     }
     
+    //interfaceitem menu area 
+    Rectangle {
+        id:menu
+        visible: false
+        color: "#99000000"
+        anchors.fill: parent
+        z:9999
+        
+        property alias item: itemSettings.item
+        
+        MouseArea {
+            hoverEnabled: true
+            acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+            anchors.fill: parent
+        }
+        
+        Item {
+            anchors.centerIn: parent
+            width: 400
+            height: 250
+            ItemSettings {
+                id: itemSettings;
+                anchors.fill: parent
+                
+                onAccepted: menu.show(false);
+                onRejected: menu.show(false);
+            }
+        }
+        
+        function show(show) {
+            menuAnimation.stop();
+            menuAnimation.hide = !show;
+            menuAnimation.start();
+        }
+        
+        SequentialAnimation {
+            
+            id: menuAnimation
+            property bool hide: true
+            
+            PropertyAction {
+                target: menu
+                property: 'visible'
+                value: true
+            }
+            PropertyAnimation {
+                target: menu
+                property: 'opacity'
+                from: menuAnimation.hide ? 1 : 0
+                to: menuAnimation.hide ? 0 : 1
+            }
+            PropertyAction {
+                target: menu
+                property: 'visible'
+                value: !menuAnimation.hide
+            }
+        }
+    }
+    
     function setupInterfaceItem(item) {
         
         item.resizeDragItem  = dragItem;
         item.resizeFixItem   = fixItem;
     }
     
-    function setSettingsMode(mode) {
-        
+    function setSettingsMode(item) {
+        menu.item = item;
+        menu.show(true)
     }
     
     function loadSettings() {
@@ -60,6 +120,17 @@ Item {
             if('setupAnchors' in interfaceArea.children[i]) {
                 interfaceArea.children[i].setupAnchors();
             }
+        }
+    }
+    
+    signal showAllTitlebars(bool satb)
+    
+    onShowAllTitlebars: {
+        interfaceArea.allTitlebars = satb;
+        for(var i=0; i<interfaceArea.children.length; ++i) {
+            
+            if('overrideHideToolbar' in interfaceArea.children[i])
+                interfaceArea.children[i].overrideHideToolbar = satb
         }
     }
 }

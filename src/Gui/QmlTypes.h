@@ -32,6 +32,9 @@
 #include <QAbstractButton>
 #include <QStyle>
 
+#include "ui_DlgInterfaceitemSettings.h"
+
+class QGraphicsSceneHoverEvent;
 namespace Gui {
    
 /**
@@ -58,6 +61,21 @@ protected:
     
 private:
     QGraphicsProxyWidget* m_proxy;
+};
+
+class GuiExport QmlHoverItem : public QDeclarativeItem {
+    
+    Q_OBJECT
+    
+public:
+    QmlHoverItem(QDeclarativeItem* parent = NULL);
+    
+    virtual void hoverEnterEvent(QGraphicsSceneHoverEvent* event);
+    virtual void hoverLeaveEvent(QGraphicsSceneHoverEvent* event);
+    
+Q_SIGNALS:
+    void enter();
+    void leave();
 };
 
 class GuiExport QmlButton : public QDeclarativeItem {
@@ -187,14 +205,40 @@ protected:
     ParameterGrp::handle m_grp;
 };
 
+class GuiExport QmlInterfaceItemSettings : public QmlProxy {
+    
+    Q_OBJECT
+    Q_PROPERTY(QObject* item READ item WRITE setItem)
+    
+public:
+    QmlInterfaceItemSettings();
+    
+    QObject* item();
+    void setItem(QObject* o);
+
+Q_SIGNALS:
+    void accepted();
+    void rejected();
+    
+public Q_SLOTS:
+    void onButtonAccepted();
+    void onButtonRejected();
+    
+protected:
+    ::Ui::DlgInterfaceitemSettings ui;
+    QObject* m_item;
+};
+
 
 static void init_qml_types() {
     qmlRegisterType<QmlProxy>      ("FreeCADLib", 1, 0, "Proxy");
+    qmlRegisterType<QmlHoverItem>  ("FreeCADLib", 1, 0, "HoverItem");
     qmlRegisterType<QmlIcon>       ("FreeCADLib", 1, 0, "Icon");
     qmlRegisterType<QmlButton>     ("FreeCADLib", 1, 0, "Button");
     qmlRegisterType<QmlTitleButton>("FreeCADLib", 1, 0, "TitleButton");
     qmlRegisterType<QmlMouseCursor>("FreeCADLib", 1, 0, "MouseCursor");
     qmlRegisterType<QmlSettings>   ("FreeCADLib", 1, 0, "Settings");
+    qmlRegisterType<QmlInterfaceItemSettings> ("FreeCADLib", 1, 0, "ItemSettings");
 };
 
 } // namespace Gui

@@ -45,8 +45,8 @@ public:
     QWidget* getInterfaceItem(QString objectname);
     void setupInterfaceItems();
     
-    QList<QAction*> getInterfaceItemActions();
-    QMenu*          getInterfaceItemMenu();
+    QList<QAction*> getInterfaceItemToggleActions();
+    QMenu*          getInterfaceItemContextMenu();
     
 public Q_SLOTS:
     void interfaceitemContextMenu();

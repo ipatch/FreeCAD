@@ -365,14 +365,20 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
 #endif
 
     // Tree view
-    TreeDockWidget* tree = new TreeDockWidget(0, this);
-    tree->setObjectName
-        (QString::fromLatin1(QT_TRANSLATE_NOOP("QDockWidget","Tree view")));
-    tree->setMinimumWidth(210);
-    if(!dynamicLayout)
+    if(!dynamicLayout) {
+        TreeDockWidget* tree = new TreeDockWidget(0, this);
+        tree->setObjectName
+            (QString::fromLatin1(QT_TRANSLATE_NOOP("QDockWidget","Tree view")));
+        tree->setMinimumWidth(210);
+    
         pDockMgr->registerDockWindow("Std_TreeView", tree);   
-    else 
+    }
+    else  {
+        TreeWidget* tree = new TreeWidget(this);
+        tree->setObjectName
+            (QString::fromLatin1(QT_TRANSLATE_NOOP("QDockWidget","Tree view")));
         GlobalDynamicInterfaceManager::get()->addInterfaceItem(tree, true);
+    }
 
     // Property view
     PropertyDockView* pcPropView = new PropertyDockView(0, this);
@@ -1030,7 +1036,7 @@ void MainWindow::onDockWindowMenuAboutToShow()
         }
     }
     else {
-        QList<QAction*> list = GlobalDynamicInterfaceManager::get()->getInterfaceItemActions();
+        QList<QAction*> list = GlobalDynamicInterfaceManager::get()->getInterfaceItemToggleActions();
         Q_FOREACH(QAction* action, list) {
             action->setParent(menu);
             menu->addAction(action);

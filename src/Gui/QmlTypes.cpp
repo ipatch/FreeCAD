@@ -47,6 +47,10 @@ void QmlProxy::setProxy(QWidget* w)
 {
     m_proxy->setWidget(w);
     m_proxy->setMinimumSize(QSize(0,0));
+    Q_FOREACH(QObject* obj, m_proxy->children()) {
+        if(obj->isWidgetType())
+            static_cast<QWidget*>(obj)->setMinimumSize(QSize(0,0));
+    }
 }
 
 void QmlProxy::geometryChanged(const QRectF& newGeometry, const QRectF& oldGeometry)
@@ -54,6 +58,24 @@ void QmlProxy::geometryChanged(const QRectF& newGeometry, const QRectF& oldGeome
     m_proxy->setGeometry(newGeometry);
     QDeclarativeItem::geometryChanged(newGeometry, oldGeometry);
 }
+
+QmlHoverItem::QmlHoverItem(QDeclarativeItem* parent) : QDeclarativeItem(parent) 
+{
+    setAcceptHoverEvents(true);
+}
+
+void QmlHoverItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
+{
+    Q_EMIT enter();
+    QGraphicsItem::hoverEnterEvent(event);
+}
+
+void QmlHoverItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
+{
+    Q_EMIT leave();
+    QGraphicsItem::hoverLeaveEvent(event);
+}
+
 
 QmlButton::QmlButton(QDeclarativeItem* parent) : QDeclarativeItem(parent),
     hovered(false), pressed(false), m_margin(0)
@@ -261,6 +283,54 @@ QString QmlSettings::getString(QString Name, QString defaultvalue)
 }
 
 void QmlSettings::valueChanged(QString name){}
+
+QmlInterfaceItemSettings::QmlInterfaceItemSettings(): QmlProxy(), m_item(NULL)
+{
+    QWidget* w = new QWidget(NULL);
+    ui.setupUi(w);
+    setProxy(w);
+    
+    connect(ui.buttons, SIGNAL(accepted()), this, SLOT(onButtonAccepted()));
+    connect(ui.buttons, SIGNAL(rejected()), this, SLOT(onButtonRejected()));
+    
+}
+
+QObject* QmlInterfaceItemSettings::item()
+{
+    return m_item;
+}
+
+void QmlInterfaceItemSettings::setItem(QObject* o) 
+{
+    m_item = o;
+    ui.titleBar->setChecked(m_item->property("hideTitlebar").value<bool>());    
+    ui.autoShade->setChecked(m_item->property("autoShade").value<bool>());  
+    ui.shadeDelay->setValue(m_item->property("shadeDelay").value<int>());  
+    ui.unshadeDelay->setValue(m_item->property("unshadeDelay").value<int>());  
+    ui.shadeHor->setChecked(m_item->property("shadeHor").value<bool>());
+    ui.shadeWidth->setValue(m_item->property("shadeWidth").value<int>());
+    ui.shadeVer->setChecked(m_item->property("shadeVer").value<bool>());
+    ui.shadeHeight->setValue(m_item->property("shadeHeight").value<int>());
+}
+
+void QmlInterfaceItemSettings::onButtonAccepted()
+{
+    m_item->setProperty("hideTitlebar", ui.titleBar->isChecked());
+    m_item->setProperty("autoShade", ui.autoShade->isChecked());
+    m_item->setProperty("shadeDelay", ui.shadeDelay->value());
+    m_item->setProperty("unshadeDelay", ui.unshadeDelay->value());    
+    m_item->setProperty("shadeHor", ui.shadeHor->isChecked());
+    m_item->setProperty("shadeWidth", ui.shadeWidth->value());
+    m_item->setProperty("shadeVer", ui.shadeVer->isChecked());
+    m_item->setProperty("shadeHeight", ui.shadeHeight->value());
+    
+    Q_EMIT accepted();
+}
+
+void QmlInterfaceItemSettings::onButtonRejected()
+{
+    Q_EMIT rejected();
+}
 
 
 

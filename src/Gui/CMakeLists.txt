@@ -333,6 +333,7 @@ SET(Gui_UIC_SRCS
     DlgEditor.ui
     DlgGeneral.ui
     DlgInputDialog.ui
+    DlgInterfaceitemSettings.ui
     DlgKeyboard.ui
     DlgMacroExecute.ui
     DlgRunExternal.ui
