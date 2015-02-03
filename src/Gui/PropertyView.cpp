@@ -112,6 +112,21 @@ PropertyView::PropertyView(QWidget *parent)
         (&PropertyView::slotChangePropertyEditor, this, _1));
     
     if(MainWindow::getInstance()->usesDynamicInterface()) {
+
+        QSizePolicy sizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+        propertyEditorView->header()->setMinimumSectionSize(0);
+        propertyEditorView->header()->setStretchLastSection(true);
+        propertyEditorView->setMinimumSize(QSize(0,0));
+        propertyEditorView->setSizePolicy(sizePolicy);
+        propertyEditorData->header()->setMinimumSectionSize(0);
+        propertyEditorData->header()->setStretchLastSection(true);
+        propertyEditorData->setMinimumSize(QSize(0,0));
+        propertyEditorData->setSizePolicy(sizePolicy);
+
+        tabs->setSizePolicy(sizePolicy);
+        tabs->setMinimumSize(QSize(0,0));
+
+        setMinimumSize(QSize(0,0));
         _prefs = App::GetApplication().GetParameterGroupByPath("User parameter:BaseApp/Preferences/Interface");
         _prefs->Attach(this);
         OnChange(*_prefs,"BackgroundColor");
@@ -126,6 +141,9 @@ PropertyView::~PropertyView()
     this->connectPropAppend.disconnect();
     this->connectPropRemove.disconnect();
     this->connectPropChange.disconnect();
+    
+    if(_prefs.isValid())
+        _prefs->Detach(this);
 }
 
 void PropertyView::slotChangePropertyData(const App::DocumentObject&, const App::Property& prop)

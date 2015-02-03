@@ -491,6 +491,9 @@ PythonConsole::~PythonConsole()
     Py_XDECREF(d->_stdinPy);
     delete d->interpreter;
     delete d;
+    
+    if(_prefs.isValid())
+        _prefs->Detach(this);
 }
 
 /** Set new font and colors according to the paramerts. */  

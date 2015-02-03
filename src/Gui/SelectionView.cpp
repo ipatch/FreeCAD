@@ -106,6 +106,9 @@ SelectionView::SelectionView(Gui::Document* pcDocument, QWidget *parent)
 SelectionView::~SelectionView()
 {
     Gui::Selection().Detach(this);
+    
+    if(_prefs.isValid())
+        _prefs->Detach(this);
 }
 
 /// @cond DOXERR

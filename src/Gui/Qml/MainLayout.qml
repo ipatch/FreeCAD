@@ -31,6 +31,7 @@ Rectangle {
     MDIArea {
         id: viewManager
         objectName: "mdiarea"
+        nav: tabnav
         anchors.fill: parent
     }
  

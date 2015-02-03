@@ -28,6 +28,7 @@ Item {
     property int  tabwidth: 120
     property Item mdiArea
         
+    property alias index: list.currentIndex
     height: 20
     width:  3*tabwidth + 3*list.spacing
     anchors.fill: parent
@@ -103,10 +104,6 @@ Item {
     function closeView(id) {
         var next = (list.currentIndex == id ? list.currentIndex - 1 : list.currentIndex)
         next = (next<0) ? 0 : next
-        mdiArea.current = next
-        list.currentIndex = next
-        var item = mdiArea.children[id]
-        item.parent = dummy
-        item.requestDestroy(item)
+        mdiArea.closeView(next, id);
     }
 }

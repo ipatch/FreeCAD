@@ -213,9 +213,12 @@ HoverItem {
         settings.setInt('wShadeSize', interfaceitem.wShadeSize)
         settings.setBool('shadeHor', interfaceitem.shadeHor)
         settings.setBool('shadeVer', interfaceitem.shadeVer)
+        settings.setInt('shadeHeight', interfaceitem.shadeHeight)
+        settings.setInt('shadeWidth', interfaceitem.shadeWidth)
         settings.setBool('autoShade', interfaceitem.autoShade)
         settings.setInt('shadeDelay', interfaceitem.shadeDelay)
         settings.setInt('unshadeDelay', interfaceitem.unshadeDelay)
+        settings.setBool('hideTitlebar', interfaceitem.hideTitlebar)
         settings.setInt('x', interfaceitem.x)
         settings.setInt('y', interfaceitem.y)
         settings.setInt('width', interfaceitem.width)
@@ -233,9 +236,12 @@ HoverItem {
         interfaceitem.wShadeSize = settings.getInt('wShadeSize', 0);
         interfaceitem.shadeHor = settings.getBool('shadeHor', false)
         interfaceitem.shadeVer = settings.getBool('shadeVer', true)
+        interfaceitem.shadeHeight = settings.getInt('shadeHeight', 0)
+        interfaceitem.shadeWidth= settings.getInt('shadeWidth', 0)        
         interfaceitem.autoShade = settings.getBool('autoShade', false)
         interfaceitem.shadeDelay = settings.getInt('shadeDelay', 0)
         interfaceitem.unshadeDelay = settings.getInt('unshadeDelay', 0)
+        interfaceitem.hideTitlebar = settings.getBool('hideTitlebar',false)
         interfaceitem.x = settings.getInt('x', 0);
         interfaceitem.y = settings.getInt('y', 0);
         interfaceitem.width = settings.getInt('width', interfaceitem.minWidth);
@@ -534,11 +540,11 @@ HoverItem {
     }
     
     function getPassiveYItemChain(list) {
-        Util.getPassiveYItemChain(list);
+        Util.getPassiveYItemChain(list, interfaceitem);
     }
     
     function getPassiveXItemChain(list) {
-        Util.getPassiveXItemChain(list);
+        Util.getPassiveXItemChain(list, interfaceitem);
     }
     
     function setAnchorIndicator(draw) {

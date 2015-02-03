@@ -320,8 +320,13 @@ ReportOutput::ReportOutput(QWidget* parent)
 ReportOutput::~ReportOutput()
 {
     getWindowParameter()->Detach(this);
-    _prefs->Detach(this);
-    _dynamicPrefs->Detach(this);
+    
+    if(_dynamicPrefs.isValid())
+        _dynamicPrefs->Detach(this);
+    
+    if(_prefs.isValid())
+        _prefs->Detach(this);
+    
     Base::Console().DetachObserver(this);
     delete reportHl;
     delete d;

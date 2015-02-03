@@ -79,7 +79,7 @@ void DynamicInterfaceManager::addInterfaceItem(QWidget* widget, bool permanent)
     QObject* interface = m_view->rootObject()->findChild<QObject*>(QString::fromAscii("Area"));
     if(interface) {
         item->setParentItem(qobject_cast<QDeclarativeItem*>(interface)); 
-        item->setProperty("area", QVariant::fromValue(interface));
+        item->setProperty("area", QVariant::fromValue(interface));    
     }
     else {
         Base::Console().Error("No interface area found, item can not be added to layout");
@@ -222,11 +222,70 @@ void GlobalDynamicInterfaceManager::addView(MDIView* view)
         Base::Console().Error("No mdiview found, view can not be added to layout");
         return;
     } 
+    
+    //connect the view signals
+    connect(mdiview, SIGNAL(viewActivated(QVariant)), this, SLOT(activate(QVariant)));
+    
+    m_views.push_back(item);
 }
+
+void GlobalDynamicInterfaceManager::closeView(MDIView* view)
+{
+    Base::Console().Message("remove Windwow\n");
+}
+
+QList< MDIView* > GlobalDynamicInterfaceManager::views()
+{
+    QList< MDIView* > list;
+    Q_FOREACH(QDeclarativeItem* item, m_views) {
+        list.push_back(static_cast<MDIView*>(item->property("proxy").value<QWidget*>()));
+    }
+    return list;
+}
+
 
 void GlobalDynamicInterfaceManager::destroy(QVariant item)
 {
-   item.value<QObject*>()->deleteLater();
+    item.value<QObject*>()->deleteLater();
+    m_views.removeAll(static_cast<QDeclarativeItem*>(item.value<QObject*>()));
 }
+
+void GlobalDynamicInterfaceManager::activate(QVariant item)
+{
+    Q_EMIT viewActivated(static_cast<MDIView*>(item.value<QObject*>()->property("proxy").value<QWidget*>()));
+}
+
+void GlobalDynamicInterfaceManager::activateView(MDIView* view)
+{
+    int c = 0;
+    QObject* mdiview = m_view->rootObject()->findChild<QObject*>(QString::fromAscii("mdiarea"));
+    Q_FOREACH(QDeclarativeItem* item, m_views) {
+        if(static_cast<MDIView*>(item->property("proxy").value<QWidget*>()) == view) {
+            QMetaObject::invokeMethod(mdiview, "activateView", Q_ARG(QVariant, c));
+        }
+         
+        ++c;
+    }
+}
+
+
+void GlobalDynamicInterfaceManager::closeActiveView()
+{
+    QObject* mdiview = m_view->rootObject()->findChild<QObject*>(QString::fromAscii("mdiarea"));
+    QMetaObject::invokeMethod(mdiview, "closeActiveView");
+}
+
+void GlobalDynamicInterfaceManager::activateNextView()
+{
+    QObject* mdiview = m_view->rootObject()->findChild<QObject*>(QString::fromAscii("mdiarea"));
+    QMetaObject::invokeMethod(mdiview, "activateNextView");
+}
+
+void GlobalDynamicInterfaceManager::activatePreviousView()
+{
+    QObject* mdiview = m_view->rootObject()->findChild<QObject*>(QString::fromAscii("mdiarea"));
+    QMetaObject::invokeMethod(mdiview, "activatePreviousView");
+}
+
 
 #include "moc_DynamicInterfaceManager.cpp"

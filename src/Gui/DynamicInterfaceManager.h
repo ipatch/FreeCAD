@@ -65,16 +65,29 @@ public:
     static GlobalDynamicInterfaceManager* get();
     
     void addView(MDIView* view);
+    void closeView(MDIView* view);
+    
+    QList<MDIView*> views();
+    void activateView(MDIView* view);
+    void activateNextView();
+    void activatePreviousView();
+    void closeActiveView();
+    
+Q_SIGNALS:
+    void viewActivated(MDIView*);
     
 public Q_SLOTS:
     //destroy cpp items
     void destroy(QVariant item);
+    //activated MDIView
+    void activate(QVariant item);
     
 private:    
     GlobalDynamicInterfaceManager();
     ~GlobalDynamicInterfaceManager();
     
     static GlobalDynamicInterfaceManager* instance;
+    QList<QDeclarativeItem*> m_views;
     
 };
 

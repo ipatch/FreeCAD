@@ -575,9 +575,12 @@ MenuItem* StdWorkbench::setupMenuBar() const
     // Windows
     MenuItem* wnd = new MenuItem( menuBar );
     wnd->setCommand("&Windows");
-    *wnd << "Std_ActivateNextWindow" << "Std_ActivatePrevWindow" << "Separator"
-         << "Std_TileWindows" << "Std_CascadeWindows"
-         << "Std_ArrangeIcons" << "Separator" << "Std_WindowsMenu" << "Std_Windows";
+    *wnd << "Std_ActivateNextWindow" << "Std_ActivatePrevWindow" << "Separator";
+    if(!MainWindow::getInstance()->usesDynamicInterface()) {
+         *wnd << "Std_TileWindows" << "Std_CascadeWindows"
+         << "Std_ArrangeIcons";
+    }
+    *wnd << "Separator" << "Std_WindowsMenu" << "Std_Windows";
 
     // Separator
     MenuItem* sep = new MenuItem( menuBar );

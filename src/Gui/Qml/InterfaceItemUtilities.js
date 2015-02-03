@@ -56,8 +56,8 @@ function setupDrag(item, mouse, mode, resizeAnchor) {
     
     var ylist = [];
     var xlist = [];
-    getPassiveYItemChain(ylist);
-    getPassiveXItemChain(xlist);
+    getPassiveYItemChain(ylist, dragItem);
+    getPassiveXItemChain(xlist, dragItem);
     setupHitPositions(xlist, ylist);
 }
 
@@ -94,20 +94,20 @@ function setupHitPositions(xlist, ylist) {
     }   
 }
 
-function getPassiveYItemChain(list) {
+function getPassiveYItemChain(list, pitem) {
     
     for (var i=0; i<anchors.anchorYlist.length; ++i) {
-        if(anchors.anchorYlist[i].passive == dragItem) {
+        if(anchors.anchorYlist[i].passive == pitem) {
             list.push(anchors.anchorYlist[i].active);
             anchors.anchorYlist[i].active.getPassiveYItemChain(list)
         }
     }    
 }
 
-function getPassiveXItemChain(list) {
+function getPassiveXItemChain(list, pitem) {
     
     for (var i=0; i<anchors.anchorXlist.length; ++i) {
-        if(anchors.anchorXlist[i].passive == dragItem) {
+        if(anchors.anchorXlist[i].passive == pitem) {
             list.push(anchors.anchorXlist[i].active);
             anchors.anchorXlist[i].active.getPassiveXItemChain(list)
         }
@@ -218,9 +218,7 @@ function loadAnchorString(string, item, area) {
     
     var anch = string.split(';');
     for(var i=0; i<anch.length; ++i) {
-        console.debug('build anchor ', anch[i]);
         var parts = anch[i].split(':');
-        console.debug('build parts ', parts[0], ' ', parts[1], ' ', parts[2])
         if(parts[1] == area.objectName) {
             item.setupAnchor(parts[0], area, parts[2]);
         }

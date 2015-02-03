@@ -439,6 +439,9 @@ TaskView::~TaskView()
     connectApplicationUndoDocument.disconnect();
     connectApplicationRedoDocument.disconnect();
     Gui::Selection().Detach(this);
+    
+    if(hGrp.isValid())
+        hGrp->Detach(this);
 }
 
 void TaskView::keyPressEvent(QKeyEvent* ke)

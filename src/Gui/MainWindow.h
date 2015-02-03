@@ -240,6 +240,7 @@ private Q_SLOTS:
      * Activates the associated tab to this widget.
      */
     void onWindowActivated(QMdiSubWindow*);
+    void onWindowActivated(MDIView*);
     /**
      * Close tab at position index.
      */

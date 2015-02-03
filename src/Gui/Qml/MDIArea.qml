@@ -26,8 +26,13 @@ Item {
     id: mdiarea
         
     property int current: 0
+    property Item nav
 
-    onCurrentChanged: setVisibilities()
+    onCurrentChanged: {
+        viewActivated(mdiarea.children[current])
+        setVisibilities()
+    }
+    
     Component.onCompleted: setVisibilities()
 
     function setVisibilities() {
@@ -35,6 +40,42 @@ Item {
             mdiarea.children[i].visible = (i == current ? true : false)
         }
     }
+    
+    signal viewActivated(variant item);
 
     clip: true
+    
+    function activateView(id) {
+        current = id
+        nav.index = id
+    }
+    
+    function closeView(next, id) {
+        current = next
+        nav.index = next
+        var item = children[id]
+        item.parent = dummy
+        item.requestDestroy(item)
+    }
+    
+    function closeAciveView() {
+    
+        var next = (current == (children.length-1)) ? current - 1 : current
+        next = (next<0) ? 0 : next
+        closeView(next, current);
+    }
+    
+    function activateNextView() {
+    
+        var next = (current < (children.length-1)) ? current + 1 : current
+        nav.index = next;
+        current = next;
+    }
+    
+    function activatePreviousView() {
+        
+        var next = (current > 0) ? current - 1 : current
+        nav.index = next;
+        current = next;
+    }
 }

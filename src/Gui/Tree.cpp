@@ -463,35 +463,6 @@ bool TreeWidget::event(QEvent *event)
     return QTreeWidget::event(event);
 }
 
-bool TreeWidget::viewportEvent(QEvent* event)
-{
-    if(MainWindow::getInstance()->usesDynamicInterface()) {
-        //check if we hit the background and therefore don't want the event
-        if(event->type() == QEvent::MouseButtonPress ||
-                event->type() == QEvent::MouseButtonRelease ||
-                event->type() == QEvent::QEvent::MouseButtonDblClick ||
-                event->type() == QEvent::Wheel ||
-                event->type() == QEvent::MouseMove ||
-                event->type() == QEvent::ContextMenu) {
-
-            QModelIndex index = indexAt(static_cast<QMouseEvent*>(event)->pos());
-
-            if(!index.isValid()) {
-                //event->ignore();
-                Base::Console().Message("invalid index\n");
-                return false;
-            }
-            else {
-                Base::Console().Message("valid index\n");
-            }
-        }
-        return QTreeWidget::viewportEvent(event);
-    }
-    else 
-        return QTreeView::viewportEvent(event);
-}
-
-
 void TreeWidget::keyPressEvent(QKeyEvent *event)
 {
 #if 0

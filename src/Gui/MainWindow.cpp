@@ -343,6 +343,11 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
     if(d->mdiArea) {
         connect(d->mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)),
                 this, SLOT(onWindowActivated(QMdiSubWindow* )));
+    }
+    else {
+        connect(GlobalDynamicInterfaceManager::get(), SIGNAL(viewActivated(MDIView*)),
+                this, SLOT(onWindowActivated(MDIView*)));
+    }
 
     connect(d->tabs, SIGNAL(currentChanged(int)),
             this, SLOT(onTabSelected(int)));
@@ -449,7 +454,8 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
         GlobalDynamicInterfaceManager::get()->addInterfaceItem(pcPython, true);
     
     //all interface items are loaded, all anchors are valid now. lets setup the layout
-    GlobalDynamicInterfaceManager::get()->setupInterfaceItems();
+    if(dynamicLayout)
+        GlobalDynamicInterfaceManager::get()->setupInterfaceItems();
 
     //Dag View.
     //work through parameter.
@@ -597,6 +603,8 @@ void MainWindow::closeActiveWindow ()
 {
     if(d->mdiArea)
         d->mdiArea->closeActiveSubWindow();
+    else
+        GlobalDynamicInterfaceManager::get()->closeActiveView();
 }
 
 void MainWindow::closeAllWindows ()
@@ -609,12 +617,16 @@ void MainWindow::activateNextWindow ()
 {
     if(d->mdiArea)
         d->mdiArea->activateNextSubWindow();
+    else
+        GlobalDynamicInterfaceManager::get()->activateNextView();
 }
 
 void MainWindow::activatePreviousWindow ()
 {
     if(d->mdiArea)
         d->mdiArea->activatePreviousSubWindow();
+    else
+        GlobalDynamicInterfaceManager::get()->activatePreviousView();
 }
 
 void MainWindow::activateWorkbench(const QString& name)
@@ -888,7 +900,7 @@ void MainWindow::removeWindow(Gui::MDIView* view)
     if(d->mdiArea)
         d->mdiArea->removeSubWindow(parent);
     else {
-        Base::Console().Message("remove Windwow\n");
+        GlobalDynamicInterfaceManager::get()->closeView(view);
     }
     parent->deleteLater();
 }
@@ -925,7 +937,11 @@ void MainWindow::onSetActiveSubWindow(QWidget *window)
 
 void MainWindow::setActiveWindow(MDIView* view)
 {
-    onSetActiveSubWindow(view->parentWidget());
+    if(d->mdiArea)
+        onSetActiveSubWindow(view->parentWidget());
+    else
+        GlobalDynamicInterfaceManager::get()->activateView(view);
+    
     d->activeView = view;
     Application::Instance->viewActivated(view);
 }
@@ -952,6 +968,13 @@ void MainWindow::onWindowActivated(QMdiSubWindow* w)
     d->activeView = view;
     Application::Instance->viewActivated(view);
 }
+
+void MainWindow::onWindowActivated(MDIView* view)
+{
+    d->activeView = view;
+    Application::Instance->viewActivated(view);
+}
+
 
 void MainWindow::onWindowsMenuAboutToShow()
 {
@@ -1053,6 +1076,11 @@ QList<QWidget*> MainWindow::windows(QMdiArea::WindowOrder order) const
             mdis << (*it)->widget();
         }
     }    
+    else {
+        Q_FOREACH(QWidget* w, GlobalDynamicInterfaceManager::get()->views()) {
+            mdis.push_back(w);
+        }
+    }
     return mdis;
 }
 
@@ -1753,7 +1781,7 @@ void MainWindow::customEvent(QEvent* e)
 
 bool MainWindow::usesDynamicInterface()
 {
-    return true;
+    return (d->mdiArea==NULL) ? true : false;
 }
 
 
