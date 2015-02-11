@@ -58,6 +58,7 @@ public:
     
 protected:
     virtual void geometryChanged(const QRectF& newGeometry, const QRectF& oldGeometry);
+    virtual bool eventFilter(QObject*, QEvent*);
     
 private:
     QGraphicsProxyWidget* m_proxy;
@@ -163,14 +164,13 @@ protected:
 class GuiExport QmlMouseCursor : public QDeclarativeItem {
     
     Q_OBJECT
-    Q_ENUMS(Qt::CursorShape)
-    Q_PROPERTY(Qt::CursorShape cursor READ cursor WRITE setCursor)
+    Q_PROPERTY(Qt::CursorShape cursor READ cursorShape WRITE setCursorShape)
     
 public:    
     QmlMouseCursor(QDeclarativeItem* parent = NULL);
    
-    Qt::CursorShape cursor();
-    void setCursor(Qt::CursorShape c);
+    Qt::CursorShape cursorShape();
+    void setCursorShape(Qt::CursorShape c);
     
 private:
     Qt::CursorShape m_current;
@@ -229,14 +229,13 @@ protected:
     QObject* m_item;
 };
 
-
 static void init_qml_types() {
     qmlRegisterType<QmlProxy>      ("FreeCADLib", 1, 0, "Proxy");
     qmlRegisterType<QmlHoverItem>  ("FreeCADLib", 1, 0, "HoverItem");
     qmlRegisterType<QmlIcon>       ("FreeCADLib", 1, 0, "Icon");
     qmlRegisterType<QmlButton>     ("FreeCADLib", 1, 0, "Button");
     qmlRegisterType<QmlTitleButton>("FreeCADLib", 1, 0, "TitleButton");
-    qmlRegisterType<QmlMouseCursor>("FreeCADLib", 1, 0, "MouseCursor");
+    qmlRegisterType<QmlMouseCursor>("FreeCADLib", 1, 0, "CursorArea");
     qmlRegisterType<QmlSettings>   ("FreeCADLib", 1, 0, "Settings");
     qmlRegisterType<QmlInterfaceItemSettings> ("FreeCADLib", 1, 0, "ItemSettings");
 };

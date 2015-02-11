@@ -31,12 +31,8 @@ Item {
     property bool fixedHeight: false
     
     property Item interfaceitem;
-         
-    MouseCursor {
-        id: cursorItem
-    }
        
-     //this is the top drag area
+    //this is the top drag area
     MouseArea {
         id: topResizeArea
         anchors.left: parent.left
@@ -46,18 +42,9 @@ Item {
 
         enabled: !fixedHeight
         
-        hoverEnabled: true
-        onEntered: {
-            if(!fixedHeight) {
-                cursorItem.cursor = Qt.SizeVerCursor
-                //if(!drag.active) interfaceitem.setAnchorIndicator(true);
-            }
-        }
-        onExited:  {
-            if(!drag.active) {
-                cursorItem.cursor = Qt.ArrowCursor
-                interfaceitem.setAnchorIndicator(false);
-            }
+        CursorArea {
+            cursor: fixedHeight ? Qt.ArrowCursor : Qt.SizeVerCursor
+            anchors.fill: parent
         }
         
         onPressed: interfaceitem.resizeDragItem.y = interfaceitem.y;
@@ -76,7 +63,6 @@ Item {
             }
             else if(!fixedHeight) {
                 interfaceitem.clearResize('bottom', 'top');
-                cursorItem.cursor = Qt.ArrowCursor
                 interfaceitem.setAnchorIndicator(false);
             }
             
@@ -114,18 +100,9 @@ Item {
 
         enabled: !fixedHeight
         
-        hoverEnabled: true
-        onEntered: {
-            if(!fixedHeight) {
-                cursorItem.cursor = Qt.SizeVerCursor
-                //if(!drag.active) interfaceitem.setAnchorIndicator(true);
-            }
-        }
-        onExited:  {
-            if(!drag.active) {
-                cursorItem.cursor = Qt.ArrowCursor
-                //interfaceitem.setAnchorIndicator(false);
-            }
+        CursorArea {
+            cursor: fixedHeight ? Qt.ArrowCursor : Qt.SizeVerCursor
+            anchors.fill: parent
         }
                 
         onPressed: interfaceitem.resizeDragItem.y = interfaceitem.y + interfaceitem.height;
@@ -144,7 +121,6 @@ Item {
             }
             else if(!fixedHeight) {
                 interfaceitem.clearResize('top', 'bottom');
-                cursorItem.cursor = Qt.ArrowCursor
                 interfaceitem.setAnchorIndicator(false);
             }
         }
@@ -182,18 +158,9 @@ Item {
 
         enabled: !fixedWidth
 
-        hoverEnabled: true
-        onEntered: {
-            if(!fixedWidth) {
-                cursorItem.cursor = Qt.SizeHorCursor
-                //if(!drag.active) interfaceitem.setAnchorIndicator(true);
-            }
-        }
-        onExited:  {
-            if(!drag.active) {
-                cursorItem.cursor = Qt.ArrowCursor
-                //interfaceitem.setAnchorIndicator(false);
-            }
+        CursorArea {
+            cursor: fixedWidth ? Qt.ArrowCursor : Qt.SizeHorCursor
+            anchors.fill: parent
         }
                 
         onPressed: interfaceitem.resizeDragItem.x = interfaceitem.x;
@@ -212,7 +179,6 @@ Item {
             }
             else if(!fixedWidth) {
                 interfaceitem.clearResize('right', 'left');
-                cursorItem.cursor = Qt.ArrowCursor
                 interfaceitem.setAnchorIndicator(false);
             }
         }
@@ -249,18 +215,9 @@ Item {
 
         enabled: !fixedWidth
         
-        hoverEnabled: true
-        onEntered: {
-            if(!fixedWidth) {
-                cursorItem.cursor = Qt.SizeHorCursor
-                //if(!drag.active) interfaceitem.setAnchorIndicator(true);
-            }
-        }
-        onExited:  {
-            if(!drag.active) {
-                cursorItem.cursor = Qt.ArrowCursor
-                //interfaceitem.setAnchorIndicator(false);
-            }
+        CursorArea {
+            cursor: fixedWidth ? Qt.ArrowCursor : Qt.SizeHorCursor
+            anchors.fill: parent
         }
                 
         onPressed: interfaceitem.resizeDragItem.x = interfaceitem.x + interfaceitem.width;
@@ -279,7 +236,6 @@ Item {
             }
             else if(!fixedWidth) {
                 interfaceitem.clearResize('left', 'right');
-                cursorItem.cursor = Qt.ArrowCursor
                 interfaceitem.setAnchorIndicator(false);
             }
         }
@@ -320,18 +276,9 @@ Item {
 
         enabled: !fixedWidth || !fixedHeight
         
-        hoverEnabled: true
-        onEntered: {
-            if(!(fixedWidth && fixedHeight)) {
-                cursorItem.cursor = Qt.SizeBDiagCursor
-                //if(!drag.active) interfaceitem.setAnchorIndicator(true);
-            }
-        }
-        onExited:  {
-            if(!drag.active) {
-                cursorItem.cursor = Qt.ArrowCursor
-                //interfaceitem.setAnchorIndicator(false);
-            }
+        CursorArea {
+            cursor: (fixedWidth && fixedHeight) ? Qt.ArrowCursor : Qt.SizeBDiagCursor
+            anchors.fill: parent
         }
                 
         onPressed: {
@@ -361,8 +308,7 @@ Item {
                     interfaceitem.clearResize('left', 'right');
                 if(!fixedHeight)
                     interfaceitem.clearResize('bottom', 'top');
-                
-                cursorItem.cursor = Qt.ArrowCursor
+
                 interfaceitem.setAnchorIndicator(false);
             }
         }
@@ -378,18 +324,9 @@ Item {
 
         enabled: !fixedWidth || !fixedHeight
         
-        hoverEnabled: true
-        onEntered: {
-            if(!(fixedWidth && fixedHeight)) {
-                cursorItem.cursor = Qt.SizeBDiagCursor
-                //if(!drag.active) interfaceitem.setAnchorIndicator(true);
-            }
-        }
-        onExited:  {
-            if(!drag.active) {
-                cursorItem.cursor = Qt.ArrowCursor
-                //interfaceitem.setAnchorIndicator(false);
-            }
+        CursorArea {
+            cursor: (fixedWidth && fixedHeight) ? Qt.ArrowCursor : Qt.SizeBDiagCursor
+            anchors.fill: parent
         }
                 
         onPressed: {
@@ -419,8 +356,7 @@ Item {
                     interfaceitem.clearResize('right', 'left');
                 if(!fixedHeight)
                     interfaceitem.clearResize('top', 'bottom');
-                
-                cursorItem.cursor = Qt.ArrowCursor
+
                 interfaceitem.setAnchorIndicator(false);
             }
         }
@@ -436,18 +372,9 @@ Item {
 
         enabled: !fixedWidth || !fixedHeight
         
-        hoverEnabled: true
-        onEntered: {
-            if(!(fixedWidth && fixedHeight)) {
-                cursorItem.cursor = Qt.SizeFDiagCursor
-                //if(!drag.active) interfaceitem.setAnchorIndicator(true);
-            }
-        }
-        onExited:  {
-            if(!drag.active) {
-                cursorItem.cursor = Qt.ArrowCursor
-                //interfaceitem.setAnchorIndicator(false);
-            }
+        CursorArea {
+            cursor: (fixedWidth && fixedHeight) ? Qt.ArrowCursor : Qt.SizeFDiagCursor
+            anchors.fill: parent
         }
                 
         onPressed: {
@@ -478,8 +405,7 @@ Item {
                     interfaceitem.clearResize('right', 'left');
                 if(!fixedHeight)
                     interfaceitem.clearResize('bottom', 'top');
-                
-                cursorItem.cursor = Qt.ArrowCursor
+
                 interfaceitem.setAnchorIndicator(false);
             }
         }
@@ -495,18 +421,9 @@ Item {
 
         enabled: !fixedWidth || !fixedHeight
         
-        hoverEnabled: true
-        onEntered: {
-            if(!(fixedWidth && fixedHeight)){
-                cursorItem.cursor = Qt.SizeFDiagCursor
-                //if(!drag.active) interfaceitem.setAnchorIndicator(true);
-            }
-        }
-        onExited:  {
-            if(!drag.active) {
-                cursorItem.cursor = Qt.ArrowCursor
-                //interfaceitem.setAnchorIndicator(false);
-            }
+        CursorArea {
+            cursor: (fixedWidth && fixedHeight) ? Qt.ArrowCursor : Qt.SizeFDiagCursor
+            anchors.fill: parent
         }
                 
         onPressed: {
@@ -536,8 +453,7 @@ Item {
                     interfaceitem.clearResize('left', 'right');
                 if(!fixedHeight)
                     interfaceitem.clearResize('top', 'bottom');
-                
-                cursorItem.cursor = Qt.ArrowCursor
+
                 interfaceitem.setAnchorIndicator(false);
             }
         }

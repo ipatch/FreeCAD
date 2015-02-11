@@ -96,11 +96,6 @@ Item {
         }
     }
     
-    //needed to reparent a view before deletion
-    Item {
-        id: dummy
-    }
-    
     function closeView(id) {
         var next = (list.currentIndex == id ? list.currentIndex - 1 : list.currentIndex)
         next = (next<0) ? 0 : next

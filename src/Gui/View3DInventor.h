@@ -102,15 +102,13 @@ public:
     void toggleClippingPlane();
     bool hasClippingPlane() const;
 
-    void setOverlayWidget(QWidget*);
-    void removeOverlayWidget();
-
     View3DInventorViewer *getViewer(void) const {return _viewer;}
   
 public Q_SLOTS:
     /// override the cursor in this view
-    void setOverrideCursor(const QCursor&);
-    void restoreOverrideCursor();
+    void    setOverrideCursor(const QCursor&);
+    QCursor overrideCursor();
+    void    restoreOverrideCursor();
 
     void dump(const char* filename);
 
@@ -138,7 +136,6 @@ private:
     View3DInventorViewer * _viewer;
     PyObject *_viewerPy;
     QTimer * stopSpinTimer;
-    QStackedWidget* stack;
 
     // friends
     friend class View3DPy;

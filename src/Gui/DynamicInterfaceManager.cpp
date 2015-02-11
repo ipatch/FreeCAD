@@ -191,7 +191,20 @@ void DynamicInterfaceManager::interfaceitemContextMenu()
 GlobalDynamicInterfaceManager* GlobalDynamicInterfaceManager::instance = NULL;
 
 GlobalDynamicInterfaceManager::GlobalDynamicInterfaceManager(){}
-GlobalDynamicInterfaceManager::~GlobalDynamicInterfaceManager(){}
+GlobalDynamicInterfaceManager::~GlobalDynamicInterfaceManager(){
+    if(m_view) {
+        QObject* mdiview = m_view->rootObject()->findChild<QObject*>(QString::fromAscii("mdiarea"));
+        disconnect(mdiview, SIGNAL(viewActivated(QVariant)), this, SLOT(activate(QVariant)));
+    }
+}
+
+void GlobalDynamicInterfaceManager::setManagedView(QDeclarativeView* view)
+{
+    Gui::DynamicInterfaceManager::setManagedView(view);
+    //connect the view signals
+    QObject* mdiview = m_view->rootObject()->findChild<QObject*>(QString::fromAscii("mdiarea"));
+    connect(mdiview, SIGNAL(viewActivated(QVariant)), this, SLOT(activate(QVariant)));
+}
 
 GlobalDynamicInterfaceManager* GlobalDynamicInterfaceManager::get()
 {
@@ -208,8 +221,8 @@ void GlobalDynamicInterfaceManager::addView(MDIView* view)
                                          QString::fromAscii("/home/stefan/Projects/FreeCAD_sf_master/src/Gui/Qml/MDIView.qml"));
     QDeclarativeItem* item = qobject_cast<QDeclarativeItem*>(component->create());
     item->setProperty("proxy", QVariant::fromValue(static_cast<QWidget*>(view)));
-        
-    //make sure we can destroy it from within qml. This is a workaround to giving the ownership to 
+   
+    //make sure we can destroy it from within qml. This is a workaround for giving the ownership to 
     //javascript as this randomly destroyed the view when dragging interfaceitems.
     connect(item, SIGNAL(requestDestroy(QVariant)), this, SLOT(destroy(QVariant)));
         
@@ -222,10 +235,6 @@ void GlobalDynamicInterfaceManager::addView(MDIView* view)
         Base::Console().Error("No mdiview found, view can not be added to layout");
         return;
     } 
-    
-    //connect the view signals
-    connect(mdiview, SIGNAL(viewActivated(QVariant)), this, SLOT(activate(QVariant)));
-    
     m_views.push_back(item);
 }
 
@@ -246,13 +255,15 @@ QList< MDIView* > GlobalDynamicInterfaceManager::views()
 
 void GlobalDynamicInterfaceManager::destroy(QVariant item)
 {
+    item.value<QObject*>()->disconnect();
     item.value<QObject*>()->deleteLater();
     m_views.removeAll(static_cast<QDeclarativeItem*>(item.value<QObject*>()));
 }
 
 void GlobalDynamicInterfaceManager::activate(QVariant item)
 {
-    Q_EMIT viewActivated(static_cast<MDIView*>(item.value<QObject*>()->property("proxy").value<QWidget*>()));
+    if(item.isValid())
+        Q_EMIT viewActivated(static_cast<MDIView*>(item.value<QObject*>()->property("proxy").value<QWidget*>()));
 }
 
 void GlobalDynamicInterfaceManager::activateView(MDIView* view)

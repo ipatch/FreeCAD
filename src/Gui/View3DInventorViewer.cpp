@@ -2710,7 +2710,8 @@ void View3DInventorViewer::setCursorRepresentation(int modearg)
 
     case NavigationStyle::DRAGGING:
     case NavigationStyle::SPINNING:
-        this->getWidget()->setCursor(spinCursor);
+        rootObject()->setCursor(spinCursor);
+        setCursor(spinCursor);
         break;
 
     case NavigationStyle::ZOOMING:
@@ -2724,7 +2725,8 @@ void View3DInventorViewer::setCursorRepresentation(int modearg)
         break;
 
     case NavigationStyle::PANNING:
-        this->getWidget()->setCursor(panCursor);
+        rootObject()->setCursor(panCursor);
+        setCursor(panCursor);
         break;
 
     case NavigationStyle::SELECTION:
@@ -2740,8 +2742,8 @@ void View3DInventorViewer::setCursorRepresentation(int modearg)
 void View3DInventorViewer::setEditing(SbBool edit)
 {
     this->editing = edit;
-    this->getWidget()->setCursor(QCursor(Qt::ArrowCursor));
-    this->editCursor = QCursor();
+    this->editCursor = QCursor(Qt::ArrowCursor);
+    setCursorRepresentation(navigation->getViewingMode());
 }
 
 void View3DInventorViewer::setComponentCursor(const QCursor& cursor)

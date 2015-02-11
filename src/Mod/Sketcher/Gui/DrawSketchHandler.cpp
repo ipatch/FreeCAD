@@ -94,11 +94,11 @@ void DrawSketchHandler::setCursor(const QPixmap &p,int x,int y)
     if (view && view->isDerivedFrom(Gui::View3DInventor::getClassTypeId())) {
         Gui::View3DInventorViewer* viewer = static_cast<Gui::View3DInventor*>(view)->getViewer();
 
-        oldCursor = viewer->getWidget()->cursor();
+        oldCursor = viewer->editingCursor();
         QCursor cursor(p, x, y);
         actCursor = cursor;
 
-        viewer->getWidget()->setCursor(cursor);
+        viewer->setEditingCursor(cursor);
     }
 }
 
@@ -112,7 +112,7 @@ void DrawSketchHandler::applyCursor(QCursor &newCursor)
     Gui::MDIView* view = Gui::getMainWindow()->activeWindow();
     if (view && view->isDerivedFrom(Gui::View3DInventor::getClassTypeId())) {
         Gui::View3DInventorViewer* viewer = static_cast<Gui::View3DInventor*>(view)->getViewer();
-        viewer->getWidget()->setCursor(newCursor);
+        viewer->setEditingCursor(newCursor);
     }
 }
 
@@ -121,7 +121,7 @@ void DrawSketchHandler::unsetCursor(void)
     Gui::MDIView* view = Gui::getMainWindow()->activeWindow();
     if (view && view->isDerivedFrom(Gui::View3DInventor::getClassTypeId())) {
         Gui::View3DInventorViewer* viewer = static_cast<Gui::View3DInventor*>(view)->getViewer();
-        viewer->getWidget()->setCursor(oldCursor);
+        viewer->setEditingCursor(oldCursor);
     }
 }
 

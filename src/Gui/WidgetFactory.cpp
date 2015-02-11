@@ -248,17 +248,20 @@ bool PythonWrapper::toCString(const Py::Object& pyobject, std::string& str)
     return false;
 }
 
-QObject* PythonWrapper::toQObject(const Py::Object& pyobject)
+/*helper template function to avoid code duplication*/
+template<typename T>
+T* toCppClass(const Py::Object& pyobject)
 {
-    // http://pastebin.com/JByDAF5Z
 #if defined (HAVE_SHIBOKEN) && defined(HAVE_PYSIDE)
 #if 1
     PyTypeObject * type = Shiboken::SbkType<QObject>();
+
     if (type) {
         if (Shiboken::Object::checkType(pyobject.ptr())) {
             SbkObject* sbkobject = reinterpret_cast<SbkObject *>(pyobject.ptr());
             void* cppobject = Shiboken::Object::cppPointer(sbkobject, type);
-            return reinterpret_cast<QObject*>(cppobject);
+            if(cppobject)
+                return static_cast<T*>(cppobject);
         }
     }
 #else // does the same using shiboken's Python interface
@@ -288,7 +291,7 @@ QObject* PythonWrapper::toQObject(const Py::Object& pyobject)
     arguments[0] = pyobject; //PyQt pointer
     Py::Object result = func.apply(arguments);
     void* ptr = PyLong_AsVoidPtr(result.ptr());
-    return reinterpret_cast<QObject*>(ptr);
+    return reinterpret_cast<T*>(ptr);
 #endif
 
     return 0;
@@ -304,6 +307,22 @@ Py::Object PythonWrapper::fromQIcon(const QIcon* icon)
     Q_UNUSED(icon);
 #endif
     throw Py::RuntimeError("Failed to wrap icon");
+}
+/*convienience macro to ease the wrapper generation*/
+#define WRAP_QT_CLASS(class) \
+    namespace Gui {\
+        template <>\
+        QCursor* PythonWrapper::toQtClass(const Py::Object& pyobject) const\
+        {\
+            return toCppClass< class >(pyobject);\
+        }\
+    }
+
+WRAP_QT_CLASS(QCursor)
+
+QObject* PythonWrapper::toQObject(const Py::Object& pyobject)
+{
+    return toCppClass<QObject>(pyobject);
 }
 
 Py::Object PythonWrapper::fromQWidget(QWidget* widget, const char* className)
@@ -879,6 +898,7 @@ Py::Object UiLoaderPy::load(const Py::Tuple& args)
 
                 const char* typeName = wrap.getWrapperName(widget);
                 Py::Object pyWdg = wrap.fromQWidget(widget, typeName);
+
                 wrap.createChildrenNameAttributes(*pyWdg, widget);
                 wrap.setParent(*pyWdg, parent);
                 return pyWdg;

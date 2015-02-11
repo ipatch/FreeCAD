@@ -49,6 +49,10 @@ public:
 
     bool toCString(const Py::Object&, std::string&);
     QObject* toQObject(const Py::Object&);
+    template<typename T>
+    T* toQtClass(const Py::Object&) const
+    { return 0; }
+    
     Py::Object fromQWidget(QWidget*, const char* className=0);
     const char* getWrapperName(QObject*) const;
     /*!

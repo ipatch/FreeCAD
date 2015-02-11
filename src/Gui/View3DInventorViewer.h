@@ -228,7 +228,7 @@ public:
     SbBool isEditing() const { return this->editing; }
     void setEditingCursor (const QCursor& cursor);
     void setComponentCursor(const QCursor& cursor);
-    void setRedirectToSceneGraph(SbBool redirect) { this->redirected = redirect; }
+   void setRedirectToSceneGraph(SbBool redirect) { this->redirected = redirect; }
     SbBool isRedirectedToSceneGraph() const { return this->redirected; }
     void setRedirectToSceneGraphEnabled(SbBool enable) { this->allowredir = enable; }
     SbBool isRedirectToSceneGraphEnabled(void) const { return this->allowredir; }

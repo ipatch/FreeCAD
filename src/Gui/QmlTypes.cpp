@@ -46,6 +46,7 @@ QWidget* QmlProxy::proxy()
 void QmlProxy::setProxy(QWidget* w)
 {
     m_proxy->setWidget(w);
+    w->installEventFilter(this);
     m_proxy->setMinimumSize(QSize(0,0));
     Q_FOREACH(QObject* obj, m_proxy->children()) {
         if(obj->isWidgetType())
@@ -58,6 +59,15 @@ void QmlProxy::geometryChanged(const QRectF& newGeometry, const QRectF& oldGeome
     m_proxy->setGeometry(newGeometry);
     QDeclarativeItem::geometryChanged(newGeometry, oldGeometry);
 }
+
+bool QmlProxy::eventFilter(QObject* o, QEvent* e)
+{
+    if(e->type() == QEvent::CursorChange)
+        setCursor(proxy()->cursor());
+    
+    return QObject::eventFilter(o,e);
+}
+
 
 QmlHoverItem::QmlHoverItem(QDeclarativeItem* parent) : QDeclarativeItem(parent) 
 {
@@ -207,15 +217,15 @@ QmlMouseCursor::QmlMouseCursor(QDeclarativeItem* parent): QDeclarativeItem(paren
 
 }
 
-Qt::CursorShape QmlMouseCursor::cursor()
+Qt::CursorShape QmlMouseCursor::cursorShape()
 {
     return m_current;
 }
 
-void QmlMouseCursor::setCursor(Qt::CursorShape c)
+void QmlMouseCursor::setCursorShape(Qt::CursorShape c)
 {
     m_current = c;
-    QApplication::setOverrideCursor(QCursor(c));
+    setCursor(QCursor(c));
 }
 
 QmlSettings::QmlSettings(): QObject()
@@ -331,7 +341,5 @@ void QmlInterfaceItemSettings::onButtonRejected()
 {
     Q_EMIT rejected();
 }
-
-
 
 #include "moc_QmlTypes.cpp"

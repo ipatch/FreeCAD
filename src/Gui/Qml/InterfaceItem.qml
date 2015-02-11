@@ -66,10 +66,6 @@ HoverItem {
         
     property alias title: titleItem.text
        
-    MouseCursor {
-        id: cursorItem
-    }
-       
     Rectangle {
         id: titlebar
         height:20
@@ -120,8 +116,12 @@ HoverItem {
             drag.minimumY: 0
             drag.maximumY: interfaceitem.parent.height - interfaceitem.height
             
+            CursorArea {
+                anchors.fill: parent
+                cursor: dragArea.drag.active ? Qt.SizeAllCursor : Qt.ArrowCursor
+            }
+            
             drag.onActiveChanged: {
-                cursorItem.cursor = (drag.active) ? Qt.SizeAllCursor : Qt.ArrowCursor;
                 if(!drag.active) {
                     setAnchorIndicator(false)
                     Util.dragMode = Util.DragMode.None;                    

@@ -39,7 +39,6 @@
 # include <QPrinter>
 # include <QPrintDialog>
 # include <QPrintPreviewDialog>
-# include <QStackedWidget>
 # include <QTimer>
 # include <QUrl>
 # include <QMimeData>
@@ -111,7 +110,6 @@ View3DInventor::View3DInventor(Gui::Document* pcDocument, QWidget* parent,
                                const QtGLWidget* sharewidget, Qt::WindowFlags wflags)
     : MDIView(pcDocument, parent, wflags), _viewerPy(0)
 {
-    stack = new QStackedWidget(this);
     // important for highlighting 
     setMouseTracking(true);
     // accept drops on the window, get handled in dropEvent, dragEnterEvent   
@@ -159,6 +157,9 @@ View3DInventor::View3DInventor(Gui::Document* pcDocument, QWidget* parent,
         _viewer = new View3DInventorViewer(f, this, sharewidget);
     else
         _viewer = new View3DInventorViewer(this, sharewidget);
+    
+    //enable embeded cursor handling
+    _viewer->installEventFilter(this);
 
     if (smoothing)
         _viewer->getSoRenderManager()->getGLRenderAction()->setSmoothing(true);
@@ -166,14 +167,14 @@ View3DInventor::View3DInventor(Gui::Document* pcDocument, QWidget* parent,
     // create the inventor widget and set the defaults
     _viewer->setDocument(this->_pcDocument);
     _viewer->setDocument(this->_pcDocument);
-    stack->addWidget(_viewer->getWidget());
+
     // http://forum.freecadweb.org/viewtopic.php?f=3&t=6055&sid=150ed90cbefba50f1e2ad4b4e6684eba
     // describes a minor error but trying to fix it leads to a major issue
     // http://forum.freecadweb.org/viewtopic.php?f=3&t=6085&sid=3f4bcab8007b96aaf31928b564190fd7
     // so the change is commented out
     // By default, the wheel events are processed by the 3d view AND the mdi area.
     //_viewer->getGLWidget()->setAttribute(Qt::WA_NoMousePropagation);
-    setCentralWidget(stack);
+    setCentralWidget(_viewer->getWidget());
 
     // apply the user settings
     OnChange(*hGrp,"EyeDistance");
@@ -892,28 +893,19 @@ bool View3DInventor::hasClippingPlane() const
     return _viewer->hasClippingPlane();
 }
 
-void View3DInventor::setOverlayWidget(QWidget* widget)
-{
-    removeOverlayWidget();
-    stack->addWidget(widget);
-    stack->setCurrentIndex(1);
-}
-
-void View3DInventor::removeOverlayWidget()
-{
-    stack->setCurrentIndex(0);
-    QWidget* overlay = stack->widget(1);
-    if (overlay) stack->removeWidget(overlay);
-}
-
 void View3DInventor::setOverrideCursor(const QCursor& aCursor)
 {
-    _viewer->getWidget()->setCursor(aCursor);
+    _viewer->setComponentCursor(aCursor);
+}
+
+QCursor View3DInventor::overrideCursor()
+{
+    return _viewer->cursor();
 }
 
 void View3DInventor::restoreOverrideCursor()
 {
-    _viewer->getWidget()->setCursor(QCursor(Qt::ArrowCursor));
+    _viewer->clearComponentCursor();
 }
 
 void View3DInventor::dump(const char* filename)
@@ -1067,6 +1059,12 @@ bool View3DInventor::eventFilter(QObject* watched, QEvent* e)
             if (!actions.contains(action))
                 this->addAction(action);
         }
+    }
+    
+    //copy the viewers cursor, this is important if we are embedded in a QGraphicsProxyWidget as this
+    //does not track child cursor changes
+    if(watched == _viewer && e->type() == QEvent::CursorChange) {
+        setCursor(_viewer->cursor());
     }
 
     return false;

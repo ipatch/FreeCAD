@@ -27,7 +27,7 @@ Item {
         
     property int current: 0
     property Item nav
-
+    
     onCurrentChanged: {
         viewActivated(mdiarea.children[current])
         setVisibilities()
@@ -54,7 +54,7 @@ Item {
         current = next
         nav.index = next
         var item = children[id]
-        item.parent = dummy
+        item.parent = nav  //just need to reparent to update model first, no matter who parent is
         item.requestDestroy(item)
     }
     

@@ -1388,11 +1388,12 @@ void QuarterDrawDeclarativeItem::paint(QPainter* painter, const QStyleOptionGrap
     //to the external viewport
     if(pimpl->externalViewport) {
         
-        int diff = pimpl->externalViewport->height() - quarterwidget->viewport()->height();
+        int hdiff = pimpl->externalViewport->height() - quarterwidget->viewport()->height();
+        int wdiff = pimpl->externalViewport->width() - quarterwidget->viewport()->width();
         QPoint map = painter->deviceTransform().map(QPoint(0,0));
         
-        SbViewportRegion vp;
-        vp.setViewportPixels(SbVec2s(map.x(), diff - map.y()),  PRIVATE(this)->sorendermanager->getViewportRegion().getViewportSizePixels());
+        SbViewportRegion vp(PRIVATE(this)->sorendermanager->getViewportRegion());
+        vp.setViewportPixels(SbVec2s(wdiff - map.x(), hdiff - map.y()),  PRIVATE(this)->sorendermanager->getViewportRegion().getViewportSizePixels());
         PRIVATE(this)->sorendermanager->setViewportRegion(vp);
     }
     

@@ -39,7 +39,7 @@ public:
     ~DynamicInterfaceManager();
     
     QDeclarativeView* managedView();
-    void setManagedView(QDeclarativeView* view);
+    virtual void setManagedView(QDeclarativeView* view);
     
     void addInterfaceItem(QWidget* widget, bool permanent = false);
     QWidget* getInterfaceItem(QString objectname);
@@ -63,6 +63,8 @@ class GuiExport GlobalDynamicInterfaceManager : public DynamicInterfaceManager {
     
 public:
     static GlobalDynamicInterfaceManager* get();
+    
+    virtual void setManagedView(QDeclarativeView* view);
     
     void addView(MDIView* view);
     void closeView(MDIView* view);
