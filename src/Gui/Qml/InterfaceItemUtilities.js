@@ -85,7 +85,10 @@ function setupHitPositions(xlist, ylist) {
     //now add all posible child hitpoints
     for (var i = 0; i < dragItem.parent.children.length; ++i) {
         var cur = dragItem.parent.children[i];
-        if(cur != dragItem && cur.width>0 && !contains(ylist, cur) && !contains(xlist, cur)) { //drag resize items have width 0
+        if(cur != dragItem && cur.width>0 
+            && !contains(ylist, cur) 
+            && !contains(xlist, cur) 
+            && cur.visible) { //drag resize items have width 0
             hitPoints.top.push({item:cur, rect:Qt.rect(cur.x-sr, cur.y-sr, cur.width+2*sr, 2*sr)});
             hitPoints.bottom.push({item:cur, rect:Qt.rect(cur.x-sr, cur.y+cur.height-sr, cur.width+2*sr, 2*sr)});
             hitPoints.left.push({item:cur, rect: Qt.rect(cur.x-sr, cur.y-sr, 2*sr, cur.height+2*sr)});

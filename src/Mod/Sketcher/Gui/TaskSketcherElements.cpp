@@ -173,7 +173,7 @@ void ElementView::contextMenuEvent (QContextMenuEvent* event)
 
     menu.menuAction()->setIconVisibleInMenu(true);
     
-    menu.exec(event->globalPos());
+    menu.exec(QCursor::pos());
 }
 
 CONTEXT_MEMBER_DEF("Sketcher_ConstrainDistanceX",doHorizontalDistance)

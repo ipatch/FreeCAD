@@ -463,6 +463,28 @@ bool TreeWidget::event(QEvent *event)
     return QTreeWidget::event(event);
 }
 
+bool TreeWidget::viewportEvent(QEvent* event)
+{
+    if(!MainWindow::getInstance()->usesDynamicInterface())
+        return QTreeView::viewportEvent(event);
+    
+        
+    if(event->type() == QEvent::MouseButtonDblClick ||
+        event->type() == QEvent::MouseButtonPress ||
+        event->type() == QEvent::MouseButtonRelease ||
+        event->type() == QEvent::MouseMove) {
+        
+        QMouseEvent* e = static_cast<QMouseEvent*>(event);
+        if(itemAt(e->pos().x(), e->pos().y()))
+            return QTreeView::viewportEvent(event);
+        else 
+            return false;
+    }
+    
+    return QTreeView::viewportEvent(event);
+}
+
+
 void TreeWidget::keyPressEvent(QKeyEvent *event)
 {
 #if 0
@@ -998,7 +1020,7 @@ TreeDockWidget::TreeDockWidget(Gui::Document* pcDocument,QWidget *parent)
     QGridLayout* pLayout = new QGridLayout(this);
     pLayout->setSpacing(0);
     pLayout->setMargin (0);
-    pLayout->addWidget(this->treeWidget, 0, 0 );
+    pLayout->addWidget(this->treeWidget, 1);
 }
 
 TreeDockWidget::~TreeDockWidget()

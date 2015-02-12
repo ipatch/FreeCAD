@@ -243,7 +243,7 @@ bool EditorView::canClose(void)
     if ( !d->textEdit->document()->isModified() )
         return true;
     this->setFocus(); // raises the view to front
-    switch( QMessageBox::question(this, tr("Unsaved document"), 
+    switch( QMessageBox::question(NULL, tr("Unsaved document"), 
                                     tr("The document has been modified.\n"
                                        "Do you want to save your changes?"),
                                      QMessageBox::Yes|QMessageBox::Default, QMessageBox::No, 

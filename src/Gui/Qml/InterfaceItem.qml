@@ -203,6 +203,8 @@ HoverItem {
         Util.anchors = new Object();
         Util.anchors.anchorXlist = new Array();
         Util.anchors.anchorYlist = new Array();
+        Util.anchors.resizeFixedAnchorCache = new Object;
+        Util.anchors.resizeDragAnchorCache = new Object;
     }
     
     //let's save everything
@@ -354,6 +356,9 @@ HoverItem {
     onLeave: if(autoShade) setShade(true);
     
     
+/*******************************************************************************************
+*                                          Anchoring
+* *****************************************************************************************/
     
     function setPassiveAnchor(anchorObject) {
         
@@ -415,7 +420,7 @@ HoverItem {
         
         if(Util.dragMode == Util.DragMode.SizeXY || Util.dragMode == Util.DragMode.SizeX
                     || Util.dragMode == Util.DragMode.SizeY) {
-            Util.anchors.resizeDragAnchorCache = anchorObject;
+            Util.anchors.resizeDragAnchorCache[thisAnchor] = anchorObject;
         }
         setAnchorIndicator(true)
     }
@@ -448,7 +453,7 @@ HoverItem {
                     
                     interfaceitem.setControlledChange(true)           
                     interfaceitem.anchors[resizeAnchor]  = resizeDragItem[resizeAnchor];
-                    Util.anchors.resizeDragAnchorCache = undefined;
+                    Util.anchors.resizeDragAnchorCache[resizeAnchor] = undefined;
                     interfaceitem.setControlledChange(false)
                 }
             }
@@ -497,8 +502,8 @@ HoverItem {
         //the fix item mused be anchored to the item with the item as active one,
         //as the passive stays fixed and the active gets dragged. As this may override
         //possible existing anchors we need to store them and reenable them when finished
-        Util.anchors.resizeFixedAnchorCache = getActiveAnchorObjectFor(fixedanchor);    
-        Util.anchors.resizeDragAnchorCache = getActiveAnchorObjectFor(draganchor);   
+        Util.anchors.resizeFixedAnchorCache[fixedanchor] = getActiveAnchorObjectFor(fixedanchor);    
+        Util.anchors.resizeDragAnchorCache[draganchor] = getActiveAnchorObjectFor(draganchor);   
         
         resizeFixItem.x = xf;
         resizeFixItem.y = yf;
@@ -506,7 +511,7 @@ HoverItem {
         interfaceitem.setControlledChange(true)
         interfaceitem.anchors[fixedanchor] = resizeFixItem[fixedanchor];
         interfaceitem.anchors[fixedanchor+'Margin'] = 0;
-        if(Util.anchors.resizeDragAnchorCache == undefined) {
+        if(Util.anchors.resizeDragAnchorCache[draganchor] == undefined) {
             interfaceitem.anchors[draganchor] = resizeDragItem[draganchor];
             interfaceitem.anchors[draganchor+'Margin'] = 0
         }
@@ -525,14 +530,19 @@ HoverItem {
         interfaceitem.anchors[drag] = undefined;
         interfaceitem.anchors[fixed] = undefined;
         
-        if(Util.anchors.resizeDragAnchorCache != undefined) {
-            var obj = Util.anchors.resizeDragAnchorCache;
+        if(Util.anchors.resizeDragAnchorCache[drag] != undefined) {
+            var obj = Util.anchors.resizeDragAnchorCache[drag];
             obj.active.anchors[obj.activeAnchor] = obj.passive[obj.passiveAnchor];
         }
         
-        if(Util.anchors.resizeFixedAnchorCache != undefined) {
-            var obj = Util.anchors.resizeFixedAnchorCache;
+        if(Util.anchors.resizeFixedAnchorCache[fixed] != undefined) {
+            var obj = Util.anchors.resizeFixedAnchorCache[fixed];
             obj.active.anchors[obj.activeAnchor] = obj.passive[obj.passiveAnchor];
+            
+            if(obj.activeAnchor != obj.passiveAnchor)
+                obj.active.anchors[obj.activeAnchor+'Margin'] = interfaceitem.margin;
+            else
+                obj.active.anchors[obj.activeAnchor+'Margin'] = 0;
         }
             
         Util.dragMode = Util.DragMode.None;
