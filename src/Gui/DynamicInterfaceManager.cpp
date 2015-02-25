@@ -56,7 +56,7 @@ void DynamicInterfaceManager::setManagedView(QDeclarativeView* view)
     
 }
 
-void DynamicInterfaceManager::addInterfaceItem(QWidget* widget, bool permanent)
+void DynamicInterfaceManager::addInterfaceItem(QWidget* widget, QString name, bool permanent)
 {
     if(!m_view)
         return;
@@ -96,7 +96,7 @@ void DynamicInterfaceManager::addInterfaceItem(QWidget* widget, bool permanent)
     item->setProperty("minHeight", widget->minimumSizeHint().height());
     
     item->setProperty("title", widget->objectName());
-    item->setObjectName(widget->objectName());
+    item->setObjectName(name);
     connect(item, SIGNAL(contextMenu()), this, SLOT(interfaceitemContextMenu()));
     
     //and change some view properties
@@ -112,8 +112,10 @@ QWidget* DynamicInterfaceManager::getInterfaceItem(QString objectname)
     
     QDeclarativeItem* item = NULL;
     for(QList<QDeclarativeItem*>::iterator it = m_interfaceitems.begin(); it!=m_interfaceitems.end(); ++it) {
-        if((*it)->objectName() == objectname)
+        if((*it)->objectName() == objectname) {
             item = *it;
+            break;
+        }
     }
     
     if(!item) {
@@ -141,7 +143,7 @@ QList< QAction* > DynamicInterfaceManager::getInterfaceItemToggleActions()
     QList< QAction* > list;
     for(QList<QDeclarativeItem*>::iterator it = m_interfaceitems.begin(); it!=m_interfaceitems.end(); ++it) {
 
-        QAction* act = new QAction((*it)->objectName(), NULL);
+        QAction* act = new QAction((*it)->property("title").toString(), NULL);
         act->setCheckable(true);
         act->setChecked((*it)->property("visible").value<bool>());
         connect(act, SIGNAL(toggled(bool)), *it, SLOT(show(bool)));
@@ -154,7 +156,7 @@ QList< QAction* > DynamicInterfaceManager::getInterfaceItemToggleActions()
         list.push_back(act);
     }
 
-    QAction* act = new QAction(QString::fromAscii("Show all title bars"), NULL);
+    QAction* act = new QAction(tr("Show all title bars"), NULL);
     act->setToolTip(tr("Show all titlebars ignoring the individual setting"));    
     QObject* interface = m_view->rootObject()->findChild<QObject*>(QString::fromAscii("Area"));
     connect(act, SIGNAL(toggled(bool)), interface, SLOT(showAllTitlebars(bool)));

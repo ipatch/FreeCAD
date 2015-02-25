@@ -221,6 +221,10 @@ TreeWidget::TreeWidget(QWidget* parent)
         header()->setStretchLastSection(true);
         header()->setMinimumSectionSize(1);
         header()->setResizeMode(QHeaderView::Stretch);  
+        
+        //connect all events that change the visible items to recalculate the partial size
+        connect(this,SIGNAL(expanded(QModelIndex)),  this, SLOT(calculatePartialSize()));
+        connect(this,SIGNAL(collapsed(QModelIndex)), this, SLOT(calculatePartialSize()));
     }
 }
 
@@ -462,28 +466,6 @@ bool TreeWidget::event(QEvent *event)
 #endif
     return QTreeWidget::event(event);
 }
-
-bool TreeWidget::viewportEvent(QEvent* event)
-{
-    if(!MainWindow::getInstance()->usesDynamicInterface())
-        return QTreeView::viewportEvent(event);
-    
-        
-    if(event->type() == QEvent::MouseButtonDblClick ||
-        event->type() == QEvent::MouseButtonPress ||
-        event->type() == QEvent::MouseButtonRelease ||
-        event->type() == QEvent::MouseMove) {
-        
-        QMouseEvent* e = static_cast<QMouseEvent*>(event);
-        if(itemAt(e->pos().x(), e->pos().y()))
-            return QTreeView::viewportEvent(event);
-        else 
-            return false;
-    }
-    
-    return QTreeView::viewportEvent(event);
-}
-
 
 void TreeWidget::keyPressEvent(QKeyEvent *event)
 {
@@ -785,6 +767,7 @@ void TreeWidget::slotDeleteDocument(const Gui::Document& Doc)
         delete it->second;
         DocumentMap.erase(it);
     }
+    calculatePartialSize();
 }
 
 void TreeWidget::slotRenameDocument(const Gui::Document& Doc)
@@ -1004,6 +987,28 @@ void TreeWidget::setItemsSelected (const QList<QTreeWidgetItem *> items, bool se
         QItemSelectionModel::Deselect);
 }
 
+void TreeWidget::rowsInserted(const QModelIndex& parent, int start, int end)
+{
+    QTreeView::rowsInserted(parent, start, end);
+    calculatePartialSize();
+}
+
+void TreeWidget::calculatePartialSize()
+{
+    QTreeWidgetItem* item = rootItem;
+    if(!item || !isVisible())
+        return;
+    
+    QRect rect;
+    while(item) {
+        rect = visualItemRect(item);
+        item = itemBelow(item);
+    }
+    
+    //we can only have a partial height, not with
+    Q_EMIT partialSizeHint(QRectF(-1, 0, -1, rect.y() + rect.height()));
+}
+
 
 // ----------------------------------------------------------------------------
 
@@ -1171,6 +1176,7 @@ void DocumentItem::slotDeleteObject(const Gui::ViewProviderDocumentObject& view)
             createNewItem(static_cast<ViewProviderDocumentObject&>(*vp));
         }
     }
+    static_cast<TreeWidget*>(treeWidget())->calculatePartialSize();
 }
 
 void DocumentItem::populateItem(DocumentObjectItem *item, bool refresh) {

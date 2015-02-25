@@ -56,11 +56,20 @@ public:
     QWidget* proxy();
     void setProxy(QWidget*);
     
+public Q_SLOTS:
+    void setPartialSizeHint(QRectF hint);
+    
+Q_SIGNALS:
+    void proxySizeChanged(int width, int height);
+    void enter();
+    void leave();
+    
 protected:
     virtual void geometryChanged(const QRectF& newGeometry, const QRectF& oldGeometry);
     virtual bool eventFilter(QObject*, QEvent*);
     
 private:
+    QRectF m_partialSizeHint;
     QGraphicsProxyWidget* m_proxy;
 };
 

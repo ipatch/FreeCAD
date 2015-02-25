@@ -25,7 +25,7 @@ import FreeCADLib 1.0
 
 import "InterfaceItemUtilities.js" as Util
 
-HoverItem {
+Item {
       
     id: interfaceitem
     //all children are added to the childarea by default
@@ -61,115 +61,128 @@ HoverItem {
     property int minHeight: 150;
     property int totalMinHeight: minHeight + titlebar.height + 3;
     
-    height: 200;
+    //height: 200;
     width:  200;
         
     property alias title: titleItem.text
-       
-    Rectangle {
+        
+    //ensure we detect hoovers over the titlebar
+    HoverItem {
         id: titlebar
-        height:20
-        width: 150
         anchors.top:   parent.top
         anchors.left:  parent.left
         anchors.right: parent.right
-        visible: !hideTitlebar || overrideHideToolbar
+            
+        height: 23
+        width:  150
+        
+        onEnter: {
+            interfaceitem.onEnter();
+        }
+        onLeave: {
+            interfaceitem.onLeave();
+        }
 
-        onVisibleChanged: {
-            if(visible) {
-                interfaceitem.height = childarea.height + 23
-                titlebar.height = 20
-                childarea.anchors.topMargin = 3;              
-            }
-            else {
-                interfaceitem.height = interfaceitem.height - titlebar.height - childarea.anchors.topMargin;
-                titlebar.height = 0;                
-                childarea.anchors.topMargin = 0;
-            }
-        }
-        
-        SystemPalette { 
-            id: palette
-        }
-        
-        radius:3
-        color: palette.window
-        
-        Text {
-            id: titleItem
-            width: parent.width - buttons.width
-            height: parent.height
-            anchors.leftMargin: 3
-            anchors.left: parent.left
-            elide: Text.ElideRight
-        }          
-        //This is our drag/menu/autoshade mouse area
-        MouseArea {
-            id: dragArea
-            acceptedButtons: Qt.LeftButton | Qt.RightButton;
-            anchors.left: titleItem.left
-            anchors.right: buttons.right
-            height: titleItem.height
-            drag.target: interfaceitem
-            drag.minimumX: 0
-            drag.maximumX: interfaceitem.parent.width - interfaceitem.width
-            drag.minimumY: 0
-            drag.maximumY: interfaceitem.parent.height - interfaceitem.height
-            
-            CursorArea {
-                anchors.fill: parent
-                cursor: dragArea.drag.active ? Qt.SizeAllCursor : Qt.ArrowCursor
-            }
-            
-            drag.onActiveChanged: {
-                if(!drag.active) {
-                    setAnchorIndicator(false)
-                    Util.dragMode = Util.DragMode.None;                    
+        Rectangle {
+            id: bar
+            anchors.bottomMargin: 3
+            anchors.fill: parent
+            visible: !hideTitlebar || overrideHideToolbar
+
+            onVisibleChanged: {
+                if(visible) {
+                    interfaceitem.height = childarea.height + 23
+                    titlebar.height = 23        
                 }
                 else {
-                    setAnchorIndicator(true)
+                    interfaceitem.height = interfaceitem.height - titlebar.height - childarea.anchors.topMargin;
+                    titlebar.height = 0;                
                 }
             }
+            
+            SystemPalette { 
+                id: palette
+            }
+            
+            radius:3
+            color: palette.window
+            
+            Text {
+                id: titleItem
+                width: parent.width - buttons.width
+                height: parent.height
+                anchors.leftMargin: 3
+                anchors.left: parent.left
+                elide: Text.ElideRight
+            }          
+            //This is our drag/menu/autoshade mouse area
+            MouseArea {
+                id: dragArea
+                acceptedButtons: Qt.LeftButton | Qt.RightButton;
+                anchors.left: titleItem.left
+                anchors.right: buttons.right
+                height: titleItem.height
+                drag.target: interfaceitem
+                drag.minimumX: 0
+                drag.maximumX: interfaceitem.parent.width - interfaceitem.width
+                drag.minimumY: 0
+                drag.maximumY: interfaceitem.parent.height - interfaceitem.height
+                
+                CursorArea {
+                    anchors.fill: parent
+                    cursor: dragArea.drag.active ? Qt.SizeAllCursor : Qt.ArrowCursor
+                }
+                
+                drag.onActiveChanged: {
+                    if(!drag.active) {
+                        setAnchorIndicator(false)
+                        Util.dragMode = Util.DragMode.None;                    
+                    }
+                    else {
+                        setAnchorIndicator(true)
+                    }
+                }
 
-            onPressed:  {
-                if(mouse.buttons == Qt.LeftButton)
-                    Util.setupDrag(interfaceitem, mouse, Util.DragMode.DragXY)
-                else 
-                    interfaceitem.contextMenu()
+                onPressed:  {
+                    if(mouse.buttons == Qt.LeftButton)
+                        Util.setupDrag(interfaceitem, mouse, Util.DragMode.DragXY)
+                    else 
+                        interfaceitem.contextMenu()
+                }
+                onPositionChanged: Util.setAnchorsForPosition(mouse);            
             }
-            onPositionChanged: Util.setAnchorsForPosition(mouse);            
-        }
-        Row {
-            id:buttons
-            anchors.top: titlebar.top;
-            anchors.right: titlebar.right
-            width: childrenRect.width
-            height: titlebar.height
-            Button {
-                width:  20
-                height: 20
-                id: menuButton
-                icon: ":/icons/preferences-system.svg"
-                
-                onActivated: area.setSettingsMode(interfaceitem);
-            }
-            TitleButton{
-                width:  20
-                height: 20
-                id: shadeButton
-                styleIcon: shade ? TitleButton.Unshade : TitleButton.Shade
-                
-                onActivated: toggleShade();
-            }
-            TitleButton{
-                width:  20
-                height: 20
-                id: closeButton
-                styleIcon: TitleButton.Close
-                
-                onActivated: {
-                    if(interfaceitem.visible)
-                        interfaceitem.show(false)
+            Row {
+                id:buttons
+                anchors.top: bar.top;
+                anchors.right: bar.right
+                width: childrenRect.width
+                height: bar.height
+                Button {
+                    width:  20
+                    height: 20
+                    id: menuButton
+                    icon: ":/icons/preferences-system.svg"
+                    
+                    onActivated: area.setSettingsMode(interfaceitem);
+                }
+                TitleButton{
+                    width:  20
+                    height: 20
+                    id: shadeButton
+                    styleIcon: shade ? TitleButton.Unshade : TitleButton.Shade
+                    
+                    onActivated: toggleShade();
+                }
+                TitleButton{
+                    width:  20
+                    height: 20
+                    id: closeButton
+                    styleIcon: TitleButton.Close
+                    
+                    onActivated: {
+                        if(interfaceitem.visible)
+                            interfaceitem.show(false)
+                    }
                 }
             }
         }
@@ -179,7 +192,6 @@ HoverItem {
     Item {
         id: childarea
        
-        anchors.topMargin: 3
         anchors.top:    titlebar.bottom
         anchors.bottom: parent.bottom
         anchors.left:   parent.left
@@ -195,7 +207,7 @@ HoverItem {
     
     Settings {
         id: settings
-        tracked: interfaceitem.objectName
+        tracked: interfaceitem.title
     }
     
     //we need to setup the anchor object arrays and load all settings
@@ -352,8 +364,12 @@ HoverItem {
     }
     
     //auto shade stuff
-    onEnter: if(autoShade) setShade(false);
-    onLeave: if(autoShade) setShade(true);
+    function onEnter() {
+        if(autoShade) setShade(false);
+    }
+    function onLeave() {
+        if(autoShade) setShade(true);
+    }
     
     
 /*******************************************************************************************

@@ -195,6 +195,11 @@ public:
     void clearActionStyle();
     void restoreActionStyle();
 
+    Q_INVOKABLE void calculatePartialSize();
+    
+Q_SIGNALS:
+    void partialSizeHint(QRectF);
+    
 protected Q_SLOTS:
     void accept();
     void reject();

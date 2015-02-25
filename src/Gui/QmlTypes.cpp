@@ -36,6 +36,9 @@ using namespace Gui;
 QmlProxy::QmlProxy(QDeclarativeItem* parent): QDeclarativeItem(parent)
 {
     m_proxy = new QGraphicsProxyWidget(this);
+    m_proxy->setAcceptHoverEvents(true);
+    m_proxy->installEventFilter(this);
+    m_partialSizeHint = QRect(-1,-1,0,0);
 }
 
 QWidget* QmlProxy::proxy()
@@ -52,21 +55,47 @@ void QmlProxy::setProxy(QWidget* w)
         if(obj->isWidgetType())
             static_cast<QWidget*>(obj)->setMinimumSize(QSize(0,0));
     }
+    
+    //check if we have a partialSize signal and connect to it when possible
+    if(w->metaObject()->indexOfSignal("partialSizeHint(QRectF)") >= 0) {
+        connect(w, SIGNAL(partialSizeHint(QRectF)), this, SLOT(setPartialSizeHint(QRectF)));       
+        QMetaObject::invokeMethod(w, "calculatePartialSize");
+    }
 }
 
 void QmlProxy::geometryChanged(const QRectF& newGeometry, const QRectF& oldGeometry)
 {
-    m_proxy->setGeometry(newGeometry);
+    //respect partial size hints
+    QRectF ng = newGeometry;
+    if(m_partialSizeHint.x() >= 0) 
+        ng.setWidth(std::min(ng.width(), m_partialSizeHint.width()));
+    if(m_partialSizeHint.y() >= 0) 
+        ng.setHeight(std::min(ng.height(), m_partialSizeHint.height()));    
+    
+    m_proxy->setGeometry(ng);
     QDeclarativeItem::geometryChanged(newGeometry, oldGeometry);
+    
+    Q_EMIT proxySizeChanged(ng.width(), ng.height());
 }
 
 bool QmlProxy::eventFilter(QObject* o, QEvent* e)
 {
     if(e->type() == QEvent::CursorChange)
         setCursor(proxy()->cursor());
-    
+    if(e->type() == QEvent::GraphicsSceneHoverEnter)
+        Q_EMIT enter();
+    if(e->type() == QEvent::GraphicsSceneHoverLeave)
+        Q_EMIT leave();
+      
     return QObject::eventFilter(o,e);
 }
+
+void QmlProxy::setPartialSizeHint(QRectF hint)
+{
+    m_partialSizeHint = hint;
+    geometryChanged(boundingRect(), boundingRect());
+}
+
 
 
 QmlHoverItem::QmlHoverItem(QDeclarativeItem* parent) : QDeclarativeItem(parent) 

@@ -132,7 +132,7 @@ void ControlSingleton::showDialog(Gui::TaskView::TaskDialog *dlg)
         if (!_taskPanel) {            
             if(MainWindow::getInstance()->usesDynamicInterface()) {
                 
-                QWidget* w = GlobalDynamicInterfaceManager::get()->getInterfaceItem(QString::fromAscii("Task View"));
+                QWidget* w = GlobalDynamicInterfaceManager::get()->getInterfaceItem(QString::fromAscii("Std_TaskView"));
                 if(!w) 
                     return;
                 _taskPanel = static_cast< Gui::TaskView::TaskView* >(w);          

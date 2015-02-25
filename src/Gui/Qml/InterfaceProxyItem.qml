@@ -35,5 +35,8 @@ InterfaceItem {
         id: proxyitem
         objectName: "proxy"
         anchors.fill: parent;
+        
+        onEnter: item.onEnter();
+        onLeave: item.onLeave();
     }    
 }

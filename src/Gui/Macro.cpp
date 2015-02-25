@@ -43,6 +43,7 @@
 #include "PythonConsole.h"
 #include "PythonConsolePy.h"
 #include "PythonDebugger.h"
+#include "DynamicInterfaceManager.h"
 
 using namespace Gui;
 
@@ -192,6 +193,12 @@ void MacroManager::addLine(LineType Type, const char* sLine)
         // search for the Python console
         if (!this->pyConsole)
             this->pyConsole = Gui::getMainWindow()->findChild<Gui::PythonConsole*>();
+        if (!this->pyConsole) {
+            QWidget* w = Gui::GlobalDynamicInterfaceManager::get()->getInterfaceItem(QString::fromAscii("Std_PythonView"));
+            
+            if(w) 
+                this->pyConsole = static_cast<PythonConsole*>(w);
+        }
         // Python console found?
         if (this->pyConsole)
             this->pyConsole->printStatement(QString::fromUtf8(sLine));

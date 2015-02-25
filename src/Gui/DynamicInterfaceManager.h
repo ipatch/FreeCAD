@@ -41,7 +41,7 @@ public:
     QDeclarativeView* managedView();
     virtual void setManagedView(QDeclarativeView* view);
     
-    void addInterfaceItem(QWidget* widget, bool permanent = false);
+    void addInterfaceItem(QWidget* widget, QString name, bool permanent = false);
     QWidget* getInterfaceItem(QString objectname);
     void setupInterfaceItems();
     

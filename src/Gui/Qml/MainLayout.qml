@@ -45,7 +45,7 @@ Rectangle {
             title: "Navigator"  
             objectName: "Navigator"
             
-            height:    titleBar.height + tabnav.height + 3
+            //height:    titleBar.height + tabnav.height + 3
             minWidth:  120
             minHeight: height
             fixedHeight: true

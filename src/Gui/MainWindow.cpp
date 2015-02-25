@@ -370,15 +370,15 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
 #endif
 
     TreeDockWidget* tree = new TreeDockWidget(0, this);
-    tree->setObjectName
-        (QString::fromLatin1(QT_TRANSLATE_NOOP("QDockWidget","Tree view")));
+    tree->setObjectName(QString::fromLatin1(QT_TRANSLATE_NOOP("QDockWidget","Tree view")));
     tree->setMinimumWidth(210);
 
     if(!dynamicLayout) 
        pDockMgr->registerDockWindow("Std_TreeView", tree);
     else  
-       GlobalDynamicInterfaceManager::get()->addInterfaceItem(tree, true);
-    
+       GlobalDynamicInterfaceManager::get()->addInterfaceItem(tree, 
+                                                              QString::fromLatin1("Std_TreeView"), 
+                                                              true);
 
     // Property view
     PropertyDockView* pcPropView = new PropertyDockView(0, this);
@@ -388,7 +388,9 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
     if(!dynamicLayout)
         pDockMgr->registerDockWindow("Std_PropertyView", pcPropView);
     else 
-        GlobalDynamicInterfaceManager::get()->addInterfaceItem(pcPropView, true);
+        GlobalDynamicInterfaceManager::get()->addInterfaceItem(pcPropView,
+                                                               QString::fromLatin1("Std_PropertyView"),
+                                                               true);
 
     // Selection view
     SelectionView* pcSelectionView = new SelectionView(0, this);
@@ -398,7 +400,9 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
     if(!dynamicLayout)
         pDockMgr->registerDockWindow("Std_SelectionView", pcSelectionView);
     else 
-        GlobalDynamicInterfaceManager::get()->addInterfaceItem(pcSelectionView, true);
+        GlobalDynamicInterfaceManager::get()->addInterfaceItem(pcSelectionView,
+                                                               QString::fromLatin1("Std_SelectionView"),
+                                                               true);
 
     // Combo view
 
@@ -411,7 +415,9 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
     else {
         Gui::TaskView::TaskView* task = new Gui::TaskView::TaskView(this);
         task->setObjectName(QString::fromLatin1(QT_TRANSLATE_NOOP("QDockWidget","Task View")));
-        GlobalDynamicInterfaceManager::get()->addInterfaceItem(task, true);
+        GlobalDynamicInterfaceManager::get()->addInterfaceItem(task,
+                                                               QString::fromLatin1("Std_TaskView"),
+                                                               true);
     }
 
 #if QT_VERSION < 0x040500
@@ -428,7 +434,9 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
     if(!dynamicLayout)
         pDockMgr->registerDockWindow("Std_ReportView", pcReport);
     else 
-        GlobalDynamicInterfaceManager::get()->addInterfaceItem(pcReport, true);
+        GlobalDynamicInterfaceManager::get()->addInterfaceItem(pcReport,
+                                                               QString::fromAscii("Std_ReportView"),
+                                                               true);
 
     // Python console
     PythonConsole* pcPython = new PythonConsole(this);
@@ -446,7 +454,9 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
     if(!dynamicLayout)
         pDockMgr->registerDockWindow("Std_PythonView", pcPython);
     else 
-        GlobalDynamicInterfaceManager::get()->addInterfaceItem(pcPython, true);
+        GlobalDynamicInterfaceManager::get()->addInterfaceItem(pcPython,
+                                                               QString::fromAscii("Std_PythonView"),
+                                                               true);
     
     //all interface items are loaded, all anchors are valid now. lets setup the layout
     if(dynamicLayout)

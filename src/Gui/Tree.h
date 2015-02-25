@@ -76,7 +76,14 @@ public:
     static const int ObjectType;
 
     void markItem(const App::DocumentObject* Obj,bool mark);
-
+    
+public Q_SLOTS:
+    void calculatePartialSize();
+    
+Q_SIGNALS:
+    //this emits the minimal needed size to show all nodes needs in the dynamic interface 
+    void partialSizeHint(QRectF);
+    
 protected:
     /// Observer message from the Selection
     void onSelectionChanged(const SelectionChanges& msg);
@@ -95,9 +102,9 @@ protected:
     void dropEvent(QDropEvent *event);
     //@}
     virtual bool event(QEvent *e);
-    virtual bool viewportEvent(QEvent* event);
     void keyPressEvent(QKeyEvent *event);
     void mouseDoubleClickEvent(QMouseEvent * event);
+    virtual void rowsInserted(const QModelIndex& parent, int start, int end);
 
 protected Q_SLOTS:
     void onCreateGroup();
