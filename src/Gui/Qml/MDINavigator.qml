@@ -32,7 +32,7 @@ Item {
     height: 20
     width:  3*tabwidth + 3*list.spacing
     anchors.fill: parent
-    
+            
     ListView {
         id: list
         model: mdiArea.children
@@ -44,18 +44,20 @@ Item {
         highlightMoveSpeed: 800
         spacing: 4
              
-        highlight: Rectangle {
-            width:  tabwidth
-            height: 20
-            radius: 4
-            color: "#60FF0000"
-        }
         delegate: Rectangle {
+            id: itemDelegate
             width:  tabwidth
             height: 20
             radius: 4
             color: "#600000FF"
-
+        
+            Settings {
+                id: settings
+                trackedPreference: "Interface"
+                
+                onValueChanged: updateSetting(name)
+            }
+    
             Icon {
                 id:image
                 width: 20
@@ -88,6 +90,26 @@ Item {
                 anchors.left: text.right
                 onActivated: closeView(index)
             }
+            
+            Component.onCompleted: updateSetting("BackgroundColor");
+    
+            function updateSetting(name) {
+            
+                if(name == "BackgroundColor" || name == "BackgroundAlpha") {
+                    
+                    var rgb = settings.getColor("BackgroundColor", "white");
+                    var a   = settings.getInt("BackgroundAlpha", 1);
+                    itemDelegate.color = Qt.rgba(rgb.x/255, rgb.y/255, rgb.z/255, a/255);            
+                }
+            }
+        }
+        
+        highlight: Rectangle {
+            width:  tabwidth
+            height: 20
+            radius: 4
+            color: "#40FF0000"
+            z:100
         }
         
         onModelChanged: {

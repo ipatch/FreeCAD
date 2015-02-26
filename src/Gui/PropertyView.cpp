@@ -25,6 +25,8 @@
 #ifndef _PreComp_
 # include <QGridLayout>
 # include <QHeaderView>
+#include <QStackedLayout>
+#include <QToolButton>
 # include <QEvent>
 #endif
 
@@ -64,37 +66,81 @@ using namespace Gui::PropertyEditor;
 PropertyView::PropertyView(QWidget *parent)
   : QWidget(parent)
 {
-    QGridLayout* pLayout = new QGridLayout( this ); 
+    QVBoxLayout* pLayout = new QVBoxLayout( this ); 
     pLayout->setSpacing(0);
     pLayout->setMargin (0);
 
-    tabs = new QTabWidget (this);
-    tabs->setObjectName(QString::fromUtf8("propertyTab"));
-    tabs->setTabPosition(QTabWidget::South);
-#if defined(Q_OS_WIN32)
-    tabs->setTabShape(QTabWidget::Triangular);
-#endif
-    pLayout->addWidget(tabs, 0, 0);
-
-    propertyEditorView = new Gui::PropertyEditor::PropertyEditor();
-    propertyEditorView->setAutomaticDocumentUpdate(false);
-    tabs->addTab(propertyEditorView, tr("View"));
 
     propertyEditorData = new Gui::PropertyEditor::PropertyEditor();
     propertyEditorData->setAutomaticDocumentUpdate(true);
-    tabs->addTab(propertyEditorData, tr("Data"));
+  
+    if(!MainWindow::getInstance()->usesDynamicInterface()) {
+        tabs = new QTabWidget (this);
+        tabs->setObjectName(QString::fromUtf8("propertyTab"));
+        tabs->setTabPosition(QTabWidget::South);
+#if defined(Q_OS_WIN32)
+        tabs->setTabShape(QTabWidget::Triangular);
+#endif
+        tabs->setTabShape(QTabWidget::Triangular);
+        pLayout->addWidget(tabs);
 
-    ParameterGrp::handle hGrp = App::GetApplication().GetUserParameter().
+        tabs->addTab(propertyEditorView, tr("View"));
+        tabs->addTab(propertyEditorData, tr("Data"));
+        
+        ParameterGrp::handle hGrp = App::GetApplication().GetUserParameter().
         GetGroup("BaseApp")->GetGroup("Preferences")->GetGroup("PropertyView");
-    if ( hGrp ) {
-        int preferredTab = hGrp->GetInt("LastTabIndex", 1);
+        if ( hGrp ) {
+            int preferredTab = hGrp->GetInt("LastTabIndex", 1);
 
-        if ( preferredTab > 0 && preferredTab < tabs->count() )
-            tabs->setCurrentIndex(preferredTab);
+            if ( preferredTab > 0 && preferredTab < tabs->count() )
+                tabs->setCurrentIndex(preferredTab);
+        }
+        
+        // connect after adding all tabs, so adding doesn't thrash the parameter
+        connect(tabs, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)));
     }
+    else {
 
-    // connect after adding all tabs, so adding doesn't thrash the parameter
-    connect(tabs, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)));
+        QSizePolicy sizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+        propertyEditorView->header()->setMinimumSectionSize(0);
+        propertyEditorView->header()->setStretchLastSection(true);
+        propertyEditorView->setMinimumSize(QSize(0,0));
+        propertyEditorView->setSizePolicy(sizePolicy);
+        propertyEditorData->header()->setMinimumSectionSize(0);
+        propertyEditorData->header()->setStretchLastSection(true);
+        propertyEditorData->setMinimumSize(QSize(0,0));
+        propertyEditorData->setSizePolicy(sizePolicy);
+
+        stack = new QStackedLayout(this);
+        stack->addWidget(propertyEditorView);
+        stack->addWidget(propertyEditorData);
+        pLayout->addLayout(stack);
+        
+        QHBoxLayout* hl = new QHBoxLayout();
+        viewButton = new QToolButton(this);
+        viewButton->setText(tr("View"));
+        viewButton->setCheckable(true);
+        viewButton->setChecked(true);
+        viewButton->setAutoExclusive(true);
+        connect(viewButton, SIGNAL(toggled(bool)), this, SLOT(toggleViewProperties(bool)));
+        hl->addWidget(viewButton);
+
+        dataButton = new QToolButton(this);
+        dataButton->setText(tr("Data"));
+        dataButton->setCheckable(true);
+        dataButton->setAutoExclusive(true);
+        hl->addWidget(dataButton);
+        hl->addStretch();
+        
+        pLayout->addLayout(hl);
+
+        setMinimumSize(QSize(0,0));
+        _prefs = App::GetApplication().GetParameterGroupByPath("User parameter:BaseApp/Preferences/Interface");
+        _prefs->Attach(this);
+        OnChange(*_prefs,"BackgroundColor");
+        OnChange(*_prefs,"BackgroundAlpha");
+    }
+    
     this->connectPropData =
     App::GetApplication().signalChangedObject.connect(boost::bind
         (&PropertyView::slotChangePropertyData, this, _1, _2));
@@ -110,28 +156,6 @@ PropertyView::PropertyView(QWidget *parent)
     this->connectPropChange =
     App::GetApplication().signalChangePropertyEditor.connect(boost::bind
         (&PropertyView::slotChangePropertyEditor, this, _1));
-    
-    if(MainWindow::getInstance()->usesDynamicInterface()) {
-
-        QSizePolicy sizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-        propertyEditorView->header()->setMinimumSectionSize(0);
-        propertyEditorView->header()->setStretchLastSection(true);
-        propertyEditorView->setMinimumSize(QSize(0,0));
-        propertyEditorView->setSizePolicy(sizePolicy);
-        propertyEditorData->header()->setMinimumSectionSize(0);
-        propertyEditorData->header()->setStretchLastSection(true);
-        propertyEditorData->setMinimumSize(QSize(0,0));
-        propertyEditorData->setSizePolicy(sizePolicy);
-
-        tabs->setSizePolicy(sizePolicy);
-        tabs->setMinimumSize(QSize(0,0));
-
-        setMinimumSize(QSize(0,0));
-        _prefs = App::GetApplication().GetParameterGroupByPath("User parameter:BaseApp/Preferences/Interface");
-        _prefs->Attach(this);
-        OnChange(*_prefs,"BackgroundColor");
-        OnChange(*_prefs,"BackgroundAlpha");
-    }
 }
 
 PropertyView::~PropertyView()
@@ -314,8 +338,14 @@ void PropertyView::tabChanged(int index)
 void PropertyView::changeEvent(QEvent *e)
 {
     if (e->type() == QEvent::LanguageChange) {
-        tabs->setTabText(0, trUtf8("View"));
-        tabs->setTabText(1, trUtf8("Data"));
+        if(tabs) {
+            tabs->setTabText(0, trUtf8("View"));
+            tabs->setTabText(1, trUtf8("Data"));
+        }
+        else {
+            dataButton->setText(trUtf8("Data"));
+            viewButton->setText(trUtf8("View"));
+        }
     }
 
     QWidget::changeEvent(e);
@@ -334,6 +364,9 @@ void PropertyView::OnChange(Base::Subject< const char* >& rCaller, const char* r
         pal.setColor(QPalette::Base, QColor(r, g, b, pal.color(QPalette::Base).alpha()));
         pal.setColor(QPalette::AlternateBase, pal.color(QPalette::Base));
         setPalette(pal);
+        pal.setColor(QPalette::Button, pal.color(QPalette::Base));
+        viewButton->setPalette(pal);
+        dataButton->setPalette(pal);
     }
     else if (strcmp(rcReason,"BackgroundAlpha") == 0) {
         int alpha = rGrp.GetInt("BackgroundAlpha",255);
@@ -343,8 +376,20 @@ void PropertyView::OnChange(Base::Subject< const char* >& rCaller, const char* r
         pal.setColor(QPalette::Base, ncol);
         pal.setColor(QPalette::AlternateBase, pal.color(QPalette::Base));
         setPalette(pal);
+        pal.setColor(QPalette::Button, pal.color(QPalette::Base));
+        viewButton->setPalette(pal);
+        dataButton->setPalette(pal);
     }
 }
+
+void PropertyView::toggleViewProperties(bool onoff)
+{
+    if(onoff)
+        stack->setCurrentIndex(0);
+    else
+        stack->setCurrentIndex(1);
+}
+
 
 
 /* TRANSLATOR Gui::DockWnd::PropertyDockView */

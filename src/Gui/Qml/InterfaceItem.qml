@@ -207,7 +207,7 @@ Item {
     
     Settings {
         id: settings
-        tracked: interfaceitem.title
+        trackedObject: interfaceitem.title
     }
     
     //we need to setup the anchor object arrays and load all settings

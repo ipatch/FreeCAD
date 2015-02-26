@@ -816,7 +816,6 @@ void TaskView::OnChange(Base::Subject< const char* >& rCaller, const char* rcRea
 void TaskView::calculatePartialSize()
 {
 
-    Base::Console().Message("calculate partial size\n");
     int height = 0.;
     
     if(ActiveCtrl)
@@ -825,8 +824,6 @@ void TaskView::calculatePartialSize()
     if(ActiveDialog) {
         const std::vector<QWidget*> cont = ActiveDialog->getDialogContent();
         Q_FOREACH(QWidget* wid, cont) {
-            Base::Console().Message("calculate children %s\n", wid->objectName().toStdString().c_str());
-            Base::Console().Message("rect: %i, %i, %i, %i\n", wid->rect().x(), wid->rect().y(), wid->rect().width(), wid->rect().height());
             height += wid->sizeHint().height() + 8;
         }
     }

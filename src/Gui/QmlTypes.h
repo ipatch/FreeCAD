@@ -188,7 +188,8 @@ private:
 class GuiExport QmlSettings : public QObject, public ParameterGrp::ObserverType {
 
     Q_OBJECT
-    Q_PROPERTY(QString tracked READ trackedObject WRITE setTrackedObject)
+    Q_PROPERTY(QString trackedObject READ tracked WRITE setTrackedObject)
+    Q_PROPERTY(QString trackedPreference READ tracked WRITE setTrackedPreference)
 public:
     
     QmlSettings();
@@ -200,13 +201,16 @@ public:
     Q_INVOKABLE int getInt(QString Name, int defaultvalue);
     Q_INVOKABLE void setString(QString Name, QString value);
     Q_INVOKABLE QString getString(QString Name, QString defaultvalue);
+    Q_INVOKABLE void setColor(QString name, QString value);
+    Q_INVOKABLE QVector3D getColor(QString name, QString defaultvalue);
     
-    QString trackedObject();
+    QString tracked();
     void setTrackedObject(QString s);
+    void setTrackedPreference(QString s);    
     
     virtual void OnChange(Base::Subject< const char* >& rCaller, const char* rcReason);
     
-public Q_SLOTS:
+Q_SIGNALS:
     void valueChanged(QString name);
     
 protected:

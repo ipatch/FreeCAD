@@ -281,14 +281,26 @@ void QmlSettings::setTrackedObject(QString s)
     m_grp->Attach(this);
 }
 
-QString QmlSettings::trackedObject()
+QString QmlSettings::tracked()
 {
     return m_tracked;
 }
 
+void QmlSettings::setTrackedPreference(QString s)
+{
+    m_tracked = s;
+    if(m_grp.isValid())
+        m_grp->Detach(this);
+    
+    QString path = QString::fromAscii("User parameter:BaseApp/Preferences/") + s;
+    m_grp = App::GetApplication().GetParameterGroupByPath(path.toStdString().c_str());
+    m_grp->Attach(this);
+}
+
+
 void QmlSettings::OnChange(Base::Subject< const char* >& rCaller, const char* rcReason)
 {
-    valueChanged(QString::fromAscii(rcReason));
+    Q_EMIT valueChanged(QString::fromAscii(rcReason));
 }
 
 void QmlSettings::setBool(QString Name, bool value)
@@ -321,7 +333,25 @@ QString QmlSettings::getString(QString Name, QString defaultvalue)
     return QString::fromStdString(m_grp->GetASCII(Name.toStdString().c_str(), defaultvalue.toStdString().c_str()));
 }
 
-void QmlSettings::valueChanged(QString name){}
+QVector3D QmlSettings::getColor(QString name, QString defaultvalue)
+{
+    QColor color(defaultvalue);
+    unsigned long text = (color.red() << 24) | (color.green() << 16) | (color.blue() << 8);
+    unsigned long background = m_grp->GetUnsigned(name.toStdString().c_str(),text); // default color (white)
+    int r,g,b;
+    r = ((background >> 24) & 0xff);
+    g = ((background >> 16) & 0xff);
+    b = ((background >> 8) & 0xff);
+    return QVector3D(r, g, b);
+}
+
+void QmlSettings::setColor(QString name, QString value)
+{
+    QColor color(value);
+    unsigned long text = (color.red() << 24) | (color.green() << 16) | (color.blue() << 8);
+    m_grp->SetUnsigned(name.toStdString().c_str(), text);
+}
+
 
 QmlInterfaceItemSettings::QmlInterfaceItemSettings(): QmlProxy(), m_item(NULL)
 {

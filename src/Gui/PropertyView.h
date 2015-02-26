@@ -30,6 +30,8 @@
 #include "Selection.h"
 #include <boost/signals.hpp>
 
+class QToolButton;
+class QStackedLayout;
 class QPixmap;
 class QTabWidget;
 
@@ -82,6 +84,9 @@ private:
     void slotRemoveDynamicProperty(const App::Property&);
     void slotChangePropertyEditor(const App::Property&);
 
+private Q_SLOTS:
+    void toggleViewProperties(bool onoff);
+    
 private:
     struct PropInfo;
     struct PropFind;
@@ -92,6 +97,8 @@ private:
     Connection connectPropRemove;
     Connection connectPropChange;
     QTabWidget* tabs;
+    QStackedLayout* stack;
+    QToolButton *viewButton, *dataButton;
     ParameterGrp::handle _prefs;
 };
 
