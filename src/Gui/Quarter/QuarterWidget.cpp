@@ -1345,6 +1345,11 @@ void QuarterWidget::setExternGlViewport(QGLWidget* vp)
      
      //delete the gl viewport and us a normal qwidget
      setViewport(NULL);
+     
+     //make sure we initilaaize the new context
+     QObject* quarteritem = rootObject()->findChild<QObject*>("scene3d");
+     if(quarteritem)
+         static_cast<QuarterDrawDeclarativeItem*>(quarteritem)->resetInitialisation();
 }
 
 
@@ -1397,11 +1402,9 @@ void QuarterDrawDeclarativeItem::paint(QPainter* painter, const QStyleOptionGrap
         PRIVATE(this)->sorendermanager->setViewportRegion(vp);
     }
     
-    painter->beginNativePainting();
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
-    
+    painter->beginNativePainting();    
     std::clock_t begin = std::clock();
-
+        
     if(!initialized) {
         glEnable(GL_DEPTH_TEST);
         quarterwidget->getSoRenderManager()->reinitialize();
@@ -1452,10 +1455,18 @@ void QuarterDrawDeclarativeItem::paint(QPainter* painter, const QStyleOptionGrap
     std::clock_t end = std::clock();
     quarterwidget->renderTime = double(double(end-begin)/CLOCKS_PER_SEC)*1000.0;
     
-    glPopAttrib();
+    //make sure the ui is drawn on top of the 3dscene
+    glDisable(GL_DEPTH_TEST);
+    
     painter->endNativePainting();
 
 }
+
+void QuarterDrawDeclarativeItem::resetInitialisation()
+{
+    initialized = false;
+}
+
 
 QuarterInteractionDeclarativeItem::QuarterInteractionDeclarativeItem(QDeclarativeItem* parent): QDeclarativeItem(parent), 
     m_eventfilter(NULL), m_interactionMode(NULL)
