@@ -60,7 +60,7 @@ public Q_SLOTS:
     void setPartialSizeHint(QRectF hint);
     
 Q_SIGNALS:
-    void proxySizeChanged(int width, int height);
+    //Svoid proxySizeChanged(int width, int height);
     void enter();
     void leave();
     

@@ -36,7 +36,6 @@ using namespace Gui;
 QmlProxy::QmlProxy(QDeclarativeItem* parent): QDeclarativeItem(parent)
 {
     m_proxy = new QGraphicsProxyWidget(this);
-    m_proxy->setAcceptHoverEvents(true);
     m_proxy->installEventFilter(this);
     m_partialSizeHint = QRect(-1,-1,0,0);
 }
@@ -70,12 +69,13 @@ void QmlProxy::geometryChanged(const QRectF& newGeometry, const QRectF& oldGeome
     if(m_partialSizeHint.x() >= 0) 
         ng.setWidth(std::min(ng.width(), m_partialSizeHint.width()));
     if(m_partialSizeHint.y() >= 0) 
-        ng.setHeight(std::min(ng.height(), m_partialSizeHint.height()));    
+        ng.setHeight(std::min(ng.height(), m_partialSizeHint.height()));   
+
+    //setting the geometry directly created problems with the hover and selection events
+    m_proxy->setMaximumSize(ng.size());
+    m_proxy->setMinimumSize(ng.size());
     
-    m_proxy->setGeometry(ng);
-    QDeclarativeItem::geometryChanged(newGeometry, oldGeometry);
-    
-    Q_EMIT proxySizeChanged(ng.width(), ng.height());
+    QDeclarativeItem::geometryChanged(newGeometry, oldGeometry);  
 }
 
 bool QmlProxy::eventFilter(QObject* o, QEvent* e)
@@ -87,16 +87,14 @@ bool QmlProxy::eventFilter(QObject* o, QEvent* e)
     if(e->type() == QEvent::GraphicsSceneHoverLeave)
         Q_EMIT leave();
       
-    return QObject::eventFilter(o,e);
+    return false;
 }
 
 void QmlProxy::setPartialSizeHint(QRectF hint)
-{
+{    
     m_partialSizeHint = hint;
-    geometryChanged(boundingRect(), boundingRect());
+    geometryChanged(QRect(0, 0, width(), height()), QRect(0, 0, width(), height()));
 }
-
-
 
 QmlHoverItem::QmlHoverItem(QDeclarativeItem* parent) : QDeclarativeItem(parent) 
 {
