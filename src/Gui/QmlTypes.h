@@ -49,12 +49,16 @@ class GuiExport QmlProxy : public QDeclarativeItem {
     
     Q_OBJECT
     Q_PROPERTY(QWidget* proxy READ proxy WRITE setProxy)
+    Q_PROPERTY(bool mimicCursor READ mimicCursor WRITE setMimicCursor)
   
 public:
     QmlProxy(QDeclarativeItem* parent = 0);
     
     QWidget* proxy();
     void setProxy(QWidget*);
+    
+    bool mimicCursor();
+    void setMimicCursor(bool onoff);
     
 public Q_SLOTS:
     void setPartialSizeHint(QRectF hint);
@@ -71,6 +75,7 @@ protected:
 private:
     QRectF m_partialSizeHint;
     QGraphicsProxyWidget* m_proxy;
+    bool m_mimicCursor;
 };
 
 class GuiExport QmlHoverItem : public QDeclarativeItem {

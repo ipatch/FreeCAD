@@ -223,6 +223,7 @@ void GlobalDynamicInterfaceManager::addView(MDIView* view)
                                          QString::fromAscii("/home/stefan/Projects/FreeCAD_sf_master/src/Gui/Qml/MDIView.qml"));
     QDeclarativeItem* item = qobject_cast<QDeclarativeItem*>(component->create());
     item->setProperty("proxy", QVariant::fromValue(static_cast<QWidget*>(view)));
+    item->findChild<QObject*>(QString::fromAscii("proxy"))->setProperty("mimicCursor", true);
    
     //make sure we can destroy it from within qml. This is a workaround for giving the ownership to 
     //javascript as this randomly destroyed the view when dragging interfaceitems.

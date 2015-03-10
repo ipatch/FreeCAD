@@ -33,7 +33,7 @@
 using namespace Gui;
 
 
-QmlProxy::QmlProxy(QDeclarativeItem* parent): QDeclarativeItem(parent)
+QmlProxy::QmlProxy(QDeclarativeItem* parent): QDeclarativeItem(parent), m_mimicCursor(false)
 {
     m_proxy = new QGraphicsProxyWidget(this);
     m_proxy->installEventFilter(this);
@@ -80,8 +80,9 @@ void QmlProxy::geometryChanged(const QRectF& newGeometry, const QRectF& oldGeome
 
 bool QmlProxy::eventFilter(QObject* o, QEvent* e)
 {
-    if(e->type() == QEvent::CursorChange)
+    if((e->type() == QEvent::CursorChange) && m_mimicCursor) {
         setCursor(proxy()->cursor());
+    }
     if(e->type() == QEvent::GraphicsSceneHoverEnter)
         Q_EMIT enter();
     if(e->type() == QEvent::GraphicsSceneHoverLeave)
@@ -94,6 +95,14 @@ void QmlProxy::setPartialSizeHint(QRectF hint)
 {    
     m_partialSizeHint = hint;
     geometryChanged(QRect(0, 0, width(), height()), QRect(0, 0, width(), height()));
+}
+
+bool QmlProxy::mimicCursor() {
+    return m_mimicCursor;
+}
+
+void QmlProxy::setMimicCursor(bool onoff) {
+    m_mimicCursor = onoff;
 }
 
 QmlHoverItem::QmlHoverItem(QDeclarativeItem* parent) : QDeclarativeItem(parent) 
