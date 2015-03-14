@@ -209,6 +209,8 @@ public:
     Q_INVOKABLE void setColor(QString name, QString value);
     Q_INVOKABLE QVector3D getColor(QString name, QString defaultvalue);
     
+    Q_INVOKABLE void clear();
+    
     QString tracked();
     void setTrackedObject(QString s);
     void setTrackedPreference(QString s);    
@@ -247,6 +249,20 @@ protected:
     QObject* m_item;
 };
 
+class GuiExport QmlFrame : public QDeclarativeItem {
+  
+    Q_OBJECT
+    
+public:
+    QmlFrame(QDeclarativeItem* parent = NULL);
+
+protected:
+    virtual void paint(QPainter* p, const QStyleOptionGraphicsItem* op, QWidget* w); 
+     
+protected:
+    bool m_frame;
+};
+
 static void init_qml_types() {
     qmlRegisterType<QmlProxy>      ("FreeCADLib", 1, 0, "Proxy");
     qmlRegisterType<QmlHoverItem>  ("FreeCADLib", 1, 0, "HoverItem");
@@ -255,6 +271,7 @@ static void init_qml_types() {
     qmlRegisterType<QmlTitleButton>("FreeCADLib", 1, 0, "TitleButton");
     qmlRegisterType<QmlMouseCursor>("FreeCADLib", 1, 0, "CursorArea");
     qmlRegisterType<QmlSettings>   ("FreeCADLib", 1, 0, "Settings");
+    qmlRegisterType<QmlFrame>      ("FreeCADLib", 1, 0, "Frame");
     qmlRegisterType<QmlInterfaceItemSettings> ("FreeCADLib", 1, 0, "ItemSettings");
 };
 

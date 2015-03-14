@@ -153,13 +153,7 @@ function setAnchorsForPosition(mousePos) {
             if(setPossibleAnchor(Qt.rect(dragItem.x+dragItem.width+sr, dragItem.y-sr, 2*sr, dragItem.height+2*sr), 'right', ['left', 'right']))
                 return;
         }
-//         if(getActiveAnchorObjectFor('horizontalCenter') == undefined) {
-//             if(setPossibleAnchor(Qt.rect(dragItem.x + dragItem.width/2-sr/2, dragItem.y-sr/2, sr, sr), 'horizontalCenter', ['horizontalCenter']))
-//                 return;
-//     
-//             if(setPossibleAnchor(Qt.rect(dragItem.x + dragItem.width/2-sr/2, dragItem.y + dragItem.height-sr, sr, 2*sr), 'horizontalCenter', ['horizontalCenter']))
-//                 return;
-//         }
+
         if(Math.abs(initMousePos.x - mousePos.x) > reset) {
             dragItem.removeActiveAnchors(false, anchors.resizeAnchor)
         }

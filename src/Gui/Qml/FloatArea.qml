@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (c) 2014 StefanTroeger <stefantroeger@gmx.net>              *
+ *   Copyright (c) 2015 StefanTroeger <stefantroeger@gmx.net>              *
  *                                                                         *
  *   This file is part of the FreeCAD CAx development system.              *
  *                                                                         *
@@ -23,40 +23,35 @@
 import QtQuick 1.1
 import FreeCADLib 1.0
 
-Rectangle {
-    id:root
-    property int currentIndex: 0
-    anchors.fill: parent
-
-    MDIArea {
-        id: viewManager
-        objectName: "mdiarea"
-        nav: tabnav
-        anchors.fill: parent
+Item {
+    id: floatArea
+    property bool allTitlebars: false   
+    
+    Item {
+        id: fixItem 
+        width:  0
+        height: 0
     }
- 
-    InterfaceArea {
-        id: interfaceArea
-        objectName: "Area"
-        anchors.fill:parent
-        
-        InterfaceItem {
-            id: navigator
-            title: "Navigator"  
-            objectName: "Navigator"
-
-            area: parent
-            height: titleBarHeight + 23
-            minWidth:  120
-            minHeight: 23
-            fixedHeight: true
+    
+    Item {
+        id: dragItem 
+        width:  0
+        height: 0
+    }
+       
+    function setupFloatItem(item) {
+        item.resizeDragItem  = dragItem;
+        item.resizeFixItem   = fixItem;
+    }
+      
+    signal showAllTitlebars(bool satb)
+    
+    onShowAllTitlebars: {
+        floatArea.allTitlebars = satb;
+        for(var i=0; i<floatArea.children.length; ++i) {
             
-            MDINavigator {
-                id: tabnav
-                tabwidth: 120    
-                mdiArea: viewManager
-                anchors.fill: parent
-            }
+            if('overrideHideToolbar' in floatArea.children[i])
+                floatArea.children[i].overrideHideToolbar = satb
         }
-    }    
+    }
 }

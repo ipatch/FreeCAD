@@ -22,22 +22,92 @@
 
 import QtQuick 1.0
 
-Item {
+FloatArea {
     id: mdiarea
-        
-    property int current: 0
+    property alias views: viewModel
+    property int   currentID: 0
+    property int   uniqueID: 0
     property Item nav
     
-    onCurrentChanged: {
-        viewActivated(mdiarea.children[current])
+    anchors.margins: 0
+    
+    ListModel {
+        id: viewModel
+    }
+    
+    onCurrentIDChanged: {
+        viewActivated(viewForID(currentID).proxy)
         setVisibilities()
     }
     
+    onChildrenChanged: {
+        //fill up the model
+        viewModel.clear();               
+        for(var i=0; i<mdiarea.children.length; ++i) {
+            var child = mdiarea.children[i];
+            if(child["viewID"] != undefined)
+                viewModel.append({item:child})
+        }
+        
+        //sort the model as the children may be shifted in position
+        var n;
+        var i;
+        for (n=0; n < viewModel.count; n++) {            
+            for (i=n+1; i < viewModel.count; i++) {                
+                if (viewModel.get(n).item.viewID > viewModel.get(i).item.viewID){
+                    viewModel.move(i, n, 1);
+                    n=0; // Repeat at start since I can't swap items i and n
+                }
+            }
+        }
+    }
+    
     Component.onCompleted: setVisibilities()
-
+    
+    function viewForID(id) {
+        
+        for (var i = 0; i < views.count; ++i) {
+            if(views.get(i).item.viewID == id)
+                return views.get(i).item
+        }
+        return undefined
+    }
+    
     function setVisibilities() {
-        for (var i = 0; i < mdiarea.children.length; ++i) {
-            mdiarea.children[i].visible = (i == current ? true : false)
+       
+        if( views.count == 0 )
+            return
+            
+        var currentItem = viewForID(currentID);
+        
+        var backwards = views.count;
+        var forwards = 0;
+        //keep a backward slot open if the currentID item is floating
+        if(currentItem.floating)
+            --backwards
+        
+        //reorder all views
+        var toplevelFull = -1
+        for (var i = 0; i < views.count; ++i) {
+            if(views.get(i).item.floating && (views.get(i).item.viewID != currentID)) {
+                views.get(i).item.z = backwards--
+                views.get(i).item.visible = true
+            }
+            else if(views.get(i).item.viewID != currentID) {                
+                views.get(i).item.z = forwards++
+                views.get(i).item.visible = false
+                toplevelFull = i
+            }
+        }
+        //now make the currentID view visible, toplevel if floating and toplevel of all non-floting else
+        if(currentItem.floating) {
+            currentItem.z = views.count;
+            currentItem.visible = true
+            views.get(toplevelFull).item.visible = true
+        }
+        else {
+            currentItem.z = forwards++
+            currentItem.visible = true
         }
     }
     
@@ -46,36 +116,48 @@ Item {
     clip: true
     
     function activateView(id) {
-        current = id
-        nav.index = id
+        console.debug("activateView called")
+        currentID = id
+        nav.index = nav.indexForId(id)
     }
     
     function closeView(next, id) {
-        current = next
+        currentID = next
         nav.index = next
-        var item = children[id]
+        var item = viewForID(id)
         item.parent = nav  //just need to reparent to update model first, no matter who parent is
         item.requestDestroy(item)
     }
     
     function closeAciveView() {
     
-        var next = (current == (children.length-1)) ? current - 1 : current
+        var next = (currentID == (children.length-1)) ? currentID - 1 : currentID
         next = (next<0) ? 0 : next
-        closeView(next, current);
+        closeView(next, currentID);
     }
     
-    function activateNextView() {
-    
-        var next = (current < (children.length-1)) ? current + 1 : current
-        nav.index = next;
-        current = next;
+    function activateNextView() {    
+        mdiarea.nav.nextView();
     }
     
     function activatePreviousView() {
-        
-        var next = (current > 0) ? current - 1 : current
-        nav.index = next;
-        current = next;
+        mdiarea.nav.previousView();
+    }
+    
+    function toggleFloat(id) {
+        var view = viewForID(id)
+        if( !view.floating ) {
+            view.anchors.fill = undefined
+            view.x = 100
+            view.y = 100
+            view.height = 400
+            view.width  = 400
+            view.floating = true
+        }
+        else {
+            view.anchors.fill = mdiarea
+            view.floating = false
+        }
+        setVisibilities()
     }
 }

@@ -25,17 +25,17 @@ import FreeCADLib 1.0
 
 Item {
     id: navigator
-    property int  tabwidth: 120
-    property Item mdiArea
-        
+    property int   tabheight: 20
+    property int   tabwidth: 120
+    property Item  mdiArea        
     property alias index: list.currentIndex
-    height: 20
-    width:  3*tabwidth + 3*list.spacing
-    anchors.fill: parent
             
+    height: tabheight
+    anchors.fill: parent
+    
     ListView {
         id: list
-        model: mdiArea.children
+        model: mdiArea.views
         
         boundsBehavior: Flickable.DragOverBounds
         highlightFollowsCurrentItem: true
@@ -47,7 +47,7 @@ Item {
         delegate: Rectangle {
             id: itemDelegate
             width:  tabwidth
-            height: 20
+            height: tabheight
             radius: 4
             color: "#600000FF"
         
@@ -62,7 +62,7 @@ Item {
                 id:image
                 width: 20
                 height: 20
-                icon: model.modelData.proxy.windowIcon
+                icon: model.item.icon
             }
             Text {
                 id: text
@@ -71,15 +71,18 @@ Item {
                 anchors.left: image.right
                 anchors.leftMargin: 2
                 elide: Text.ElideRight
-                text: model.modelData.proxy.windowTitle
+                text: model.item.title
             }
             MouseArea {
                 width:tabwidth-20
                 height: 20
                 anchors.left: parent.left
                 onClicked: {
-                    mdiArea.current = index
-                    list.currentIndex = index;
+                    list.currentIndex = index
+                    mdiArea.currentID = model.item.viewID                    
+                }
+                onDoubleClicked: {
+                    mdiArea.toggleFloat(model.item.viewID)
                 }
             }
             Button {
@@ -88,7 +91,7 @@ Item {
                 margin: 1
                 icon: ":/icons/delete.svg"
                 anchors.left: text.right
-                onActivated: closeView(index)
+                onActivated: closeView(model.item.viewID)
             }
             
             Component.onCompleted: updateSetting("BackgroundColor");
@@ -102,6 +105,10 @@ Item {
                     itemDelegate.color = Qt.rgba(rgb.x/255, rgb.y/255, rgb.z/255, a/255);            
                 }
             }
+            
+            function getViewID() {
+                return model.item.viewID
+            }
         }
         
         highlight: Rectangle {
@@ -112,15 +119,38 @@ Item {
             z:100
         }
         
-        onModelChanged: {
-            mdiArea.current = list.model.length-1
-            list.currentIndex = list.model.length-1
+        onCountChanged: {
+            if(list.model.count > 0) {
+                console.debug("model changed!")
+                list.currentIndex = list.model.count-1
+                mdiArea.currentID = list.currentItem.getViewID()
+            }
+        }
+    }
+    
+    function indexForId(id) {
+        for (var i = 0; i < list.model.count; ++i) {
+            if(list.model.get(i).item.viewID == id)
+                return i;
         }
     }
     
     function closeView(id) {
-        var next = (list.currentIndex == id ? list.currentIndex - 1 : list.currentIndex)
+        var idx = indexForId(id);
+        var next = (list.currentIndex == idx ? list.currentIndex - 1 : list.currentIndex)
         next = (next<0) ? 0 : next
-        mdiArea.closeView(next, id);
+        mdiArea.closeView(list.model.get(next).item.viewID, id);
+    }
+    
+    function nextView() {
+        var next = (list.currentIndex < (list.model.count-1)) ? list.currentIndex + 1 : list.currentIndex
+        list.currentIndex = next;
+        mdiArea.currentID = list.model.get(next).item.viewID;
+    }
+    
+    function previousView() {        
+        var next = (list.currentIndex > 0) ? list.currentIndex - 1 : list.currentIndex
+        list.currentIndex = next;
+        mdiArea.currentID = list.model.get(next).item.viewID;
     }
 }

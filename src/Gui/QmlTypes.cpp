@@ -359,6 +359,13 @@ void QmlSettings::setColor(QString name, QString value)
     m_grp->SetUnsigned(name.toStdString().c_str(), text);
 }
 
+void QmlSettings::clear()
+{
+    if(m_grp.isValid())
+        m_grp->Clear();
+}
+
+
 
 QmlInterfaceItemSettings::QmlInterfaceItemSettings(): QmlProxy(), m_item(NULL)
 {
@@ -407,5 +414,24 @@ void QmlInterfaceItemSettings::onButtonRejected()
 {
     Q_EMIT rejected();
 }
+
+QmlFrame::QmlFrame(QDeclarativeItem* parent): QDeclarativeItem(parent)
+{
+    setFlag(QGraphicsItem::ItemHasNoContents, false);
+    
+    //create and cache the clipping region for transparent pixels
+    
+}
+
+void QmlFrame::paint(QPainter* p, const QStyleOptionGraphicsItem* op, QWidget* w)
+{
+    QStyleOptionFrameV2 opt;
+    opt.initFrom(w);
+    opt.rect = boundingRect().toRect();
+    opt.state = QStyle::State_Sunken;
+    QApplication::style()->drawPrimitive(QStyle::PE_Frame, &opt, p, w);
+}
+
+
 
 #include "moc_QmlTypes.cpp"

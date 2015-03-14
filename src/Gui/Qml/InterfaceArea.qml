@@ -23,23 +23,10 @@
 import QtQuick 1.1
 import FreeCADLib 1.0
 
-Item {
+FloatArea {
     id: interfaceArea
-    property bool allTitlebars: false;
     anchors.margins: 3;
-    
-    Item {
-        id: fixItem 
-        width:  0
-        height: 0
-    }
-    
-    Item {
-        id: dragItem 
-        width:  0
-        height: 0
-    }
-    
+   
     //interfaceitem menu area 
     Rectangle {
         id:menu
@@ -50,6 +37,7 @@ Item {
         
         property alias item: itemSettings.item
         
+        //block all mouse events to prevent interaction with the background items
         MouseArea {
             hoverEnabled: true
             acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
@@ -98,13 +86,7 @@ Item {
             }
         }
     }
-    
-    function setupInterfaceItem(item) {
-        
-        item.resizeDragItem  = dragItem;
-        item.resizeFixItem   = fixItem;
-    }
-    
+       
     function setSettingsMode(item) {
         menu.item = item;
         menu.show(true)
@@ -120,17 +102,6 @@ Item {
             if('setupAnchors' in interfaceArea.children[i]) {
                 interfaceArea.children[i].setupAnchors();
             }
-        }
-    }
-    
-    signal showAllTitlebars(bool satb)
-    
-    onShowAllTitlebars: {
-        interfaceArea.allTitlebars = satb;
-        for(var i=0; i<interfaceArea.children.length; ++i) {
-            
-            if('overrideHideToolbar' in interfaceArea.children[i])
-                interfaceArea.children[i].overrideHideToolbar = satb
         }
     }
 }

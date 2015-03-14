@@ -23,6 +23,7 @@
 #include "Base/Console.h"
 #include <QDeclarativeItem>
 #include <QDeclarativeEngine>
+#include <QDeclarativeProperty>
 #include <QMenu>
 #include <QApplication>
 
@@ -77,10 +78,8 @@ void DynamicInterfaceManager::addInterfaceItem(QWidget* widget, QString name, bo
         
     //add it to the scene
     QObject* interface = m_view->rootObject()->findChild<QObject*>(QString::fromAscii("Area"));
-    if(interface) {
+    if(interface) 
         item->setParentItem(qobject_cast<QDeclarativeItem*>(interface)); 
-        item->setProperty("area", QVariant::fromValue(interface));    
-    }
     else {
         Base::Console().Error("No interface area found, item can not be added to layout");
         return;
@@ -220,10 +219,12 @@ void GlobalDynamicInterfaceManager::addView(MDIView* view)
 {
     //create the component and set the view proxy
     QDeclarativeComponent* component = new QDeclarativeComponent(m_view->engine(), 
-                                         QString::fromAscii("/home/stefan/Projects/FreeCAD_sf_master/src/Gui/Qml/MDIView.qml"));
+                                         QString::fromAscii("/home/stefan/Projects/FreeCAD_sf_master/src/Gui/Qml/MDIProxyView.qml"));
     QDeclarativeItem* item = qobject_cast<QDeclarativeItem*>(component->create());
     item->setProperty("proxy", QVariant::fromValue(static_cast<QWidget*>(view)));
-    item->findChild<QObject*>(QString::fromAscii("proxy"))->setProperty("mimicCursor", true);
+    item->setProperty("mimicCursor", true);
+    item->setProperty("title", view->windowTitle());
+    item->setProperty("icon", view->windowIcon());
    
     //make sure we can destroy it from within qml. This is a workaround for giving the ownership to 
     //javascript as this randomly destroyed the view when dragging interfaceitems.
@@ -231,9 +232,8 @@ void GlobalDynamicInterfaceManager::addView(MDIView* view)
         
     //add it to the scene
     QObject* mdiview = m_view->rootObject()->findChild<QObject*>(QString::fromAscii("mdiarea"));
-    if(mdiview) {
+    if(mdiview)
         item->setParentItem(qobject_cast<QDeclarativeItem*>(mdiview)); 
-    }
     else {
         Base::Console().Error("No mdiview found, view can not be added to layout");
         return;
@@ -265,20 +265,16 @@ void GlobalDynamicInterfaceManager::destroy(QVariant item)
 
 void GlobalDynamicInterfaceManager::activate(QVariant item)
 {
-    if(item.isValid())
-        Q_EMIT viewActivated(static_cast<MDIView*>(item.value<QObject*>()->property("proxy").value<QWidget*>()));
+    if(item.isValid())                
+        Q_EMIT viewActivated(static_cast<MDIView*>(item.value<QObject*>()));
 }
 
 void GlobalDynamicInterfaceManager::activateView(MDIView* view)
 {
-    int c = 0;
     QObject* mdiview = m_view->rootObject()->findChild<QObject*>(QString::fromAscii("mdiarea"));
     Q_FOREACH(QDeclarativeItem* item, m_views) {
-        if(static_cast<MDIView*>(item->property("proxy").value<QWidget*>()) == view) {
-            QMetaObject::invokeMethod(mdiview, "activateView", Q_ARG(QVariant, c));
-        }
-         
-        ++c;
+        if(static_cast<MDIView*>(item->property("proxy").value<QWidget*>()) == view) 
+            QMetaObject::invokeMethod(mdiview, "activateView", Q_ARG(QVariant, item->property("viewID")));
     }
 }
 
