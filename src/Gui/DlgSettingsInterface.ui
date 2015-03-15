@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>477</width>
+    <width>463</width>
     <height>560</height>
    </rect>
   </property>
@@ -17,7 +17,7 @@
    <item>
     <widget class="QGroupBox" name="GroupBox12">
      <property name="title">
-      <string>Interface item settings</string>
+      <string>General settings</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
@@ -118,15 +118,12 @@
        </widget>
       </item>
       <item>
-       <widget class="Gui::PrefRadioButton" name="item3DView">
+       <widget class="Gui::PrefCheckBox" name="replaceMDI">
         <property name="text">
-         <string>Draw interface items inside 3D view</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
+         <string>Replace MDI area with dynamic view manager</string>
         </property>
         <property name="prefEntry" stdset="0">
-         <cstring>3DItems</cstring>
+         <cstring>ReplaceMDI</cstring>
         </property>
         <property name="prefPath" stdset="0">
          <cstring>Interface</cstring>
@@ -134,7 +131,118 @@
        </widget>
       </item>
       <item>
-       <widget class="Gui::PrefRadioButton" name="replaceDockers">
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="0">
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Fixed</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>100</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Default drag mode</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="Gui::PrefComboBox" name="dragMode">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="prefEntry" stdset="0">
+           <cstring>DefaultDragMode</cstring>
+          </property>
+          <property name="prefPath" stdset="0">
+           <cstring>Interface</cstring>
+          </property>
+          <item>
+           <property name="text">
+            <string>Tile</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Anchor</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>Navigator Position</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="Gui::PrefComboBox" name="navigatorPosition">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="prefEntry" stdset="0">
+           <cstring>NavigatorPosition</cstring>
+          </property>
+          <property name="prefPath" stdset="0">
+           <cstring>Interface</cstring>
+          </property>
+          <item>
+           <property name="text">
+            <string>Bottom</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Top</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Left</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Right</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="Gui::PrefCheckBox" name="replaceDocker">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>Replace dockers with interface items</string>
         </property>
@@ -163,7 +271,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QLabel" name="label_3">
+       <widget class="QLabel" name="label_5">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -171,10 +279,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Note:&lt;/span&gt; Interface items are drawn together with the 3D scene. Hence a large and slow 3d scene slows the interface.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="scaledContents">
-         <bool>false</bool>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Note:&lt;/span&gt; Changing the interface mode (e.g. activating the docker replacement) will take only effect after restarting FreeCAD&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -185,7 +290,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="label_5">
+       <widget class="QLabel" name="label_3">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -193,7 +298,10 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Note:&lt;/span&gt; Changing the interface mode (e.g. from 3D view items to docker replacement) will take only effect after restarting FreeCAD&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Note:&lt;/span&gt; Interface items and dynamic views are drawn together with the 3D scene. Hence a large and slow 3d scene slows the interface.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="scaledContents">
+         <bool>false</bool>
         </property>
         <property name="alignment">
          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -239,8 +347,13 @@
    <header>Gui/PrefWidgets.h</header>
   </customwidget>
   <customwidget>
-   <class>Gui::PrefRadioButton</class>
-   <extends>QRadioButton</extends>
+   <class>Gui::PrefCheckBox</class>
+   <extends>QCheckBox</extends>
+   <header>Gui/PrefWidgets.h</header>
+  </customwidget>
+  <customwidget>
+   <class>Gui::PrefComboBox</class>
+   <extends>QComboBox</extends>
    <header>Gui/PrefWidgets.h</header>
   </customwidget>
  </customwidgets>
@@ -249,5 +362,70 @@
   <tabstop>backgroundAlpha</tabstop>
  </tabstops>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>replaceMDI</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>replaceDocker</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>231</x>
+     <y>139</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>231</x>
+     <y>226</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>replaceMDI</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>dragMode</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>231</x>
+     <y>139</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>368</x>
+     <y>167</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>replaceMDI</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>navigatorPosition</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>231</x>
+     <y>139</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>368</x>
+     <y>197</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>replaceDocker</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>navigatorPosition</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>231</x>
+     <y>226</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>368</x>
+     <y>197</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

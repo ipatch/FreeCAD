@@ -262,8 +262,11 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
     instance = this;
 
     // Create the layout containing the workspace and a tab bar
-    bool dynamicLayout = usesDynamicInterface();
-    if(!dynamicLayout) {
+    ParameterGrp::handle group = App::GetApplication().GetUserParameter().GetGroup("BaseApp")->
+                GetGroup("Preferences")->GetGroup("Interface");
+    bool dynamicViews     = group->GetBool("ReplaceMDI", false);
+    bool dynamicInterface = group->GetBool("ReplaceDockers", false);
+    if(!dynamicViews && !dynamicInterface) {
         d->declarativeView = NULL;
         d->mdiArea = new QMdiArea();
         setCentralWidget(d->mdiArea);
@@ -300,8 +303,13 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
         d->declarativeView->setSource(QString::fromAscii("/home/stefan/Projects/FreeCAD_sf_master/src/Gui/Qml/MainLayout.qml"));
         setCentralWidget(d->declarativeView);
                  
-        GlobalDynamicInterfaceManager::get()->setManagedView(d->declarativeView);
+        GlobalDynamicInterfaceManager::get()->setManagedViewViewer(d->declarativeView);
         d->mdiArea = NULL;
+        
+        if(!dynamicInterface)
+            GlobalDynamicInterfaceManager::get()->setNavigatorFixed(DynamicInterfaceManager::Position(group->GetInt("NavigatorPosition", 0)));
+        else 
+           GlobalDynamicInterfaceManager::get()->setManagedInterfaceViewer(d->declarativeView); 
     };
 
 
@@ -373,7 +381,7 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
     tree->setObjectName(QString::fromLatin1(QT_TRANSLATE_NOOP("QDockWidget","Tree view")));
     tree->setMinimumWidth(210);
 
-    if(!dynamicLayout) 
+    if(!dynamicInterface) {
        pDockMgr->registerDockWindow("Std_TreeView", tree);
     else  
        GlobalDynamicInterfaceManager::get()->addInterfaceItem(tree, 
@@ -385,7 +393,7 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
     pcPropView->setObjectName
         (QString::fromLatin1(QT_TRANSLATE_NOOP("QDockWidget","Property view")));
     pcPropView->setMinimumWidth(210);
-    if(!dynamicLayout)
+    if(!dynamicInterface)
         pDockMgr->registerDockWindow("Std_PropertyView", pcPropView);
     else 
         GlobalDynamicInterfaceManager::get()->addInterfaceItem(pcPropView,
@@ -397,7 +405,7 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
     pcSelectionView->setObjectName
         (QString::fromLatin1(QT_TRANSLATE_NOOP("QDockWidget","Selection view")));
     pcSelectionView->setMinimumWidth(210);
-    if(!dynamicLayout)
+    if(!dynamicInterface)
         pDockMgr->registerDockWindow("Std_SelectionView", pcSelectionView);
     else 
         GlobalDynamicInterfaceManager::get()->addInterfaceItem(pcSelectionView,
@@ -405,8 +413,7 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
                                                                true);
 
     // Combo view
-
-    if(!dynamicLayout) {
+    if(!dynamicInterface) {
         CombiView* pcCombiView = new CombiView(0, this);
         pcCombiView->setObjectName(QString::fromLatin1(QT_TRANSLATE_NOOP("QDockWidget","Combo View")));
         pcCombiView->setMinimumWidth(150);
@@ -423,15 +430,14 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
 #if QT_VERSION < 0x040500
     // Report view
     Gui::DockWnd::ReportView* pcReport = new Gui::DockWnd::ReportView(this);
-    pcReport->setObjectName(QString::fromLatin1(QT_TRANSLATE_NOOP("QDockWidget","Report view")));
-    if(!dynamicLayout)
-        pDockMgr->registerDockWindow("Std_ReportView", pcReport);
 #else
     // Report view (must be created before PythonConsole!)
     ReportOutput* pcReport = new ReportOutput(this);
+#endif
     pcReport->setWindowIcon(BitmapFactory().pixmap("MacroEditor"));
     pcReport->setObjectName(QString::fromLatin1(QT_TRANSLATE_NOOP("QDockWidget","Report view")));
-    if(!dynamicLayout)
+
+    if(!dynamicInterface)
         pDockMgr->registerDockWindow("Std_ReportView", pcReport);
     else 
         GlobalDynamicInterfaceManager::get()->addInterfaceItem(pcReport,
@@ -451,7 +457,8 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
 
     pcPython->setWindowIcon(Gui::BitmapFactory().iconFromTheme("applications-python"));
     pcPython->setObjectName(QString::fromLatin1(QT_TRANSLATE_NOOP("QDockWidget","Python console")));
-    if(!dynamicLayout)
+  
+    if(!dynamicInterface)
         pDockMgr->registerDockWindow("Std_PythonView", pcPython);
     else 
         GlobalDynamicInterfaceManager::get()->addInterfaceItem(pcPython,
@@ -459,7 +466,7 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
                                                                true);
     
     //all interface items are loaded, all anchors are valid now. lets setup the layout
-    if(dynamicLayout)
+    if(dynamicInterface)
         GlobalDynamicInterfaceManager::get()->setupInterfaceItems();
 
     //Dag View.
@@ -1786,7 +1793,12 @@ void MainWindow::customEvent(QEvent* e)
 
 bool MainWindow::usesDynamicInterface()
 {
-    return (d->mdiArea==NULL) ? true : false;
+    return usesDynamicViews() && GlobalDynamicInterfaceManager::get()->interfaceActivated();
+}
+
+bool MainWindow::usesDynamicViews()
+{
+    return GlobalDynamicInterfaceManager::get()->viewsActivated();
 }
 
 

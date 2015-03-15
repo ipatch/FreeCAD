@@ -35,18 +35,29 @@ class GuiExport DynamicInterfaceManager : public QObject
     Q_OBJECT
     
 public:
+    enum Position {
+        Bottom = 0,
+        Top,
+        Left,
+        Right,
+    };
+    
     DynamicInterfaceManager();
     ~DynamicInterfaceManager();
     
-    QDeclarativeView* managedView();
-    virtual void setManagedView(QDeclarativeView* view);
+    QDeclarativeView* managedInterfaceViewer();
+    virtual void setManagedInterfaceViewer(QDeclarativeView* view);
     
     void addInterfaceItem(QWidget* widget, QString name, bool permanent = false);
     QWidget* getInterfaceItem(QString objectname);
-    void setupInterfaceItems();
+    void setupInterfaceItems();    
+    void positionInterfaceItem(QString name, Position pos);
     
     QList<QAction*> getInterfaceItemToggleActions();
     QMenu*          getInterfaceItemContextMenu();
+    
+    bool interfaceActivated();
+    bool hasInterfaceItems();
     
 public Q_SLOTS:
     void interfaceitemContextMenu();
@@ -54,6 +65,7 @@ public Q_SLOTS:
 protected:
     QDeclarativeView* m_view;
     QList<QDeclarativeItem*> m_interfaceitems;
+    bool m_interfaceActivated;
 };
 
 //Singleton for the global user interface
@@ -64,7 +76,8 @@ class GuiExport GlobalDynamicInterfaceManager : public DynamicInterfaceManager {
 public:
     static GlobalDynamicInterfaceManager* get();
     
-    virtual void setManagedView(QDeclarativeView* view);
+    QDeclarativeView* managedViewViewer();
+    virtual void setManagedViewViewer(QDeclarativeView* view);
     
     void addView(MDIView* view);
     void closeView(MDIView* view);
@@ -74,6 +87,10 @@ public:
     void activateNextView();
     void activatePreviousView();
     void closeActiveView();
+    
+    void setNavigatorFixed(Position pos);
+    bool hasViews();
+    bool viewsActivated();
     
 Q_SIGNALS:
     void viewActivated(MDIView*);
@@ -90,6 +107,7 @@ private:
     
     static GlobalDynamicInterfaceManager* instance;
     QList<QDeclarativeItem*> m_views;
+    bool m_viewsActivated;
     
 };
 

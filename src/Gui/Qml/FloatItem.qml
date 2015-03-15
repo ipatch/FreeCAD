@@ -37,6 +37,7 @@ Item {
     property int   floatMode:           Util.FloatMode.Free
     property bool  hideTitlebar:        false
     property bool  overrideHideToolbar: false
+    property bool  frame:               false
     
         
     height: 43
@@ -174,6 +175,26 @@ Item {
                 height: bar.height
                 children: controlsDelegate
             }
+        }
+    }
+    
+    //draw the frame rectangle below the childarea for the illusion of a frame
+    Rectangle {
+        visible: floatitem.frame
+        radius:  2
+        color:   palette.window
+        
+        anchors.top:    titlebar.bottom
+        anchors.left:   parent.left
+        anchors.right:  parent.right
+        anchors.bottom: parent.bottom
+        
+        onVisibleChanged: {
+        
+            if(visible)
+                childarea.anchors.margins = 2
+            else
+                childarea.anchors.margins = 0
         }
     }
     
@@ -456,7 +477,7 @@ Item {
     }
     
     function setAnchorIndicator(draw) {
-        if(loatMode == Util.FloatMode.Anchor) {
+        if(floatMode == Util.FloatMode.Anchor) {
             var clist = area.children;
             for(var i=0; i<clist.length; ++i) {
                 if('drawAnchorIndicator' in clist[i]) 

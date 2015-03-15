@@ -26,7 +26,7 @@ import FreeCADLib 1.0
 Item {
     id: navigator
     property int   tabheight: 20
-    property int   tabwidth: 120
+    property int   tabwidth: 140
     property Item  mdiArea        
     property alias index: list.currentIndex
             
@@ -60,8 +60,11 @@ Item {
     
             Icon {
                 id:image
-                width: 20
-                height: 20
+                anchors.left:   parent.left
+                anchors.top:    parent.top
+                anchors.bottom: parent.bottom
+                anchors.margins: 2
+                width: 16
                 icon: model.item.icon
             }
             Text {

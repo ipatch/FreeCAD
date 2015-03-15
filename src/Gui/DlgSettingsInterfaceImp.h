@@ -43,6 +43,9 @@ public:
     void loadSettings();
     
     virtual void changeEvent(QEvent* e);
+    
+public Q_SLOTS:
+    void replaceMDIToggled(bool value);
 };
 
 } // namespace Dialog

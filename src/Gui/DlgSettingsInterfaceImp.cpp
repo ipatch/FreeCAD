@@ -37,6 +37,7 @@ DlgSettingsInterfaceImp::DlgSettingsInterfaceImp(QWidget* parent)
     : PreferencePage( parent )
 {
     this->setupUi(this);
+    connect(replaceMDI, SIGNAL(toggled(bool)), this, SLOT(replaceMDIToggled(bool)));
 }
 
 /** 
@@ -51,21 +52,48 @@ void DlgSettingsInterfaceImp::saveSettings()
 {
     backgroundColor->onSave();
     backgroundAlpha->onSave();
-    item3DView->onSave();
-    replaceDockers->onSave();
+    replaceMDI->onSave();
+    replaceDocker->onSave();
+    dragMode->onSave();
+    navigatorPosition->onSave();
 }
 
 void DlgSettingsInterfaceImp::loadSettings()
 {
     backgroundColor->onRestore();
     backgroundAlpha->onRestore();
-    item3DView->onRestore();
-    replaceDockers->onRestore();
+    replaceMDI->onRestore();
+    replaceDocker->onRestore();
+    dragMode->onRestore();
+    navigatorPosition->onRestore();
+    
+    if(replaceMDI->isChecked()) {
+        dragMode->setEnabled(true);
+        navigatorPosition->setEnabled(true);
+        replaceDocker->setEnabled(true);
+    }
+    else {
+        replaceDocker->setChecked(false);
+        dragMode->setEnabled(false);
+        navigatorPosition->setEnabled(false);
+        replaceDocker->setEnabled(false);
+    }
+    
+    if(replaceDocker->isChecked())
+        navigatorPosition->setEnabled(false);
 }
 
 void DlgSettingsInterfaceImp::changeEvent(QEvent* e)
 {
 
+}
+
+void DlgSettingsInterfaceImp::replaceMDIToggled(bool value)
+{
+    if(!value) {
+        replaceDocker->setChecked(false);
+        navigatorPosition->setEnabled(false);
+    }
 }
 
 

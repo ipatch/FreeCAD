@@ -11,6 +11,7 @@ FloatItem {
     
     floatMode: 2
     hideTitlebar: !floating
+    frame: floating
     default property alias content: mdiview.ccontent //all children are added to the childarea by default
     signal requestDestroy(variant item)
     

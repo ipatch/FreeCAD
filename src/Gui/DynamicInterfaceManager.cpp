@@ -24,6 +24,7 @@
 #include <QDeclarativeItem>
 #include <QDeclarativeEngine>
 #include <QDeclarativeProperty>
+#include <QDeclarativeExpression>
 #include <QMenu>
 #include <QApplication>
 
@@ -31,23 +32,29 @@ using namespace Gui;
 
 DynamicInterfaceManager::DynamicInterfaceManager() {
     m_view = NULL;
+    m_interfaceActivated = false;
 }
 
 DynamicInterfaceManager::~DynamicInterfaceManager(){
     
 }
 
-QDeclarativeView* DynamicInterfaceManager::managedView()
+QDeclarativeView* DynamicInterfaceManager::managedInterfaceViewer()
 {
     return m_view;
 }
 
-void DynamicInterfaceManager::setManagedView(QDeclarativeView* view)
+void DynamicInterfaceManager::setManagedInterfaceViewer(QDeclarativeView* view)
 {
-    if(m_view)
+    if(!view)
         return;
     
-    m_view = view;
+    m_interfaceActivated = true;
+    
+    if(!m_view)  
+        m_view = view;
+    else if(m_view != view)
+        Base::Console().Error("Changing viewer curently not suppported");
     
     //some items are added to the qml files directly. process them here to ensure they work like
     //c++ added items
@@ -186,12 +193,80 @@ void DynamicInterfaceManager::interfaceitemContextMenu()
     menu->exec(QCursor::pos());
 }
 
+bool DynamicInterfaceManager::hasInterfaceItems()
+{
+    return (m_interfaceitems.count() > 0);
+}
+
+void DynamicInterfaceManager::positionInterfaceItem(QString name, DynamicInterfaceManager::Position pos)
+{   
+    if(!m_view)
+        return;
+    
+    QObject* obj = m_view->rootObject()->findChild<QObject*>(QString::fromAscii("Navigator"));
+    
+    if(!obj)
+        return;
+    
+    QDeclarativeItem* item = qobject_cast<QDeclarativeItem*>(obj);
+    
+    //unset the unneeded anchors
+    QDeclarativeExpression undef(m_view->rootContext(), item, QString::fromAscii("undefined"));
+    if( pos==Top ) {        
+        QDeclarativeProperty prop(item, QString::fromAscii("anchors.bottom"));
+        prop.write(undef.evaluate());
+    }
+    if( pos==Bottom ) {        
+        QDeclarativeProperty prop(item, QString::fromAscii("anchors.top"));
+        prop.write(undef.evaluate());
+    }
+    if( pos==Left ) {        
+        QDeclarativeProperty prop(item, QString::fromAscii("anchors.left"));
+        prop.write(undef.evaluate());
+    }
+    if( pos==Right ) {        
+        QDeclarativeProperty prop(item, QString::fromAscii("anchors.right"));
+        prop.write(undef.evaluate());
+    }
+    
+    //set the needed anchors
+    if( pos==Top || pos==Left || pos==Right) {
+        QDeclarativeExpression expr(m_view->rootContext(), item, QString::fromAscii("parent.top"));
+        QDeclarativeProperty prop(item, QString::fromAscii("anchors.top"));
+        prop.write(expr.evaluate());
+    }
+    
+    if( pos==Bottom || pos==Left || pos==Right) {
+        QDeclarativeExpression expr(m_view->rootContext(), item, QString::fromAscii("parent.bottom"));
+        QDeclarativeProperty prop(item, QString::fromAscii("anchors.bottom"));
+        prop.write(expr.evaluate());
+    }
+    
+    if( pos==Left || pos==Top || pos==Bottom) {
+        QDeclarativeExpression expr(m_view->rootContext(), item, QString::fromAscii("parent.left"));
+        QDeclarativeProperty prop(item, QString::fromAscii("anchors.left"));
+        prop.write(expr.evaluate());
+    }
+    
+    if( pos==Right || pos==Bottom || pos==Top) {
+        QDeclarativeExpression expr(m_view->rootContext(), item, QString::fromAscii("parent.right"));
+        QDeclarativeProperty prop(item, QString::fromAscii("anchors.right"));
+        prop.write(expr.evaluate());
+    }
+}
+
+bool DynamicInterfaceManager::interfaceActivated()
+{
+    return m_interfaceActivated;
+}
 
 
 
 GlobalDynamicInterfaceManager* GlobalDynamicInterfaceManager::instance = NULL;
 
-GlobalDynamicInterfaceManager::GlobalDynamicInterfaceManager(){}
+GlobalDynamicInterfaceManager::GlobalDynamicInterfaceManager(){
+    m_viewsActivated = false;
+}
 GlobalDynamicInterfaceManager::~GlobalDynamicInterfaceManager(){
     if(m_view) {
         QObject* mdiview = m_view->rootObject()->findChild<QObject*>(QString::fromAscii("mdiarea"));
@@ -199,13 +274,28 @@ GlobalDynamicInterfaceManager::~GlobalDynamicInterfaceManager(){
     }
 }
 
-void GlobalDynamicInterfaceManager::setManagedView(QDeclarativeView* view)
+void GlobalDynamicInterfaceManager::setManagedViewViewer(QDeclarativeView* view)
 {
-    Gui::DynamicInterfaceManager::setManagedView(view);
+    if(!view)
+        return;
+    
+    m_viewsActivated = true;
+    
+    if(!m_view)  
+        m_view = view;
+    else if(m_view != view)
+        Base::Console().Error("Changing viewer curently not suppported");
+    
     //connect the view signals
     QObject* mdiview = m_view->rootObject()->findChild<QObject*>(QString::fromAscii("mdiarea"));
     connect(mdiview, SIGNAL(viewActivated(QVariant)), this, SLOT(activate(QVariant)));
 }
+
+QDeclarativeView* GlobalDynamicInterfaceManager::managedViewViewer()
+{
+    return m_view;
+}
+
 
 GlobalDynamicInterfaceManager* GlobalDynamicInterfaceManager::get()
 {
@@ -295,6 +385,23 @@ void GlobalDynamicInterfaceManager::activatePreviousView()
 {
     QObject* mdiview = m_view->rootObject()->findChild<QObject*>(QString::fromAscii("mdiarea"));
     QMetaObject::invokeMethod(mdiview, "activatePreviousView");
+}
+
+bool GlobalDynamicInterfaceManager::hasViews()
+{
+    return (m_views.count() > 0);
+}
+
+bool GlobalDynamicInterfaceManager::viewsActivated()
+{
+    return m_viewsActivated;
+}
+
+void GlobalDynamicInterfaceManager::setNavigatorFixed(DynamicInterfaceManager::Position pos)
+{
+    QObject* nav = m_view->rootObject()->findChild<QObject*>(QString::fromAscii("Navigator"));
+    nav->setProperty("hideTitlebar", true);
+    positionInterfaceItem(QString::fromAscii("Navigator"), pos);
 }
 
 

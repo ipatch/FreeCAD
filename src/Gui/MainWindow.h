@@ -157,6 +157,7 @@ public:
      * returns true if the dynamic interface layout is used, false if the classic docker-based one is in action 
      */
     bool usesDynamicInterface();
+    bool usesDynamicViews();
     
 
 public Q_SLOTS:

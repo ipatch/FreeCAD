@@ -47,13 +47,13 @@ Rectangle {
 
             area: parent
             height: titleBarHeight + 23
-            minWidth:  120
-            minHeight: 23
+            minWidth:  tabnav.tabwidth
+            minHeight: 20
             fixedHeight: true
             
             MDINavigator {
                 id: tabnav
-                tabwidth: 120    
+                tabwidth: 140    
                 mdiArea: viewManager
                 anchors.fill: parent
             }
