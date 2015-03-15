@@ -42,6 +42,7 @@ FloatItem {
     property int  shadeHeight: 0
      
     width:  200
+    floatMode: 3
   
     Settings {
         id: settings

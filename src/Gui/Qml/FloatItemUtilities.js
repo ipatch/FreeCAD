@@ -21,8 +21,8 @@
  ***************************************************************************/
 
 //settings
-var sr = 8;    //snap radius around the items
-var reset = 50; //reset radius 
+var sr = 6;     //snap radius around the items
+var reset = 30; //reset radius 
 
 //enumerations
 var DragMode = {
@@ -34,6 +34,12 @@ var DragMode = {
     SizeY:  5,
     Nonde:  6
 };
+
+var FloatMode = {
+    Free:   1,
+    Tile:   2,
+    Anchor: 3
+}
 
 //used to store the x and y anchor list and numerous anchor information
 var anchors;
@@ -60,6 +66,10 @@ function setupDrag(item, mouse, mode, resizeAnchor) {
     getPassiveXItemChain(xlist, dragItem);
     setupHitPositions(xlist, ylist);
 }
+
+/******************************************************************************************************
+ *                                            Anchoring
+ * ****************************************************************************************************/
 
 function setupHitPositions(xlist, ylist) {
 
@@ -130,13 +140,6 @@ function setAnchorsForPosition(mousePos) {
             if(setPossibleAnchor(Qt.rect(dragItem.x-sr, dragItem.y+dragItem.height-sr, dragItem.width+2*sr, 2*sr), 'bottom', ['top', 'bottom']))
                 return
         }
-//         if(getActiveAnchorObjectFor('verticalCenter') == undefined) {
-//             if(setPossibleAnchor(Qt.rect(dragItem.x-sr, dragItem.y+dragItem.height/2-sr/2, 2*sr, sr), 'verticalCenter', ['verticalCenter']))
-//                 return; 
-//             
-//             if(setPossibleAnchor(Qt.rect(dragItem.x+dragItem.width-2*sr, dragItem.y+dragItem.height/2-sr/2, 2*sr, sr), 'verticalCenter', ['verticalCenter']))
-//                return;   
-//         }
         if(Math.abs(initMousePos.y - mousePos.y) > reset) {
             dragItem.removeActiveAnchors(true, anchors.resizeAnchor)
         }
@@ -226,4 +229,112 @@ function loadAnchorString(string, item, area) {
             }
         }
     }
+}
+
+
+/******************************************************************************************************
+ *                                            Tiling
+ * ****************************************************************************************************/
+
+var tiling
+
+
+function setupTiling(mX, mY, indicator) {
+     
+    tiling = {}
+    tiling.indicator = indicator
+    tiling.maxX = mX
+    tiling.maxY = mY
+    tiling.indicator.visible = false
+}
+
+function setTileForPosition(pos) {
+    
+    if(tiling == undefined)
+        return
+    
+    if(pos.x < sr) {
+        tiling.indicator.visible = true
+        tiling.indicator.x = 0
+        tiling.indicator.width = tiling.maxX/2
+        if(pos.y < tiling.maxY/4) {        
+            tiling.indicator.y = 0
+            tiling.indicator.height = tiling.maxY/2
+        }
+        else if(pos.y < tiling.maxY*3/4) {
+            tiling.indicator.y = 0
+            tiling.indicator.height = tiling.maxY
+        }
+        else {
+            tiling.indicator.y = tiling.maxY/2
+            tiling.indicator.height = tiling.maxY/2
+        }
+    }
+    else if((tiling.maxX - pos.x) < sr) {
+        tiling.indicator.visible = true
+        tiling.indicator.x = tiling.maxX/2
+        tiling.indicator.width = tiling.maxX/2
+        if(pos.y < tiling.maxY/4) {        
+            tiling.indicator.y = 0
+            tiling.indicator.height = tiling.maxY/2
+        }
+        else if(pos.y < tiling.maxY*3/4) {
+            tiling.indicator.y = 0
+            tiling.indicator.height = tiling.maxY
+        }
+        else {
+            tiling.indicator.y = tiling.maxY/2
+            tiling.indicator.height = tiling.maxY/2
+        }
+    }
+    else if(pos.y < sr) {
+        tiling.indicator.visible = true
+        tiling.indicator.y = 0
+        tiling.indicator.height = tiling.maxY/2
+        if(pos.x < tiling.maxX/4) {        
+            tiling.indicator.x = 0
+            tiling.indicator.width = tiling.maxX/2
+        }
+        else if(pos.x < tiling.maxX*3/4) {
+            tiling.indicator.x = 0
+            tiling.indicator.width = tiling.maxX
+        }
+        else {
+            tiling.indicator.x = tiling.maxX/2
+            tiling.indicator.width = tiling.maxX/2
+        }
+    }
+    else if((tiling.maxY - pos.y) < sr) {
+        tiling.indicator.visible = true
+        tiling.indicator.y = tiling.maxY/2
+        tiling.indicator.height = tiling.maxY/2
+        if(pos.x < tiling.maxX/4) {        
+            tiling.indicator.x = 0
+            tiling.indicator.width = tiling.maxX/2
+        }
+        else if(pos.x < tiling.maxX*3/4) {
+            tiling.indicator.x = 0
+            tiling.indicator.width = tiling.maxX
+        }
+        else {
+            tiling.indicator.x = tiling.maxX/2
+            tiling.indicator.width = tiling.maxX/2
+        }
+    }
+    else 
+        tiling.indicator.visible = false
+    
+}
+
+function finishTiling(item) {
+    
+    if(!tiling.indicator.visible)
+        return
+        
+    item.x = tiling.indicator.x
+    item.y = tiling.indicator.y
+    item.width = tiling.indicator.width
+    item.height = tiling.indicator.height
+    
+    tiling.indicator.visible = false
 }

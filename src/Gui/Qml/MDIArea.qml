@@ -103,7 +103,9 @@ FloatArea {
         if(currentItem.floating) {
             currentItem.z = views.count;
             currentItem.visible = true
-            views.get(toplevelFull).item.visible = true
+            var topEntry = views.get(toplevelFull)
+            if(topEntry != undefined)
+                topEntry.item.visible = true
         }
         else {
             currentItem.z = forwards++
@@ -116,7 +118,6 @@ FloatArea {
     clip: true
     
     function activateView(id) {
-        console.debug("activateView called")
         currentID = id
         nav.index = nav.indexForId(id)
     }

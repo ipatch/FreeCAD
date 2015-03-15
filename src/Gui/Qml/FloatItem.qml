@@ -29,19 +29,23 @@ Item {
       
     id: floatitem
     
+    
     property alias titleBarHeight:      titlebar.height
     property alias title:               titleItem.text
-    property alias ccontent:            childarea.children
+    property alias ccontent:            childarea.children  
     
-    height: 43
-    property bool  hideTitlebar: false
+    property int   floatMode:           Util.FloatMode.Free
+    property bool  hideTitlebar:        false
     property bool  overrideHideToolbar: false
+    
         
+    height: 43
     //drag+resize properties
     property int  margin: 3;     
     property Item area: parent
     property Item resizeDragItem
     property Item resizeFixItem
+    property Item tileIndicatorItem
     
     property alias fixedWidth:  resizer.fixedWidth
     property alias fixedHeight: resizer.fixedHeight
@@ -112,10 +116,6 @@ Item {
                 anchors.right: titleItem.right
                 height: titleItem.height
                 drag.target: floatitem
-                drag.minimumX: 0
-                drag.maximumX: floatitem.parent.width - floatitem.width
-                drag.minimumY: 0
-                drag.maximumY: floatitem.parent.height - floatitem.height
                 
                 CursorArea {
                     anchors.fill: parent
@@ -124,11 +124,31 @@ Item {
                 
                 drag.onActiveChanged: {
                     if(!drag.active) {
-                        setAnchorIndicator(false)
+                        if(floatMode == Util.FloatMode.Anchor)
+                            setAnchorIndicator(false)    
+                            
+                        if(floatMode == Util.FloatMode.Tile)
+                                Util.finishTiling(floatitem)
+                            
                         Util.dragMode = Util.DragMode.None;                    
                     }
                     else {
-                        setAnchorIndicator(true)
+                        if(floatMode == Util.FloatMode.Anchor) {
+                            setAnchorIndicator(true)
+                            drag.maximumX = floatitem.parent.width - floatitem.width
+                            drag.maximumY = floatitem.parent.height - floatitem.height
+                            drag.minimumX = 0
+                            drag.minimumY = 0
+                        }  
+                        else {
+                            drag.maximumX = floatitem.parent.width - 50
+                            drag.maximumY = floatitem.parent.height - 50
+                            drag.minimumX = -(floatitem.width - 50)
+                            drag.minimumY = -(floatitem.height - 50)
+                            
+                            if(floatMode == Util.FloatMode.Tile)
+                                Util.setupTiling(area.width, area.height, tileIndicatorItem)
+                        }
                     }
                 }
 
@@ -138,7 +158,13 @@ Item {
                     else 
                         floatitem.contextMenu()
                 }
-                onPositionChanged: Util.setAnchorsForPosition(mouse);            
+                onPositionChanged: {                    
+                    if(floatMode == Util.FloatMode.Anchor)
+                        Util.setAnchorsForPosition(mouse);  
+                    else if(floatMode == Util.FloatMode.Tile) 
+                        Util.setTileForPosition(mapToItem(area, mouse.x, mouse.y))
+                }
+                
             }
             Item {
                 id:buttons
@@ -177,6 +203,8 @@ Item {
         if(area["setupFloatItem"] != undefined)
             area.setupFloatItem(floatitem);
     }
+    
+    onFloatModeChanged: Util.loatMode = floatMode
     
     //we need to setup the anchor object arrays and load all settings
     Component.onCompleted: {
@@ -428,10 +456,12 @@ Item {
     }
     
     function setAnchorIndicator(draw) {
-        var clist = area.children;
-        for(var i=0; i<clist.length; ++i) {
-            if('drawAnchorIndicator' in clist[i]) 
-                clist[i].drawAnchorIndicator(draw);
+        if(loatMode == Util.FloatMode.Anchor) {
+            var clist = area.children;
+            for(var i=0; i<clist.length; ++i) {
+                if('drawAnchorIndicator' in clist[i]) 
+                    clist[i].drawAnchorIndicator(draw);
+            }
         }
     }
     

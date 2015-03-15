@@ -121,7 +121,6 @@ Item {
         
         onCountChanged: {
             if(list.model.count > 0) {
-                console.debug("model changed!")
                 list.currentIndex = list.model.count-1
                 mdiArea.currentID = list.currentItem.getViewID()
             }

@@ -38,10 +38,20 @@ Item {
         width:  0
         height: 0
     }
+    
+    Rectangle {
+        id: tileIndicator
+        color: "#EEEEEEEE"
+        border.width: 2
+        border.color: "#AAAAAAAA"
+        radius: 5
+        z:999999
+    }
        
     function setupFloatItem(item) {
-        item.resizeDragItem  = dragItem;
-        item.resizeFixItem   = fixItem;
+        item.resizeDragItem    = dragItem;
+        item.resizeFixItem     = fixItem;
+        item.tileIndicatorItem = tileIndicator;
     }
       
     signal showAllTitlebars(bool satb)
