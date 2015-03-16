@@ -67,6 +67,7 @@ Q_SIGNALS:
     //Svoid proxySizeChanged(int width, int height);
     void enter();
     void leave();
+    void focusIn();
     
 protected:
     virtual void geometryChanged(const QRectF& newGeometry, const QRectF& oldGeometry);

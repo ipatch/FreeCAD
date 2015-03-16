@@ -13,8 +13,9 @@ MDIView {
         objectName: "proxy"
         anchors.fill: parent
         
-        onEnter: mdiview.onEnter();
-        onLeave: mdiview.onLeave();    
+        onEnter:   mdiview.onEnter();
+        onLeave:   mdiview.onLeave();    
+        onFocusIn: mdiview.activated();
     }
 }
 

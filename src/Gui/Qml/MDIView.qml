@@ -19,6 +19,9 @@ FloatItem {
     function onEnter() {}
     function onLeave() {}
     
+        
+    onActivated: area.activateView(viewID)
+    
     onAreaChanged:  {
         if(area["setupFloatItem"] != undefined)
             viewID = ++mdiview.area.uniqueID

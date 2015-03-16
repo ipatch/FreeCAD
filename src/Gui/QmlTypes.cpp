@@ -87,6 +87,8 @@ bool QmlProxy::eventFilter(QObject* o, QEvent* e)
         Q_EMIT enter();
     if(e->type() == QEvent::GraphicsSceneHoverLeave)
         Q_EMIT leave();
+    if(e->type() == QEvent::FocusIn)
+        Q_EMIT focusIn();
       
     return false;
 }

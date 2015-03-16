@@ -58,7 +58,10 @@ Item {
     //controls 
     property Item controlsDelegate
     
-    width:  200;
+    //signals emmited
+    signal activated();
+    
+    width:  200;  
            
    //ensure we detect hoovers over the titlebar
     HoverItem {
@@ -158,6 +161,8 @@ Item {
                         Util.setupDrag(floatitem, mouse, Util.DragMode.DragXY)
                     else 
                         floatitem.contextMenu()
+                        
+                    activated()
                 }
                 onPositionChanged: {                    
                     if(floatMode == Util.FloatMode.Anchor)
