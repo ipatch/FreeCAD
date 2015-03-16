@@ -77,15 +77,56 @@ Item {
                 text: model.item.title
             }
             MouseArea {
+                id: marea
                 width:tabwidth-20
                 height: 20
                 anchors.left: parent.left
-                onClicked: {
+                
+                CursorArea {
+                    anchors.fill: parent
+                    cursor: marea.drag.active ? Qt.SizeAllCursor : Qt.ArrowCursor
+                }
+                
+                onPressed: {
                     list.currentIndex = index
-                    mdiArea.currentID = model.item.viewID                    
+                    mdiArea.currentID = model.item.viewID  
                 }
                 onDoubleClicked: {
                     mdiArea.toggleFloat(model.item.viewID)
+                }
+                drag.target: content
+                drag.axis: Drag.YAxis
+                drag.onActiveChanged: {                    
+                    if(drag.active) {
+                        list.currentIndex = index
+                        mdiArea.currentID = model.item.viewID 
+                        var mouse = mapToItem(mdiArea, marea.mouseX, marea.mouseY)
+                        mdiArea.toggleFloat(model.item.viewID, mouse)
+                        drag.axis = Drag.XandYAxis
+                        //mimic the items drag behaviour with our content item
+                        model.item.setupDragProxy(content, drag)
+                    }
+                    else {
+                        drag.axis = Drag.YAxis
+                        content.x = parent.x + parent.width/2 -200
+                        content.y = parent.y + 10
+                    }
+                    var m = mapToItem(mdiArea, mouseX, mouseY)
+                    model.item.areaActivateDrag(drag.active, m)
+                }
+                
+                onPositionChanged: {
+                    var m = mapToItem(mdiArea, mouse.x, mouse.y)
+                    model.item.areaDragPosition(m)
+                    m = mapToItem(mdiArea, content.x, content.y)
+                    model.item.x = m.x
+                    model.item.y = m.y
+                }
+                
+                Item {
+                    id: content
+                    x: parent.x + parent.width/2 -200
+                    y: parent.y + 10
                 }
             }
             Button {

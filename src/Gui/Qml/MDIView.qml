@@ -20,7 +20,7 @@ FloatItem {
     function onLeave() {}
     
         
-    onActivated: area.activateView(viewID)
+    onActivated: if(area != undefined) area.activateView(viewID)
     
     onAreaChanged:  {
         if(area["setupFloatItem"] != undefined)

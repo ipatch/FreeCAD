@@ -149,16 +149,17 @@ FloatArea {
         var view = viewForID(id)
         if( !view.floating ) {
             view.anchors.fill = undefined
-            view.x = 100
-            view.y = 100
             view.height = 400
             view.width  = 400
+            view.x = 100
+            view.y = 100
             view.floating = true
         }
         else {
             view.anchors.fill = mdiarea
             view.floating = false
-        }
+        }         
+        
         setVisibilities()
     }
 }

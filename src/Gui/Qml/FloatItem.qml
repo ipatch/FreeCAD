@@ -126,51 +126,16 @@ Item {
                     cursor: dragArea.drag.active ? Qt.SizeAllCursor : Qt.ArrowCursor
                 }
                 
-                drag.onActiveChanged: {
-                    if(!drag.active) {
-                        if(floatMode == Util.FloatMode.Anchor)
-                            setAnchorIndicator(false)    
-                            
-                        if(floatMode == Util.FloatMode.Tile)
-                                Util.finishTiling(floatitem)
-                            
-                        Util.dragMode = Util.DragMode.None;                    
-                    }
-                    else {
-                        if(floatMode == Util.FloatMode.Anchor) {
-                            setAnchorIndicator(true)
-                            drag.maximumX = floatitem.parent.width - floatitem.width
-                            drag.maximumY = floatitem.parent.height - floatitem.height
-                            drag.minimumX = 0
-                            drag.minimumY = 0
-                        }  
-                        else {
-                            drag.maximumX = floatitem.parent.width - 50
-                            drag.maximumY = floatitem.parent.height - 50
-                            drag.minimumX = -(floatitem.width - 50)
-                            drag.minimumY = -(floatitem.height - 50)
-                            
-                            if(floatMode == Util.FloatMode.Tile)
-                                Util.setupTiling(area.width, area.height, tileIndicatorItem)
-                        }
-                    }
-                }
+                drag.onActiveChanged: floatitem.activateDrag(drag.active, {x: mouseX, y:mouseY})
 
                 onPressed:  {
-                    if(mouse.buttons == Qt.LeftButton)
-                        Util.setupDrag(floatitem, mouse, Util.DragMode.DragXY)
-                    else 
+                    if(mouse.buttons != Qt.LeftButton) 
                         floatitem.contextMenu()
                         
                     activated()
                 }
-                onPositionChanged: {                    
-                    if(floatMode == Util.FloatMode.Anchor)
-                        Util.setAnchorsForPosition(mouse);  
-                    else if(floatMode == Util.FloatMode.Tile) 
-                        Util.setTileForPosition(mapToItem(area, mouse.x, mouse.y))
-                }
                 
+                onPositionChanged: floatitem.dragPosition(mouse)                
             }
             Item {
                 id:buttons
@@ -278,6 +243,80 @@ Item {
     anchors.onVerticalCenterChanged: {
         if(!Util.anchors.controlledChange)
             console.debug("Vertical Center anchor removed")
+    }
+    
+/*******************************************************************************************
+*                                          Draging
+* *****************************************************************************************/
+
+    function activateDrag(active, mouse) {
+        if(!active) {
+            Util.setupDrag(floatitem, mouse, Util.DragMode.DragXY)
+            
+            if(floatMode == Util.FloatMode.Anchor)
+                setAnchorIndicator(false)    
+                
+            if(floatMode == Util.FloatMode.Tile)
+                    Util.finishTiling(floatitem)
+                
+            Util.dragMode = Util.DragMode.None;                    
+        }
+        else {
+            if(floatMode == Util.FloatMode.Anchor) {
+                setAnchorIndicator(true)
+                dragArea.drag.maximumX = floatitem.parent.width - floatitem.width
+                dragArea.drag.maximumY = floatitem.parent.height - floatitem.height
+                dragArea.drag.minimumX = 0
+                dragArea.drag.minimumY = 0
+            }  
+            else {
+                dragArea.drag.maximumX = floatitem.parent.width - 50
+                dragArea.drag.maximumY = floatitem.parent.height - 50
+                dragArea.drag.minimumX = -(floatitem.width - 50)
+                dragArea.drag.minimumY = -(floatitem.height - 50)
+                
+                if(floatMode == Util.FloatMode.Tile)
+                    Util.setupTiling(area.width, area.height, tileIndicatorItem)
+            }
+        }
+    }
+    
+    function areaActivateDrag(active, mouse) {
+        var m = dragArea.mapFromItem(area, mouse.x, mouse.y)
+        activateDrag(active, m)
+    }
+    
+    function dragPosition(mouse) {
+        if(floatMode == Util.FloatMode.Anchor)
+            Util.setAnchorsForPosition(mouse);  
+        else if(floatMode == Util.FloatMode.Tile) 
+            Util.setTileForPosition(mapToItem(area, mouse.x, mouse.y))
+    }
+    function areaDragPosition(mouse) {
+        var m = dragArea.mapFromItem(area, mouse.x, mouse.y)
+        dragPosition(m)
+    }
+    
+    function setupDragProxy(item, drag) {
+        item.x = floatitem.x
+        item.y = floatitem.y
+        item.width = floatitem.width
+        item.height = floatitem.height
+        
+        var max
+        var min
+        if(floatMode == Util.FloatMode.Anchor) {
+             max = item.parent.mapFromItem(area, floatitem.parent.width - floatitem.width, floatitem.parent.height - floatitem.height)
+             min = item.parent.mapFromItem(area, 0, 0)
+        }  
+        else {
+            max = item.parent.mapFromItem(area, floatitem.parent.width - 50, floatitem.parent.height - 50)
+            min = item.parent.mapFromItem(area,  -(floatitem.width - 50), -(floatitem.height - 50))
+        }
+        drag.maximumX = max.x
+        drag.maximumY = max.y
+        drag.minimumX = min.x
+        drag.minimumY = min.y
     }
         
 /*******************************************************************************************
