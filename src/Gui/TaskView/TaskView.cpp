@@ -416,7 +416,7 @@ TaskView::TaskView(QWidget *parent)
     if(Gui::MainWindow::getInstance()->usesDynamicInterface()) {
         setFrameShape(QFrame::NoFrame);
         setAttribute(Qt::WA_TranslucentBackground, true);
-        scheme->panelBackground = QBrush(Qt::transparent);
+        //scheme->panelBackground = QBrush(Qt::transparent);
         taskPanel->layout()->setMargin(0);
         
         //attach parameter Observer
@@ -791,6 +791,7 @@ void TaskView::restoreActionStyle()
     static_cast<QSint::FreeCADPanelScheme*>(QSint::FreeCADPanelScheme::defaultScheme())->restoreActionStyle();
     taskPanel->setScheme(QSint::FreeCADPanelScheme::defaultScheme());
 #endif
+}
 
 void TaskView::OnChange(Base::Subject< const char* >& rCaller, const char* rcReason)
 {
@@ -801,14 +802,14 @@ void TaskView::OnChange(Base::Subject< const char* >& rCaller, const char* rcRea
         r = ((background >> 24) & 0xff);
         g = ((background >> 16) & 0xff);
         b = ((background >> 8) & 0xff);
-        scheme->groupBackground = QBrush(QColor(r, g, b, scheme->groupBackground.color().alpha()));
+        //scheme->groupBackground = QBrush(QColor(r, g, b, scheme->groupBackground.color().alpha()));
         taskPanel->setScheme(scheme);
     }
     else if (strcmp(rcReason,"BackgroundAlpha") == 0) {
         int alpha = rGrp.GetInt("BackgroundAlpha",255);
-        QColor gc = scheme->groupBackground.color();
-        gc.setAlpha(alpha);
-        scheme->groupBackground = QBrush(gc);
+        //QColor gc = scheme->groupBackground.color();
+        //gc.setAlpha(alpha);
+        //scheme->groupBackground = QBrush(gc);
         taskPanel->setScheme(scheme);
     }
 }

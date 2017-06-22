@@ -134,10 +134,12 @@ void DlgGeneralImp::saveSettings()
     bool pythonWordWrap = App::GetApplication().GetUserParameter().
         GetGroup("BaseApp")->GetGroup("Preferences")->GetGroup("General")->GetBool("PythonWordWrap", true);
 
-    if (pythonWordWrap) {
-      pcPython->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
-    } else {
-      pcPython->setWordWrapMode(QTextOption::NoWrap);
+    if(pc) {
+        if (pythonWordWrap) {
+            pcPython->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
+        } else {
+            pcPython->setWordWrapMode(QTextOption::NoWrap);
+        }
     }
 
     // set new user defined style
@@ -162,7 +164,7 @@ void DlgGeneralImp::saveSettings()
     hGrp = App::GetApplication().GetParameterGroupByPath("User parameter:BaseApp/Preferences/MainWindow");
     hGrp->SetBool("TiledBackground", this->tiledBackground->isChecked());
 
-    QMdiArea* mdi = getMainWindow()->getMdiArea();
+    QMdiArea* mdi = getMainWindow()->mdiArea();
     if(mdi) {
         mdi->setProperty("showImage", this->tiledBackground->isChecked());
 

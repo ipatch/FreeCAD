@@ -357,9 +357,6 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
                 this, SLOT(onWindowActivated(MDIView*)));
     }
 
-    connect(d->tabs, SIGNAL(currentChanged(int)),
-            this, SLOT(onTabSelected(int)));
-
     DockWindowManager* pDockMgr = DockWindowManager::instance();
 
     // Show all dockable windows over the workbench facility
@@ -381,7 +378,7 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
     tree->setObjectName(QString::fromLatin1(QT_TRANSLATE_NOOP("QDockWidget","Tree view")));
     tree->setMinimumWidth(210);
 
-    if(!dynamicInterface) {
+    if(!dynamicInterface)
        pDockMgr->registerDockWindow("Std_TreeView", tree);
     else  
        GlobalDynamicInterfaceManager::get()->addInterfaceItem(tree, 
@@ -471,7 +468,7 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
 
     //Dag View.
     //work through parameter.
-    ParameterGrp::handle group = App::GetApplication().GetUserParameter().
+    group = App::GetApplication().GetUserParameter().
           GetGroup("BaseApp")->GetGroup("Preferences")->GetGroup("DAGView");
     bool enabled = group->GetBool("Enabled", false);
     group->SetBool("Enabled", enabled); //ensure entry exists.
@@ -500,7 +497,6 @@ MainWindow::MainWindow(QWidget * parent, Qt::WindowFlags f)
         connect(result, SIGNAL(currentChanged(int)), l, SLOT(tabChanged()));
         l->unusedTabBars << result;
     }
-#endif
 #endif
 
     // accept drops on the window, get handled in dropEvent, dragEnterEvent
@@ -990,7 +986,7 @@ void MainWindow::onWindowActivated(MDIView* view)
 
 void MainWindow::onWindowsMenuAboutToShow()
 {
-    QList<QMdiSubWindow*> windows = windows();
+    QList<QWidget*> _windows = windows();
     QWidget* active = activeWindow();
     
     // We search for the 'Std_WindowsMenu' command that provides the list of actions
@@ -1096,13 +1092,6 @@ QList<QWidget*> MainWindow::windows(QMdiArea::WindowOrder order) const
     return mdis;
 }
 
-#if !defined (NO_USE_QT_MDI_AREA)
-QMdiArea* MainWindow::getMdiArea()
-{
-    return d->mdiArea;
-}
-#endif
-
 // set text to the pane
 void MainWindow::setPaneText(int i, QString text)
 {
@@ -1121,6 +1110,11 @@ MDIView* MainWindow::activeWindow(void) const
     // each activated window notifies this main window when it is activated
     return d->activeView;
 }
+
+QMdiArea* MainWindow::mdiArea() const {
+    return d->mdiArea;
+}
+
 
 void MainWindow::closeEvent (QCloseEvent * e)
 {
@@ -1687,7 +1681,7 @@ void MainWindow::changeEvent(QEvent *e)
         if (wb) wb->retranslate();
     }
     else if (e->type() == QEvent::ActivationChange) {
-        if (isActiveWindow() && getMdiArea()) {
+        if (isActiveWindow() && mdiArea()) {
             QMdiSubWindow* mdi = d->mdiArea->activeSubWindow();
             if (mdi) {
                 MDIView* view = dynamic_cast<MDIView*>(mdi->widget());

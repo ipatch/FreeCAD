@@ -1025,7 +1025,7 @@ TreeDockWidget::TreeDockWidget(Gui::Document* pcDocument,QWidget *parent)
     QGridLayout* pLayout = new QGridLayout(this);
     pLayout->setSpacing(0);
     pLayout->setMargin (0);
-    pLayout->addWidget(this->treeWidget, 1);
+    pLayout->addWidget(this->treeWidget);
 }
 
 TreeDockWidget::~TreeDockWidget()
@@ -1097,12 +1097,6 @@ void DocumentItem::slotResetEdit(const Gui::ViewProviderDocumentObject& v)
 
 void DocumentItem::slotNewObject(const Gui::ViewProviderDocumentObject& obj) {
     createNewItem(obj);
-
-    std::string name (v.getObject()->getNameInDocument());
-    std::map<std::string, DocumentObjectItem*>::iterator it = ObjectMap.find(name);
-    if (it != ObjectMap.end()) {
-        it->second->setData(0, Qt::BackgroundColorRole,QVariant());
-    }
 }
 
 bool DocumentItem::createNewItem(const Gui::ViewProviderDocumentObject& obj,

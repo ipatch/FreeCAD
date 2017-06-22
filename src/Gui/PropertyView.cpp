@@ -71,6 +71,9 @@ PropertyView::PropertyView(QWidget *parent)
     pLayout->setMargin (0);
 
 
+    propertyEditorView = new Gui::PropertyEditor::PropertyEditor();
+    propertyEditorView->setAutomaticDocumentUpdate(false);
+
     propertyEditorData = new Gui::PropertyEditor::PropertyEditor();
     propertyEditorData->setAutomaticDocumentUpdate(true);
   

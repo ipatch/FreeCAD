@@ -99,6 +99,12 @@ public:
      * Returns the active MDI window or 0 if there is none.
      */
     MDIView* activeWindow() const;
+    
+    /**
+     * Returns the MDI area
+     */
+    QMdiArea* mdiArea() const;
+    
     /**
      * Sets the active window to \a view.
      */

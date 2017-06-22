@@ -216,6 +216,8 @@ private:
   friend class QuarterWidgetP;
   friend class QuarterDrawDeclarativeItem;
   class QuarterWidgetP * pimpl;
+  
+  bool initialized =  false;
 };
 
 //declarative item which draws the 3d content. Having an extra item for this prevents to draw on

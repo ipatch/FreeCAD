@@ -905,7 +905,7 @@ QCursor View3DInventor::overrideCursor()
 
 void View3DInventor::restoreOverrideCursor()
 {
-    _viewer->clearComponentCursor();
+    //_viewer->clearComponentCursor();
 }
 
 void View3DInventor::dump(const char* filename)

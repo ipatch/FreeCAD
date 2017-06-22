@@ -94,11 +94,11 @@ void DrawSketchHandler::setCursor(const QPixmap &p,int x,int y)
     if (view && view->isDerivedFrom(Gui::View3DInventor::getClassTypeId())) {
         Gui::View3DInventorViewer* viewer = static_cast<Gui::View3DInventor*>(view)->getViewer();
 
-        oldCursor = viewer->editingCursor();
+        /*oldCursor = viewer->editingCursor();
         QCursor cursor(p, x, y);
         actCursor = cursor;
 
-        viewer->setEditingCursor(cursor);
+        viewer->setEditingCursor(cursor);*/
     }
 }
 

@@ -522,7 +522,7 @@ void PythonConsole::OnChange( Base::Subject<const char*> &rCaller,const char* sR
         setTabStopWidth(width);
     } 
     else if (strcmp(sReason,"BackgroundColor") == 0) {
-        unsigned long background = hPrefGrp.GetUnsigned("BackgroundColor",ULONG_MAX); // default color (white)
+        unsigned long background = hPrefGrp->GetUnsigned("BackgroundColor",ULONG_MAX); // default color (white)
         int r,g,b;
         r = ((background >> 24) & 0xff);
         g = ((background >> 16) & 0xff);
@@ -532,7 +532,7 @@ void PythonConsole::OnChange( Base::Subject<const char*> &rCaller,const char* sR
         setPalette(pal);
     }
     else if (strcmp(sReason,"BackgroundAlpha") == 0) {
-        int alpha = hPrefGrp.GetInt("BackgroundAlpha",255);
+        int alpha = hPrefGrp->GetInt("BackgroundAlpha",255);
         QPalette pal = palette();
         QColor ncol = pal.color(QPalette::Base);
         ncol.setAlpha(alpha);
@@ -545,7 +545,7 @@ void PythonConsole::OnChange( Base::Subject<const char*> &rCaller,const char* sR
         if (it != d->colormap.end()) {
             QColor color = it.value();
             unsigned long col = (color.red() << 24) | (color.green() << 16) | (color.blue() << 8);
-            col = hPrefGrp.GetUnsigned( sReason, col);
+            col = hPrefGrp->GetUnsigned( sReason, col);
             color.setRgb((col>>24)&0xff, (col>>16)&0xff, (col>>8)&0xff);
             pythonSyntax->setColor(QString::fromLatin1(sReason), color);
         }
