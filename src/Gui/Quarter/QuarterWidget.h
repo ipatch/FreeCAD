@@ -206,7 +206,7 @@ protected:
   virtual void resizeEvent(QResizeEvent*);
   virtual void actualRedraw(void);
   virtual bool updateDevicePixelRatio(void);
-  virtual void drawBackground(QPainter* painter, const QRectF& rect);
+//  virtual void drawBackground(QPainter* painter, const QRectF& rect);
 
   
   double renderTime;

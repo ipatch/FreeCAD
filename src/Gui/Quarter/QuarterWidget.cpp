@@ -836,13 +836,17 @@ void QuarterWidget::resizeEvent(QResizeEvent* event)
     PRIVATE(this)->soeventmanager->setViewportRegion(vp);
     if (scene())
         scene()->setSceneRect(QRect(QPoint(0, 0), event->size()));
+    
+    rootObject()->setProperty("width", event->size().width()); 
+    rootObject()->setProperty("height", event->size().height());
+    
     QGraphicsView::resizeEvent(event);
 }
 
 /*!
   Overridden from QGLWidget to render the scenegraph
 */
-//void QuarterWidget::paintEvent(QPaintEvent* event)
+/*
 void QuarterWidget::drawBackground(QPainter* painter, const QRectF& rect)
 {
 
@@ -925,7 +929,7 @@ void QuarterWidget::drawBackground(QPainter* painter, const QRectF& rect)
 
     std::clock_t end = std::clock();
     renderTime = double(double(end-begin)/CLOCKS_PER_SEC)*1000.0;
-}
+}*/
 /*
 bool QuarterWidget::viewportEvent(QEvent* event)
 {
@@ -1362,7 +1366,14 @@ QWidget* QuarterWidget::getWidget() const
 
 QWidget* QuarterWidget::getGLWidget() const
 {
-    return const_cast<QWidget*>(getGLWidget());
+    //someone may have changed our viewport from outside
+    if(viewport()->inherits("QtGLWidget")){
+        return viewport();
+    }
+    else {
+        assert(PRIVATE(this)->externalViewport);
+        return PRIVATE(this)->externalViewport;
+    }
 }
 
 QuarterDrawDeclarativeItem::QuarterDrawDeclarativeItem(QDeclarativeItem* parent): QDeclarativeItem(parent),

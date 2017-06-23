@@ -103,7 +103,7 @@ PropertyView::PropertyView(QWidget *parent)
         connect(tabs, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)));
     }
     else {
-
+        tabs=nullptr;
         QSizePolicy sizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
         propertyEditorView->header()->setMinimumSectionSize(0);
         propertyEditorView->header()->setStretchLastSection(true);
