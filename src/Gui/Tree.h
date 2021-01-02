@@ -176,6 +176,7 @@ protected Q_SLOTS:
 
 private Q_SLOTS:
     void onItemSelectionChanged(void);
+    void onItemChanged(QTreeWidgetItem*, int);
     void onItemEntered(QTreeWidgetItem * item);
     void onItemCollapsed(QTreeWidgetItem * item);
     void onItemExpanded(QTreeWidgetItem * item);
@@ -436,6 +437,8 @@ public:
     TreeWidget *getTree() const;
 
 private:
+    void setCheckState(bool checked);
+
     QBrush bgBrush;
     DocumentItem *myOwner;
     DocumentObjectDataPtr myData;
