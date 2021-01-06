@@ -4978,9 +4978,9 @@ App::DocumentObject *DocumentObjectItem::getRelativeParent(
 }
 
 void DocumentObjectItem::setCheckState(bool checked) {
-    ParameterGrp::handle hGrp = App::GetApplication().GetParameterGroupByPath("User parameter:BaseApp/Preferences/TreeView");
+    const bool useSelectionBoxes = App::GetApplication().GetParameterGroupByPath("User parameter:BaseApp/Preferences/View")->GetBool("CheckBoxSelectionCheckBoxes", false);
 
-    if (hGrp->GetBool("UseSelectionCheckboxes", false))
+    if (useSelectionBoxes)
         QTreeWidgetItem::setCheckState(0, checked ? Qt::Checked : Qt::Unchecked);
     else
         setData(0, Qt::CheckStateRole, QVariant());
