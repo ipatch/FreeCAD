@@ -264,7 +264,7 @@ public:
     virtual Property *copyBeforeChange(void) const {return nullptr;}
 
 
-    virtual void SetRestoreError(const char *);
+    virtual void SetRestoreError(const char *) override;
 
     /** Return a unique ID for the property
      *
