@@ -38,7 +38,7 @@
 #include <Base/Console.h>
 #include "ComplexGeoData.h"
 
-FC_LOG_LEVEL_INIT("ComplexGeoData", true,true);
+FC_LOG_LEVEL_INIT("ComplexGeoData", true, 2);
 
 using namespace Data;
 
