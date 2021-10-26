@@ -6286,9 +6286,10 @@ App::DocumentObject *DocumentItem::getTopParent(
             if (parent->type() != TreeWidget::ObjectType)
                 break;
             if (count < 0) {
-                objItem = static_cast<DocumentObjectItem*>(parent);
-                if (objItem->object()->getObject() != obj)
+                auto oitem = static_cast<DocumentObjectItem*>(parent);
+                if (oitem->object()->getObject() != obj)
                     continue;
+                objItem = oitem;
             }
             if (parent->isHidden())
                 count += 1000;
@@ -6338,7 +6339,7 @@ App::DocumentObject *DocumentItem::getTopParent(
                 << " -> " << topParent->getFullName() << '.' << ss.str());
         subname = ss.str();
     }
-    return topParent;
+    return topParent ? topParent : obj;
 }
 
 DocumentObjectItem *DocumentItem::findItemByObject(
