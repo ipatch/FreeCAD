@@ -3472,13 +3472,12 @@ std::vector<App::DocumentObject*> Document::getDependencyList(
                     continue;
                 }
                 // For components with more than one member, they form a loop together
+                ss << '\n';
                 for(size_t i=0;i<v.second.size();++i) {
                     auto it = vertexMap.find(v.second[i]);
                     if(it==vertexMap.end())
                         continue;
-                    if(i%6==0)
-                        ss << '\n';
-                    ss << it->second->getFullName() << ", ";
+                    ss << App::SubObjectT(it->second, "").getObjectFullName() << '\n';
                 }
                 ss << '\n';
             }
