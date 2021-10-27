@@ -744,10 +744,7 @@ bool SoFCUnifiedSelection::setHighlight(SoFullPath *path, const SoDetail *det,
 
         this->preSelection = 1;
         int ret = Gui::Selection().setPreselect(docname,objname,subname,x,y,z,0,true);
-        if(ret<0 && hasHighlight())
-            return true;
-
-        if(ret) {
+        if(ret > 0 || ret == -1) {
             if (hasHighlight()) {
                 SoHighlightElementAction action;
                 action.setHighlighted(false);
