@@ -697,8 +697,10 @@ void SoFCUnifiedSelection::onPreselectTimer() {
         setHighlight(infos[0]);
     else {
         // Do not remove preslection in case of dock overlay mouse pass through
-        if (!OverlayManager::instance()->isUnderOverlay())
-            setHighlight(PickedInfo());
+        if (!OverlayManager::instance()->isUnderOverlay()) {
+            // setHighlight(PickedInfo());
+            Selection().rmvPreselect();
+        }
     }
 
     preselTime = SbTime::getTimeOfDay();

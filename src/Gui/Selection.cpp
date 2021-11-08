@@ -1114,6 +1114,7 @@ void SelectionSingleton::rmvPreselect()
     }
 
     FC_TRACE("rmv preselect");
+    ToolTip::hideText();
 
     // notify observing objects
     notify(std::move(Chng));
