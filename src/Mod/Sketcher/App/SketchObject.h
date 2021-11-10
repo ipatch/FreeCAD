@@ -729,6 +729,7 @@ public:
     App::PropertyLink Base;
     App::PropertyLinkSub BaseRefs;
     App::PropertyBool SyncPlacement;
+    App::PropertyVector ScaleVector;
 
     App::DocumentObjectExecReturn *execute(void);
     virtual void onChanged(const App::Property* /*prop*/);
