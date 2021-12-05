@@ -40,6 +40,11 @@ class gp_Dir;
 
 class BRepBuilderAPI_MakeShape;
 
+namespace App
+{
+class PropertyLinkList;
+}
+
 namespace Part
 {
 
@@ -69,6 +74,8 @@ public:
     virtual const App::PropertyComplexGeoData* getPropertyOfGeometry() const override;
 
     virtual PyObject* getPyObject(void) override;
+
+    virtual App::PropertyLinkList *getShapeLinksProperty() {return nullptr;}
 
     struct HistoryItem {
         App::DocumentObject *obj;
