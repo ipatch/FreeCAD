@@ -556,6 +556,7 @@ public:
         LinkRestoreLabel,
         LinkSyncSubObject, // used by DlgPropertyLink
         LinkNewElement, // return new element name in getPyObject
+        LinkSilentRestore, // do not report error on restore (e.g. missing external link)
     };
     inline bool testFlag(int flag) const {
         return _Flags.test((std::size_t)flag);
@@ -564,6 +565,8 @@ public:
     virtual void setAllowPartial(bool enable) { (void)enable; }
 
     void setReturnNewElement(bool enable);
+
+    void setSilentRestore(bool enable);
 
 protected:
     virtual void hasSetValue() override;
