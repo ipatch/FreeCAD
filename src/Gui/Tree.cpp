@@ -5822,7 +5822,10 @@ void TreeWidget::_slotDeleteObject(const Gui::ViewProviderDocumentObject& view, 
                 // claimed children cache is expected to have been cleared.
                 docItem->populateItem(item, true);
             }
-            item->myOwner = 0;
+            if (item->myOwner) {
+                item->myOwner->removeItemOnTop(item);
+                item->myOwner = 0;
+            }
             delete item;
         }
         blockConnection(lock);
