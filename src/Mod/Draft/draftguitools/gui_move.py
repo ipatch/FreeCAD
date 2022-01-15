@@ -98,7 +98,7 @@ class Move(gui_base_original.Modifier):
                                               spaces=True,
                                               noarchchild=True)
         print(self.selected_objects)
-        self.ui.lineUi(title=translate("draft", self.featureName), icon="Draft_Move")
+        self.ui.lineUi(title=translate("draft", self.featureName))
         self.ui.modUi()
         if self.copymode:
             self.ui.isCopy.setChecked(True)
