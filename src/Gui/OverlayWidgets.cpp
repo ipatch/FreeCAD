@@ -3593,7 +3593,7 @@ public:
             int dockArea = overlay->getDockArea();
 
             if (dockArea == Qt::BottomDockWidgetArea) {
-                if (rect.bottom() - pos.y() < sideSize.height()) {
+                if (pos.y() < rect.bottom() && rect.bottom() - pos.y() < sideSize.height()) {
                     rect.setTop(rect.bottom() - _MinimumOverlaySize);
                     rect.setBottom(rectMain.bottom());
                     rect.setLeft(rectMdi.left());
@@ -3604,7 +3604,7 @@ public:
                 }
             }
             if (dockArea == Qt::LeftDockWidgetArea) {
-                if (pos.x() - rect.left() < sideSize.width()) {
+                if (pos.x() >= rect.left() && pos.x() - rect.left() < sideSize.width()) {
                     rect.setRight(rect.left() + _MinimumOverlaySize);
                     rect.setLeft(rectMain.left());
                     rect.setTop(rectMdi.top());
@@ -3615,7 +3615,7 @@ public:
                 }
             }
             else if (dockArea == Qt::RightDockWidgetArea) {
-                if (rect.right() - pos.x() < sideSize.width()) {
+                if (pos.x() < rect.right() && rect.right() - pos.x() < sideSize.width()) {
                     rect.setLeft(rect.right() - _MinimumOverlaySize);
                     rect.setRight(rectMain.right());
                     rect.setTop(rectMdi.top());
@@ -3626,7 +3626,7 @@ public:
                 }
             }
             else if (dockArea == Qt::TopDockWidgetArea) {
-                if (pos.y() - rect.top() < sideSize.height()) {
+                if (pos.y() >= rect.top() && pos.y() - rect.top() < sideSize.height()) {
                     rect.setBottom(rect.top() + _MinimumOverlaySize);
                     rect.setTop(rectMain.top());
                     rect.setLeft(rectMdi.left());
@@ -3713,6 +3713,7 @@ public:
         OverlayTabWidget *dst = nullptr;
         int dstIndex = -1;
         QDockWidget *dstDock = nullptr;
+        Qt::DockWidgetArea dstDockArea;
 
         if (!tabWidget) {
             rect = QRect(pos - dragOffset, dragSize);
@@ -3729,6 +3730,7 @@ public:
                     continue;
                 if (dockWidget->rect().contains(dockWidget->mapFromGlobal(pos))) {
                     dstDock = dockWidget;
+                    dstDockArea = getMainWindow()->dockWidgetArea(dstDock);
                     rect = QRect(dockWidget->mapToGlobal(QPoint()),
                                 dockWidget->size());
                     break;
@@ -3780,6 +3782,37 @@ public:
                 _DragFloating->hide();
         }
 
+        int insertDock = 0; // 0: tabify, -1: insert before, 1: insert after
+        if (!dst && dstDock) {
+            switch(dstDockArea) {
+            case Qt::LeftDockWidgetArea:
+            case Qt::RightDockWidgetArea:
+                if (pos.y() < rect.top() + rect.height()/4) {
+                    insertDock = -1;
+                    rect.setBottom(rect.top() + rect.height()/2);
+                }
+                else if (pos.y() > rect.bottom() - rect.height()/4) {
+                    insertDock = 1;
+                    int height = rect.height();
+                    rect.setTop(rect.bottom() - height/4);
+                    rect.setHeight(height/2);
+                }
+                break;
+            default:
+                if (pos.x() < rect.left() + rect.width()/4) {
+                    insertDock = -1;
+                    rect.setRight(rect.left() + rect.width()/2);
+                }
+                else if (pos.x() > rect.right() - rect.width()/4) {
+                    insertDock = 1;
+                    int width = rect.width();
+                    rect.setLeft(rect.right() - width/4);
+                    rect.setWidth(width/2);
+                }
+                break;
+            }
+        }
+
         if (!drop) {
             if (!_DragFrame)
                 _DragFrame = new OverlayDragFrame(getMainWindow());
@@ -3819,7 +3852,37 @@ public:
         if (!dst) {
             if (dstDock) {
                 dock->setFloating(false);
-                getMainWindow()->tabifyDockWidget(dstDock, dock);
+                if(insertDock == 0)
+                    getMainWindow()->tabifyDockWidget(dstDock, dock);
+                else {
+                    std::map<int, QDockWidget*> docks;
+                    for(auto dockWidget : getMainWindow()->findChildren<QDockWidget*>()) {
+                        if (dockWidget == dock
+                                || !dockWidget->isVisible()
+                                || getMainWindow()->dockWidgetArea(dockWidget) != dstDockArea)
+                            continue;
+                        auto pos = dockWidget->mapToGlobal(QPoint(0,0));
+                        if (dstDockArea == Qt::LeftDockWidgetArea || dstDockArea == Qt::RightDockWidgetArea)
+                            docks[pos.y()] = dockWidget;
+                        else
+                            docks[pos.x()] = dockWidget;
+                    }
+                    auto it = docks.begin();
+                    for (;it != docks.end(); ++it) {
+                        if (it->second == dstDock)
+                            break;
+                    }
+                    if (insertDock > 0 && it != docks.end())
+                        ++it;
+                    for (auto iter = it; iter != docks.end(); ++iter)
+                        getMainWindow()->removeDockWidget(iter->second);
+                    getMainWindow()->addDockWidget(dstDockArea, dock);
+                    dock->show();
+                    for (auto iter = it; iter != docks.end(); ++iter) {
+                        getMainWindow()->addDockWidget(dstDockArea, iter->second);
+                        iter->second->show();
+                    }
+                }
             }
             else {
                 dock->setFloating(true);
