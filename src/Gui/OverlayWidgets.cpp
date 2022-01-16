@@ -2045,6 +2045,15 @@ isNear(const QPoint &a, const QPoint &b, int tol = 16)
 
 void OverlayTitleBar::mouseMoveEvent(QMouseEvent *me)
 {
+    if (ignoreMouse) {
+        if (!(me->buttons() & Qt::LeftButton))
+            ignoreMouse = false;
+        else {
+            me->ignore();
+            return;
+        }
+    }
+
     if (_Dragging != this && mouseMovePending && (me->buttons() & Qt::LeftButton)) {
         if (isNear(dragOffset, me->pos()))
             return;
@@ -2081,6 +2090,7 @@ void OverlayTitleBar::mousePressEvent(QMouseEvent *me)
     OverlayTabWidget *tabWidget = qobject_cast<OverlayTabWidget*>(parent);
     if (!tabWidget) {
         if(QApplication::queryKeyboardModifiers() == Qt::ShiftModifier) {
+            ignoreMouse = true;
             me->ignore();
             return;
         }
@@ -2099,7 +2109,7 @@ void OverlayTitleBar::mousePressEvent(QMouseEvent *me)
             }
         }
     }
-
+    ignoreMouse = false;
     QSize mwSize = getMainWindow()->size();
     dragSize.setWidth(std::max(_MinimumOverlaySize,
                                std::min(mwSize.width()/2, dragSize.width())));
@@ -2113,6 +2123,11 @@ void OverlayTitleBar::mousePressEvent(QMouseEvent *me)
 
 void OverlayTitleBar::mouseReleaseEvent(QMouseEvent *me)
 {
+    if (ignoreMouse) {
+        me->ignore();
+        return;
+    }
+
     setCursor(Qt::OpenHandCursor);
     mouseMovePending = false;
     if (_Dragging != this)
