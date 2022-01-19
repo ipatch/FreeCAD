@@ -181,6 +181,7 @@ SbTime  ViewProviderSketch::prvClickTime;
 SbVec2s ViewProviderSketch::prvClickPos;
 SbVec2s ViewProviderSketch::prvCursorPos;
 SbVec2s ViewProviderSketch::newCursorPos;
+SbVec2f ViewProviderSketch::prvPickedPoint;
 
 //**************************************************************************
 // Edit data structure
@@ -768,7 +769,8 @@ bool ViewProviderSketch::mouseButtonPressed(int Button, bool pressed, const SbVe
     SbVec3f pos = point;
     if (pp) {
         const SoDetail *detail = pp->getDetail();
-        if (detail && detail->getTypeId() == SoPointDetail::getClassTypeId()) {
+        // if (detail && detail->getTypeId() == SoPointDetail::getClassTypeId()) {
+        if (detail) {
             pos = pp->getPoint();
         }
     }
@@ -776,6 +778,8 @@ bool ViewProviderSketch::mouseButtonPressed(int Button, bool pressed, const SbVe
     try {
         getCoordsOnSketchPlane(x,y,pos,normal);
         snapToGrid(x, y);
+        prvPickedPoint[0] = x;
+        prvPickedPoint[1] = y;
     }
     catch (const Base::DivisionByZeroError&) {
         return false;
@@ -1419,14 +1423,10 @@ bool ViewProviderSketch::mouseMove(const SbVec2s &cursorPos, Gui::View3DInventor
                 if (geo->getTypeId() == Part::GeomLineSegment::getClassTypeId() ||
                     geo->getTypeId() == Part::GeomBSplineCurve::getClassTypeId()) {
                     relative = true;
-                    //xInit = x;
-                    //yInit = y;
                     // Since the cursor moved from where it was clicked, and this is a relative move,
                     // calculate the click position and use it as initial point.
-                    SbLine line2;
-                    getProjectingLine(prvCursorPos, viewer, line2);
-                    getCoordsOnSketchPlane(xInit,yInit,line2.getPosition(),line2.getDirection());
-                    snapToGrid(xInit, yInit);
+                    xInit = prvPickedPoint[0];
+                    yInit = prvPickedPoint[1];
                 } else {
                     relative = false;
                     xInit = 0;
