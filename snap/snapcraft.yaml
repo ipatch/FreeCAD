@@ -251,7 +251,7 @@ parts:
     source: https://github.com/realthunder/FreeCADMakeImage.git
     override-prime: |
       export FMK_BUILD_DATE=$(date +%Y%m%d)
-      branding_path=$SNAPCRAFT_PART_SRC/conda/branding/asm3-daily
+      branding_path=$SNAPCRAFT_PART_SRC/conda/branding/asm3
       $branding_path/install.sh $branding_path $SNAPCRAFT_PRIME/usr
       sed -i -E \
         "s|^Icon=(.*)|Icon=\${SNAP}/usr/share/icons/hicolor/scalable/apps/freecad_link.svg|g" \
