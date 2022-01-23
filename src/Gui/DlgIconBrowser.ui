@@ -130,15 +130,14 @@
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Icon prefix</string>
+        <string>Icon directory</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="Gui::PrefLineEdit" name="editPrefix">
        <property name="toolTip">
-        <string>Icon export directory. It is a subdirectory under your application user direction
-Gui/Stylesheets/icons.</string>
+        <string>Icon export directory. It is a subdirectory, Gui/IconSets, in your application user directory.</string>
        </property>
        <property name="prefEntry" stdset="0">
         <cstring>IconBrowserIconPrefix</cstring>
