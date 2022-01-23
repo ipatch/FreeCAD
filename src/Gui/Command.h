@@ -573,6 +573,7 @@ public:
     int getType() const { return eType; }
     //@}
 
+    virtual void refreshIcon();
 
     /** @name arbitrary helper methods */
     //@{
@@ -649,6 +650,8 @@ public:
 
     Command *getCommand(int idx) const;
 
+    virtual void refreshIcon();
+
 protected:
     virtual void activated(int iMsg);
     virtual Gui::Action * createAction(void);
@@ -695,6 +698,7 @@ class PythonCommand: public Command
 public:
     PythonCommand(const char* name, PyObject * pcPyCommand, const char* pActivationString);
     virtual ~PythonCommand();
+    virtual void refreshIcon();
 
 protected:
     /** @name Methods reimplemented for Command Framework */
@@ -746,6 +750,7 @@ class PythonGroupCommand: public Command
 public:
     PythonGroupCommand(const char* name, PyObject * pcPyCommand);
     virtual ~PythonGroupCommand();
+    virtual void refreshIcon();
 
 protected:
     /** @name Methods reimplemented for Command Framework */
@@ -910,6 +915,8 @@ public:
 
     void addCommandMode(const char* sContext, const char* sName);
     void updateCommands(const char* sContext, int mode);
+
+    void refreshIcons();
 
     /// Return a revision number to check for any changes in commands
     int getRevision() { return _revision; }
