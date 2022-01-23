@@ -99,6 +99,8 @@ public:
     /// Get a list of TaskBoxes associated with this object
     virtual void getTaskViewContent(std::vector<Gui::TaskView::TaskContent*>&) const override;
 
+    virtual QIcon getIcon(void) const;
+
     /// Run a redraw
     void updateView();
     /// Get the object of this ViewProvider object

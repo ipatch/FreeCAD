@@ -308,7 +308,7 @@ void ViewProvider::update(const App::Property* prop)
 
 QIcon ViewProvider::getIcon(void) const
 {
-    return mergeOverlayIcons (Gui::BitmapFactory().pixmap(sPixmap));
+    return mergeOverlayIcons (Gui::BitmapFactory().iconFromTheme(sPixmap));
 }
 
 void ViewProvider::getExtraIcons(std::vector<std::pair<QByteArray,QPixmap> > &icons) const

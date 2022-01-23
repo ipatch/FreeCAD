@@ -1062,7 +1062,10 @@ static QByteArray _iconTagExport("group:Export");
 void ViewProviderDocumentObject::getExtraIcons(
         std::vector<std::pair<QByteArray,QPixmap> > &icons) const
 {
-    ViewProvider::getExtraIcons(icons);
+    {
+        BitmapCacheContext ctx(getObject() ? getObject()->getTypeId().getName() : getTypeId().getName());
+        ViewProvider::getExtraIcons(icons);
+    }
 
     auto prop = App::GroupExtension::getChildExportProperty(getObject());
     if (prop && prop->getValue()) {
@@ -1132,4 +1135,11 @@ void ViewProviderDocumentObject::setupContextMenu(QMenu* menu, QObject* receiver
             }
         }
     }
+}
+
+
+QIcon ViewProviderDocumentObject::getIcon(void) const
+{
+    BitmapCacheContext ctx(getObject() ? getObject()->getTypeId().getName() : getTypeId().getName());
+    return ViewProvider::getIcon();
 }
