@@ -558,6 +558,10 @@ void DlgCustomActionsImp::changeEvent(QEvent *e)
         showActions();
         ui->actionAccel->setText(qApp->translate("Gui::AccelLineEdit", "none"));
     }
+    else if (e->type() == QEvent::StyleChange) {
+        ui->actionListWidget->clear();
+        showActions();
+    }
     QWidget::changeEvent(e);
 }
 
