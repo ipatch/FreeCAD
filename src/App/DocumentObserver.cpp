@@ -175,21 +175,28 @@ void DocumentObjectT::operator=(const DocumentObject* obj)
 }
 
 void DocumentObjectT::operator=(const Property *prop) {
-    if(!prop || !prop->getName()
-             || !prop->getContainer()
-             || !prop->getContainer()->isDerivedFrom(App::DocumentObject::getClassTypeId()))
-    {
-        object.clear();
-        label.clear();
-        document.clear();
-        property.clear();
-    } else {
-        auto obj = static_cast<App::DocumentObject*>(prop->getContainer());
-        object = obj->getNameInDocument();
-        label = obj->Label.getValue();
-        document = obj->getDocument()->getName();
-        property = prop->getName();
+    if(prop && prop->getName() && prop->getContainer()) {
+        if (prop->getContainer()->isDerivedFrom(App::DocumentObject::getClassTypeId())) {
+            auto obj = static_cast<App::DocumentObject*>(prop->getContainer());
+            object = obj->getNameInDocument();
+            label = obj->Label.getValue();
+            document = obj->getDocument()->getName();
+            property = prop->getName();
+            return;
+        }
+        if (prop->getContainer()->isDerivedFrom(App::Document::getClassTypeId())) {
+            auto doc = static_cast<App::Document*>(prop->getContainer());
+            object.clear();
+            label = doc->Label.getValue();
+            document = doc->getName();
+            property = prop->getName();
+            return;
+        }
     }
+    object.clear();
+    label.clear();
+    document.clear();
+    property.clear();
 }
 
 bool DocumentObjectT::operator==(const DocumentObjectT &other) const {
@@ -271,10 +278,12 @@ std::string DocumentObjectT::getPropertyPython() const
 }
 
 Property *DocumentObjectT::getProperty() const {
+    if (object.empty()) {
+        auto doc = getDocument();
+        return doc ? doc->getPropertyByName(property.c_str()) : nullptr;
+    }
     auto obj = getObject();
-    if(obj)
-        return obj->getPropertyByName(property.c_str());
-    return 0;
+    return obj ? obj->getPropertyByName(property.c_str()) : nullptr;
 }
 
 // -----------------------------------------------------------------------------
@@ -454,8 +463,15 @@ const std::string &SubObjectT::getSubName() const {
     return subname;
 }
 
-std::string SubObjectT::getSubNameNoElement() const {
-    return Data::ComplexGeoData::noElementName(subname.c_str());
+std::string SubObjectT::getSubNameNoElement(bool withObjName) const {
+    if (!withObjName)
+        return Data::ComplexGeoData::noElementName(subname.c_str());
+    std::string res(getObjectName());
+    res += ".";
+    const char * element = Data::ComplexGeoData::findElementName(subname.c_str());
+    if(element)
+        return res.insert(res.size(), subname.c_str(), element - subname.c_str());
+    return res;
 }
 
 const char *SubObjectT::getElementName() const {
