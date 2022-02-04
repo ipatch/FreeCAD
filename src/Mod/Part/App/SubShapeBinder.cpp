@@ -1255,7 +1255,9 @@ SubShapeBinder::import(const App::SubObjectT &feature,
                 || (!subs.empty() && resolvedSub != subs[0]))
             continue;
         if (element.size()) {
-            auto res = Part::Feature::getElementFromSource(binder, "", sobj, element.c_str(), true);
+            auto res = Part::Feature::getElementFromSource(
+                    binder, "", binderSupport.getValue(),
+                    (resolvedSub + element).c_str(), true);
             if (res.size())
                 return App::SubObjectT(binder, res.front().second.c_str());
             FC_WARN("Failed to deduce bound geometry from existing import: " << binder->getFullName());
@@ -1290,11 +1292,12 @@ SubShapeBinder::import(const App::SubObjectT &feature,
     std::map<App::DocumentObject*, std::vector<std::string> > support;
     auto &supportSubs = support[link];
     if (resolvedSub.size())
-        supportSubs.push_back(std::move(resolvedSub));
+        supportSubs.push_back(resolvedSub);
     binder->setLinks(std::move(support));
     if (element.size()) {
         doc->recomputeFeature(binder);
-        auto res = Part::Feature::getElementFromSource(binder, "", sobj, element.c_str(), true);
+        auto res = Part::Feature::getElementFromSource(
+                binder, "", link, (resolvedSub + element).c_str(), true);
         if (res.size()) {
             guard.release();
             return App::SubObjectT(binder, res.front().second.c_str());

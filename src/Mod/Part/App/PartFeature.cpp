@@ -326,10 +326,10 @@ Feature::getElementFromSource(App::DocumentObject *obj,
     if (!obj || !src)
         return res;
 
-    auto shape = getTopoShape(obj, subname); 
+    auto shape = getTopoShape(obj, subname, false, nullptr, nullptr, true,
+            /*transform = */ false);
     App::DocumentObject *owner = nullptr;
     auto srcShape = getTopoShape(src, srcSub, false, nullptr, &owner);
-
     int tagChanges;
     std::pair<std::string, std::string> element;
     const char *checkingSubname = "";
@@ -405,6 +405,9 @@ Feature::getElementFromSource(App::DocumentObject *obj,
         }
         return res;
     }
+
+    if (element.second.empty())
+        return res;
 
     // No shortcut, need to search every element of the same type. This may
     // result in multiple matches, e.g. a compound of array of the same
