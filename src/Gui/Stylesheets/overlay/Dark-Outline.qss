@@ -105,7 +105,7 @@ Gui--OverlayProxyWidget {
   qproperty-hintColor: rgba(50, 50, 50, 0.6);
 }
 
-Gui--OverlayToolButton {
+Gui--OverlayToolutton {
   background: transparent;
   padding: 0px;
   border: none;
