@@ -36,6 +36,7 @@
 # include <QApplication>
 # include <QPalette>
 # include <QtGlobal>
+# include <QMenu>
 #endif
 
 #include <boost/algorithm/string/predicate.hpp>
