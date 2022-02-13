@@ -2991,7 +2991,7 @@ public:
             App::Document *pDoc,PropertyXLink *l, const char *objName)
     {
         QString path;
-        l->filePath = getDocPath(filename,pDoc,true,&path);
+        l->filePath = getDocPath(filename,pDoc,false,&path);
 
         FC_LOG("finding doc " << filename);
 
@@ -3747,9 +3747,11 @@ void PropertyXLink::Save (Base::Writer &writer) const {
                 }else
                     FC_WARN("PropertyXLink export without saving the document");
             }
-            if(_path.size())
-                path = _path.c_str();
-        }
+        } else if (filePath.size())
+            _path = DocInfo::getDocPath(filePath.c_str(),owner->getDocument(),true);
+
+        if(_path.size())
+            path = _path.c_str();
         writer.Stream() << writer.ind()
             << "<XLink file=\"" << encodeAttribute(path)
             << "\" stamp=\"" << (docInfo&&docInfo->pcDoc?docInfo->pcDoc->LastModifiedDate.getValue():"")
