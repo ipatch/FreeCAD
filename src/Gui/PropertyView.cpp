@@ -247,7 +247,7 @@ void PropertyView::hideEvent(QHideEvent *ev) {
 
 void PropertyView::showEvent(QShowEvent *ev) {
     this->attachSelection();
-    this->timer->start(ViewParams::instance()->getPropertyViewTimer());
+    this->timer->start(ViewParams::PropertyViewTimer());
     QWidget::showEvent(ev);
 }
 
@@ -273,7 +273,7 @@ void PropertyView::slotChangePropertyData(const App::Property& prop)
 {
     if (propertyEditorData->propOwners.count(prop.getContainer())) {
         propertyEditorData->updateProperty(prop);
-        timer->start(ViewParams::instance()->getPropertyViewTimer());
+        timer->start(ViewParams::PropertyViewTimer());
     }
 }
 
@@ -281,7 +281,7 @@ void PropertyView::slotChangePropertyView(const Gui::ViewProvider&, const App::P
 {
     if (propertyEditorView->propOwners.count(prop.getContainer())) {
         propertyEditorView->updateProperty(prop);
-        timer->start(ViewParams::instance()->getPropertyViewTimer());
+        timer->start(ViewParams::PropertyViewTimer());
     }
 }
 
@@ -299,7 +299,7 @@ void PropertyView::slotAppendDynamicProperty(const App::Property& prop)
     if (propertyEditorData->propOwners.count(parent)
             || propertyEditorView->propOwners.count(parent))
     {
-        timer->start(ViewParams::instance()->getPropertyViewTimer());
+        timer->start(ViewParams::PropertyViewTimer());
     }
 }
 
@@ -312,7 +312,7 @@ void PropertyView::slotRemoveDynamicProperty(const App::Property& prop)
         propertyEditorView->removeProperty(prop);
     else
         return;
-    timer->start(ViewParams::instance()->getPropertyViewTimer());
+    timer->start(ViewParams::PropertyViewTimer());
 }
 
 void PropertyView::slotChangePropertyEditor(const App::Document &, const App::Property& prop)
@@ -320,10 +320,10 @@ void PropertyView::slotChangePropertyEditor(const App::Document &, const App::Pr
     App::PropertyContainer* parent = prop.getContainer();
     if (propertyEditorData->propOwners.count(parent)) {
         propertyEditorData->updateProperty(prop);
-        timer->start(ViewParams::instance()->getPropertyViewTimer());
+        timer->start(ViewParams::PropertyViewTimer());
     } else if(propertyEditorView->propOwners.count(parent)) {
         propertyEditorView->updateProperty(prop);
-        timer->start(ViewParams::instance()->getPropertyViewTimer());
+        timer->start(ViewParams::PropertyViewTimer());
     }
 }
 
@@ -334,7 +334,7 @@ void PropertyView::slotDeleteDocument(const Gui::Document &doc) {
         propertyEditorData->buildUp();
         propertyEditorData->setAutomaticDocumentUpdate(true);
         clearPropertyItemSelection();
-        timer->start(ViewParams::instance()->getPropertyViewTimer());
+        timer->start(ViewParams::PropertyViewTimer());
     }
 }
 
@@ -345,7 +345,7 @@ void PropertyView::slotDeletedViewObject(const Gui::ViewProvider &vp) {
         propertyEditorData->buildUp();
         propertyEditorData->setAutomaticDocumentUpdate(true);
         clearPropertyItemSelection();
-        timer->start(ViewParams::instance()->getPropertyViewTimer());
+        timer->start(ViewParams::PropertyViewTimer());
     }
 }
 
@@ -356,7 +356,7 @@ void PropertyView::slotDeletedObject(const App::DocumentObject &obj) {
         propertyEditorData->buildUp();
         propertyEditorData->setAutomaticDocumentUpdate(true);
         clearPropertyItemSelection();
-        timer->start(ViewParams::instance()->getPropertyViewTimer());
+        timer->start(ViewParams::PropertyViewTimer());
     }
 }
 
@@ -366,7 +366,7 @@ void PropertyView::slotActiveDocument(const Gui::Document &doc)
 }
 
 void PropertyView::checkEnable(const char *doc) {
-    if(ViewParams::instance()->getEnablePropertyViewForInactiveDocument()) {
+    if(ViewParams::EnablePropertyViewForInactiveDocument()) {
         setEnabled(true);
         return;
     }
@@ -401,7 +401,7 @@ void PropertyView::onSelectionChanged(const SelectionChanges& msg)
         return;
 
     // clear the properties.
-    timer->start(ViewParams::instance()->getPropertyViewTimer());
+    timer->start(ViewParams::PropertyViewTimer());
 }
 
 void PropertyView::applyParams()

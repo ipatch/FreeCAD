@@ -1729,15 +1729,15 @@ void ExpLineEdit::keyPressEvent(QKeyEvent *event)
 LineEditStyle::LineEditStyle(QStyle *style)
     :QProxyStyle(style)
 {
-    cursor_width = ViewParams::getTextCursorWidth();
+    cursor_width = ViewParams::TextCursorWidth();
 }
 
 void LineEditStyle::setup(QLineEdit *le)
 {
     if (!le) return;
     if (auto style = qobject_cast<LineEditStyle*>(le->style())) {
-        if (style->cursorWidth() != ViewParams::getTextCursorWidth()) {
-            style->setCursorWidth(ViewParams::getTextCursorWidth());
+        if (style->cursorWidth() != ViewParams::TextCursorWidth()) {
+            style->setCursorWidth(ViewParams::TextCursorWidth());
             if (le->hasFocus())
                 le->update();
         }
@@ -1748,13 +1748,13 @@ void LineEditStyle::setup(QLineEdit *le)
 void LineEditStyle::setup(QTextEdit *editor)
 {
     if (editor)
-        editor->setCursorWidth(ViewParams::getTextCursorWidth());
+        editor->setCursorWidth(ViewParams::TextCursorWidth());
 }
 
 void LineEditStyle::setup(QPlainTextEdit *editor)
 {
     if (editor)
-        editor->setCursorWidth(ViewParams::getTextCursorWidth());
+        editor->setCursorWidth(ViewParams::TextCursorWidth());
 }
 
 void LineEditStyle::setupWidget(QWidget *w)

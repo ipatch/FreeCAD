@@ -2063,7 +2063,7 @@ std::set<int> ViewProviderSketch::detectPreselectionConstr(const SoPickedPoint *
 
     SoPath *path = Point->getPath();
     SoNode *tail = path->getTail();
-    int r = static_cast<int>(Gui::ViewParams::getPickRadius());
+    int r = static_cast<int>(Gui::ViewParams::PickRadius());
 
     for (int i=1; i<path->getLength(); ++i) {
         SoNode * tailFather = path->getNodeFromTail(i);

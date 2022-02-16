@@ -269,11 +269,11 @@ ViewProviderPartExt::ViewProviderPartExt()
     VisualTouched = true;
     forceUpdateCount = 0;
 
-    unsigned long lcol = Gui::ViewParams::instance()->getDefaultShapeLineColor(); // dark grey (25,25,25)
+    unsigned long lcol = Gui::ViewParams::DefaultShapeLineColor(); // dark grey (25,25,25)
     float r,g,b;
     r = ((lcol >> 24) & 0xff) / 255.0; g = ((lcol >> 16) & 0xff) / 255.0; b = ((lcol >> 8) & 0xff) / 255.0;
-    int lwidth = Gui::ViewParams::instance()->getDefaultShapeLineWidth();
-    int psize = Gui::ViewParams::instance()->getDefaultShapePointSize();
+    int lwidth = Gui::ViewParamsDefaultShapeLineWidth();
+    int psize = Gui::ViewParamsDefaultShapePointSize();
 
     NormalsFromUV = PartParams::NormalsFromUVNodes();
 

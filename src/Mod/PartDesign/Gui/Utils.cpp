@@ -1141,7 +1141,7 @@ public:
             Gui::Selection().clearSelection();
             // fall through
         case OnTopAddSelect: {
-            bool ontop = Gui::ViewParams::getShowSelectionOnTop();
+            bool ontop = Gui::ViewParams::ShowSelectionOnTop();
             if (!ontop)
                 Gui::ViewParams::setShowSelectionOnTop(true);
             Gui::Selection().addSelection(objT);

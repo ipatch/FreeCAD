@@ -8,7 +8,6 @@ def declare_begin(module):
     class_doc = module.ClassDoc
 
     cog.out(f'''
-#include <unordered_map>
 #include <Base/Parameter.h>
 
 namespace {namespace} {{
@@ -78,8 +77,10 @@ def define(module):
     class_doc = module.ClassDoc
 
     cog.out(f'''
+#include <unordered_map>
 #include <App/Application.h>
 #include <App/DynamicProperty.h>
+#include "{class_name}.h"
 
 using namespace {namespace};
 

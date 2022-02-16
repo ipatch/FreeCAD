@@ -172,7 +172,7 @@ void SoBrepEdgeSet::glRender(SoGLRenderAction *action, bool inpath)
 
     Gui::FCDepthFunc depthGuard;
     if(!inpath && !delayrendering) {
-        if (ctx && ((!Gui::ViewParams::getShowSelectionOnTop() && ctx->isSelected())
+        if (ctx && ((!Gui::ViewParams::ShowSelectionOnTop() && ctx->isSelected())
                     || ctx->isHighlighted())) {
             if (ctx->isHighlightAll() || ctx->isSelectAll()) {
                 action->addDelayedPath(action->getCurPath()->copy());
@@ -201,7 +201,7 @@ void SoBrepEdgeSet::glRender(SoGLRenderAction *action, bool inpath)
     int pass = 2;
 
     if((!ctx2 || !ctx2->isSelectAll())
-       && Gui::ViewParams::getShowSelectionOnTop()
+       && Gui::ViewParams::ShowSelectionOnTop()
        && (!ctx || !ctx->isSelectAll()
                 || !Gui::ViewParams::highlightIndicesOnFullSelect()
                 || highlightIndices.getNum())
@@ -233,11 +233,11 @@ void SoBrepEdgeSet::glRender(SoGLRenderAction *action, bool inpath)
     for(;pass<=2;++pass) {
         state->push();
         if(pass==0) {
-            int pattern = Gui::ViewParams::getSelectionLinePattern();
+            int pattern = Gui::ViewParams::SelectionLinePattern();
             if(pattern) {
                 SoLinePatternElement::set(state, pattern);
-                if (Gui::ViewParams::getSelectionLinePatternScale() > 1)
-                    glLineStipple((GLint) (Gui::ViewParams::getSelectionLinePatternScale()),
+                if (Gui::ViewParams::SelectionLinePatternScale() > 1)
+                    glLineStipple((GLint) (Gui::ViewParams::SelectionLinePatternScale()),
                                 (GLushort) (pattern & 0xffff));
             }
         } else if(pass==1) {
@@ -254,7 +254,7 @@ void SoBrepEdgeSet::glRender(SoGLRenderAction *action, bool inpath)
             if(width < 1.0)
                 width = 1.0;
             if (Gui::SoFCDisplayModeElement::showHiddenLines(state))
-                width = std::max(width, (float)Gui::ViewParams::getSelectionHiddenLineWidth());
+                width = std::max(width, (float)Gui::ViewParams::SelectionHiddenLineWidth());
             pass = 2;
         }
 
@@ -496,8 +496,8 @@ void SoBrepEdgeSet::_renderSelection(SoGLRenderAction *action,
                 state,this,&color,!RenderIndices.empty());
         if(pattern) {
             SoLinePatternElement::set(state, this, pattern);
-            if (Gui::ViewParams::getSelectionLinePatternScale() > 1)
-                glLineStipple((GLint) (Gui::ViewParams::getSelectionLinePatternScale()),
+            if (Gui::ViewParams::SelectionLinePatternScale() > 1)
+                glLineStipple((GLint) (Gui::ViewParams::SelectionLinePatternScale()),
                               (GLushort) (pattern & 0xffff));
         }
     }

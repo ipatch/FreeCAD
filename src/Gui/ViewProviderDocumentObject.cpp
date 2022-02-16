@@ -103,7 +103,7 @@ ViewProviderDocumentObject::ViewProviderDocumentObject()
             "No shadowing: Neither cast nor receive any shadow.");
 
     ADD_PROPERTY_TYPE(Selectable, (true), sgroup, App::Prop_None, "Set if the object is selectable in the 3d view");
-    Selectable.setValue(ViewParams::instance()->getEnableSelection());
+    Selectable.setValue(ViewParams::EnableSelection());
 
     static const char* OnTopEnum[]= {"Disabled","Enabled","Object","Element",NULL};
     ADD_PROPERTY_TYPE(OnTopWhenSelected,((long int)0), sgroup, App::Prop_None,
@@ -303,7 +303,7 @@ void ViewProviderDocumentObject::show(void)
 {
     ViewProvider::show();
 
-    if(ViewParams::instance()->getUpdateSelectionVisual()
+    if(ViewParams::UpdateSelectionVisual()
            && !SelectionNoTopParentCheck::enabled())
     {
         auto obj = getObject();
@@ -626,7 +626,7 @@ bool ViewProviderDocumentObject::getElementPicked(const SoPickedPoint *pp, std::
     SoPath* path = pp->getPath();
     int idx = -1;
     auto childRoot = getChildRoot();
-    if(!childRoot && ViewParams::instance()->getMapChildrenPlacement())
+    if(!childRoot && ViewParams::MapChildrenPlacement())
         childRoot = getChildrenGroup();
     if(childRoot)
         idx = path->findNode(childRoot);
@@ -688,7 +688,7 @@ bool ViewProviderDocumentObject::getDetailPath(
     if(!vp) return false;
 
     auto childRoot = getChildRoot();
-    if(!childRoot && ViewParams::instance()->getMapChildrenPlacement())
+    if(!childRoot && ViewParams::MapChildrenPlacement())
         childRoot = getChildrenGroup();
 
     for(;;) {
@@ -840,7 +840,7 @@ Base::BoundBox3d ViewProviderDocumentObject::_getBoundingBox(
         return ViewProvider::_getBoundingBox(subname,&smat,false,viewer,depth+1);
     }
 
-    if(ViewParams::instance()->getMapChildrenPlacement()) {
+    if(ViewParams::MapChildrenPlacement()) {
         _subname = std::string(subname,dot+1-subname);
         subname = _subname.c_str();
         nextsub = dot+1;
