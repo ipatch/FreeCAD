@@ -284,6 +284,10 @@ public:
     virtual bool getElementPicked(const SoPickedPoint *pp, std::string &subname) const;
     virtual bool isEditingPickExclusive() const;
 
+    /// check if by default viewing sketch from bottom on start editing
+    static bool viewBottomOnEdit();
+    void setViewBottomOnEdit(bool enable);
+
     /** Observer for parameter group. */
     void OnChange(Base::Subject<const char*> &rCaller, const char * sReason) override;
 
