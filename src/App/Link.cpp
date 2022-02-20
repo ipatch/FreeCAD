@@ -57,43 +57,74 @@ namespace bp = boost::placeholders;
 typedef boost::iterator_range<const char*> CharRange;
 
 ////////////////////////////////////////////////////////////////////////
-LinkParams::LinkParams() {
-    handle = GetApplication().GetParameterGroupByPath(
-            "User parameter:BaseApp/Preferences/Link");
-#undef FC_LINK_PARAM
-#define FC_LINK_PARAM(_name,_ctype,_type,_def) \
-    _##_name = handle->Get##_type(#_name,_def);\
-    handle->Set##_type(#_name,_##_name);\
-    funcs[#_name] = &LinkParams::update##_name;
 
-    FC_LINK_PARAMS
+/*[[[cog
+import LinkParams
+LinkParams.define()
+]]]*/
 
-    handle->Attach(this);
-}
+class LinkParamsP: public ParameterGrp::ObserverType {
+public:
+    ParameterGrp::handle handle;
+    std::unordered_map<const char *,void(*)(LinkParamsP*),App::CStringHasher,App::CStringHasher> funcs;
 
-LinkParams::~LinkParams()
-{
-}
+    bool CopyOnChangeApplyToAll;
 
-void LinkParams::OnChange(Base::Subject<const char*> &, const char* sReason) {
-    if(!sReason)
-        return;
-    auto it = funcs.find(sReason);
-    if(it == funcs.end())
-        return;
-    it->second(this);
-}
+    LinkParamsP() {
+        handle = App::GetApplication().GetParameterGroupByPath("User parameter:BaseApp/Preferences/Link");
+        handle->Attach(this);
 
-LinkParams *LinkParams::instance() {
-    static LinkParams *inst;
-    if(!inst)
-        inst = new LinkParams;
+        CopyOnChangeApplyToAll = handle->GetBool("CopyOnChangeApplyToAll", true);
+        funcs["CopyOnChangeApplyToAll"] = &LinkParamsP::updateCopyOnChangeApplyToAll;
+    }
+
+    ~LinkParamsP() {
+    }
+
+    void OnChange(Base::Subject<const char*> &, const char* sReason) {
+        if(!sReason)
+            return;
+        auto it = funcs.find(sReason);
+        if(it == funcs.end())
+            return;
+        it->second(this);
+    }
+
+
+    static void updateCopyOnChangeApplyToAll(LinkParamsP *self) {
+        self->CopyOnChangeApplyToAll = self->handle->GetBool("CopyOnChangeApplyToAll", true);
+    }
+};
+
+LinkParamsP *instance() {
+    static LinkParamsP *inst;
+    if (!inst)
+        inst = new LinkParamsP;
     return inst;
 }
 
 ParameterGrp::handle LinkParams::getHandle() {
-    return handle;
+    return instance()->handle;
 }
+
+const char *LinkParams::docCopyOnChangeApplyToAll() {
+    return "";
+}
+const bool & LinkParams::CopyOnChangeApplyToAll() {
+    return instance()->CopyOnChangeApplyToAll;
+}
+const bool & LinkParams::defaultCopyOnChangeApplyToAll() {
+    const static bool def = true;
+    return def;
+}
+void LinkParams::setCopyOnChangeApplyToAll(const bool &v) {
+    instance()->handle->SetBool("CopyOnChangeApplyToAll",v);
+    instance()->CopyOnChangeApplyToAll = v;
+}
+void LinkParams::removeCopyOnChangeApplyToAll() {
+    instance()->handle->RemoveBool("CopyOnChangeApplyToAll");
+}
+//[[[end]]]
 
 ///////////////////////////////////////////////////////////////////////////////
 
