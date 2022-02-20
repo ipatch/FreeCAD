@@ -704,6 +704,30 @@ class AppExport LinkParams {
 public:
     static ParameterGrp::handle getHandle();
 
+    static const bool & HideScaleVector();
+    static const bool & defaultHideScaleVector();
+    static void removeHideScaleVector();
+    static void setHideScaleVector(const bool &v);
+    static const char *docHideScaleVector();
+
+    static const bool & CreateInPlace();
+    static const bool & defaultCreateInPlace();
+    static void removeCreateInPlace();
+    static void setCreateInPlace(const bool &v);
+    static const char *docCreateInPlace();
+
+    static const bool & CreateInContainer();
+    static const bool & defaultCreateInContainer();
+    static void removeCreateInContainer();
+    static void setCreateInContainer(const bool &v);
+    static const char *docCreateInContainer();
+
+    static const std::string & ActiveContainerKey();
+    static const std::string & defaultActiveContainerKey();
+    static void removeActiveContainerKey();
+    static void setActiveContainerKey(const std::string &v);
+    static const char *docActiveContainerKey();
+
     static const bool & CopyOnChangeApplyToAll();
     static const bool & defaultCopyOnChangeApplyToAll();
     static void removeCopyOnChangeApplyToAll();

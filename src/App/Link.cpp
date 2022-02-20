@@ -68,12 +68,24 @@ public:
     ParameterGrp::handle handle;
     std::unordered_map<const char *,void(*)(LinkParamsP*),App::CStringHasher,App::CStringHasher> funcs;
 
+    bool HideScaleVector;
+    bool CreateInPlace;
+    bool CreateInContainer;
+    std::string ActiveContainerKey;
     bool CopyOnChangeApplyToAll;
 
     LinkParamsP() {
         handle = App::GetApplication().GetParameterGroupByPath("User parameter:BaseApp/Preferences/Link");
         handle->Attach(this);
 
+        HideScaleVector = handle->GetBool("HideScaleVector", true);
+        funcs["HideScaleVector"] = &LinkParamsP::updateHideScaleVector;
+        CreateInPlace = handle->GetBool("CreateInPlace", true);
+        funcs["CreateInPlace"] = &LinkParamsP::updateCreateInPlace;
+        CreateInContainer = handle->GetBool("CreateInContainer", true);
+        funcs["CreateInContainer"] = &LinkParamsP::updateCreateInContainer;
+        ActiveContainerKey = handle->GetASCII("ActiveContainerKey", "");
+        funcs["ActiveContainerKey"] = &LinkParamsP::updateActiveContainerKey;
         CopyOnChangeApplyToAll = handle->GetBool("CopyOnChangeApplyToAll", true);
         funcs["CopyOnChangeApplyToAll"] = &LinkParamsP::updateCopyOnChangeApplyToAll;
     }
@@ -91,6 +103,18 @@ public:
     }
 
 
+    static void updateHideScaleVector(LinkParamsP *self) {
+        self->HideScaleVector = self->handle->GetBool("HideScaleVector", true);
+    }
+    static void updateCreateInPlace(LinkParamsP *self) {
+        self->CreateInPlace = self->handle->GetBool("CreateInPlace", true);
+    }
+    static void updateCreateInContainer(LinkParamsP *self) {
+        self->CreateInContainer = self->handle->GetBool("CreateInContainer", true);
+    }
+    static void updateActiveContainerKey(LinkParamsP *self) {
+        self->ActiveContainerKey = self->handle->GetASCII("ActiveContainerKey", "");
+    }
     static void updateCopyOnChangeApplyToAll(LinkParamsP *self) {
         self->CopyOnChangeApplyToAll = self->handle->GetBool("CopyOnChangeApplyToAll", true);
     }
@@ -105,6 +129,78 @@ LinkParamsP *instance() {
 
 ParameterGrp::handle LinkParams::getHandle() {
     return instance()->handle;
+}
+
+const char *LinkParams::docHideScaleVector() {
+    return "";
+}
+const bool & LinkParams::HideScaleVector() {
+    return instance()->HideScaleVector;
+}
+const bool & LinkParams::defaultHideScaleVector() {
+    const static bool def = true;
+    return def;
+}
+void LinkParams::setHideScaleVector(const bool &v) {
+    instance()->handle->SetBool("HideScaleVector",v);
+    instance()->HideScaleVector = v;
+}
+void LinkParams::removeHideScaleVector() {
+    instance()->handle->RemoveBool("HideScaleVector");
+}
+
+const char *LinkParams::docCreateInPlace() {
+    return "";
+}
+const bool & LinkParams::CreateInPlace() {
+    return instance()->CreateInPlace;
+}
+const bool & LinkParams::defaultCreateInPlace() {
+    const static bool def = true;
+    return def;
+}
+void LinkParams::setCreateInPlace(const bool &v) {
+    instance()->handle->SetBool("CreateInPlace",v);
+    instance()->CreateInPlace = v;
+}
+void LinkParams::removeCreateInPlace() {
+    instance()->handle->RemoveBool("CreateInPlace");
+}
+
+const char *LinkParams::docCreateInContainer() {
+    return "";
+}
+const bool & LinkParams::CreateInContainer() {
+    return instance()->CreateInContainer;
+}
+const bool & LinkParams::defaultCreateInContainer() {
+    const static bool def = true;
+    return def;
+}
+void LinkParams::setCreateInContainer(const bool &v) {
+    instance()->handle->SetBool("CreateInContainer",v);
+    instance()->CreateInContainer = v;
+}
+void LinkParams::removeCreateInContainer() {
+    instance()->handle->RemoveBool("CreateInContainer");
+}
+
+const char *LinkParams::docActiveContainerKey() {
+    return "";
+}
+const std::string & LinkParams::ActiveContainerKey() {
+    return instance()->ActiveContainerKey;
+}
+const std::string & LinkParams::defaultActiveContainerKey() {
+    const static std::string def = "";
+    return def;
+}
+void LinkParams::setActiveContainerKey(const std::string &v) {
+    instance()->handle->SetASCII("ActiveContainerKey",v);
+    instance()->ActiveContainerKey = v;
+}
+void LinkParams::removeActiveContainerKey() {
+    instance()->handle->RemoveASCII("ActiveContainerKey");
 }
 
 const char *LinkParams::docCopyOnChangeApplyToAll() {

@@ -13,6 +13,10 @@ ParamPath = 'User parameter:BaseApp/Preferences/Link'
 ClassDoc = 'Convenient class to obtain App::Link related parameters'
 
 Params = [
+    ParamBool('HideScaleVector', True),
+    ParamBool('CreateInPlace', True),
+    ParamBool('CreateInContainer', bool, False),
+    ParamString('ActiveContainerKey', ""),
     ParamBool('CopyOnChangeApplyToAll', True),
 ]
 
