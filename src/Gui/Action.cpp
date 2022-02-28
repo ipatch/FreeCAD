@@ -80,6 +80,7 @@
 #include "ViewParams.h"
 #include "BitmapFactory.h"
 #include "PieMenu.h"
+#include "ShortcutManager.h"
 
 #include <Base/Exception.h>
 #include <App/Application.h>
@@ -176,6 +177,11 @@ void Action::setEnabled(bool b)
     _action->setEnabled(b);
 }
 
+bool Action::isEnabled() const
+{
+    return _action->isEnabled();
+}
+
 void Action::setVisible(bool b)
 {
     _action->setVisible(b);
@@ -249,8 +255,8 @@ QString Action::createToolTip(QString _tooltip,
     if (text.isEmpty())
         return _tooltip;
 
-    // The follow code tries to make a more useful tooltip by inserting at the
-    // begining of the tooltip the action title in bold followed by the
+    // The following code tries to make a more useful tooltip by inserting at
+    // the beginning of the tooltip the action title in bold followed by the
     // shortcut.
     //
     // The long winding code is to deal with the fact that Qt will auto wrap

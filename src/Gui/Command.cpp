@@ -56,6 +56,7 @@
 #include "View3DInventorViewer.h"
 #include "WorkbenchManager.h"
 #include "Workbench.h"
+#include "ShortcutManager.h"
 
 #include <Base/Console.h>
 #include <Base/Exception.h>
@@ -157,6 +158,19 @@ Action* CommandBase::getAction() const
     return _pcAction;
 }
 
+void CommandBase::setShortcut(const QString &shortcut)
+{
+    if (_pcAction)
+        _pcAction->setShortcut(shortcut);
+}
+
+QString CommandBase::getShortcut() const
+{
+    if (_pcAction)
+        _pcAction->shortcut().toString();
+    return QString();
+}
+
 Action * CommandBase::createAction()
 {
     // does nothing
@@ -254,6 +268,12 @@ void Command::addTo(QWidget *pcWidget)
     if (!_pcAction) {
         BitmapCacheContext ctx(getName());
         _pcAction = createAction();
+#ifdef FC_DEBUG
+        // Accelerator conflict can now be dynamically resolved in ShortcutManager
+        //
+        // printConflictingAccelerators();
+#endif
+        setShortcut(ShortcutManager::instance()->getShortcut(getName(), getAccel()));
         testActive();
     }
 
@@ -271,6 +291,12 @@ void Command::addToGroup(ActionGroup* group)
     if (!_pcAction) {
         BitmapCacheContext ctx(getName());
         _pcAction = createAction();
+#ifdef FC_DEBUG
+        // Accelerator conflict can now be dynamically resolved in ShortcutManager
+        //
+        // printConflictingAccelerators();
+#endif
+        setShortcut(ShortcutManager::instance()->getShortcut(getName(), getAccel()));
         testActive();
     }
     group->addAction(_pcAction->findChild<QAction*>());
@@ -905,13 +931,6 @@ void Command::applyCommandData(const char* context, Action* action)
     else
         action->setStatusTip(QCoreApplication::translate(
             context, getToolTipText()));
-    QString accel = action->shortcut().toString(QKeySequence::NativeText);
-    if (!accel.isEmpty()) {
-        // show shortcut inside status tip
-        QString stip = QString::fromLatin1("(%1)\t%2")
-            .arg(accel, action->statusTip());
-        action->setStatusTip(stip);
-    }
 }
 
 const char* Command::keySequenceToAccel(int sk) const
@@ -1096,7 +1115,10 @@ void GroupCommand::setup(Action *pcAction) {
         auto cmd = cmds[idx].first;
         BitmapCacheContext ctx(cmd->getName());
         pcAction->setText(QCoreApplication::translate(className(), getMenuText()));
-        pcAction->setIcon(BitmapFactory().iconFromTheme(cmd->getPixmap()));
+        if (auto childAction = cmd->getAction())
+            pcAction->setIcon(childAction->icon());
+        else
+            pcAction->setIcon(BitmapFactory().iconFromTheme(cmd->getPixmap()));
         const char *context = dynamic_cast<PythonCommand*>(cmd) ? cmd->getName() : cmd->className();
         const char *tooltip = cmd->getToolTipText();
         const char *statustip = cmd->getStatusTip();
@@ -1243,20 +1265,6 @@ Action * MacroCommand::createAction(void)
     pcAction->setWhatsThis(QString::fromUtf8(sWhatsThis));
     if (sPixmap)
         pcAction->setIcon(Gui::BitmapFactory().pixmap(sPixmap));
-    pcAction->setShortcut(QString::fromLatin1(sAccel));
-
-    QString accel = pcAction->shortcut().toString(QKeySequence::NativeText);
-    if (!accel.isEmpty()) {
-        // show shortcut inside tooltip
-        QString ttip = QString::fromLatin1("%1 (%2)")
-            .arg(pcAction->toolTip(), accel);
-        pcAction->setToolTip(ttip);
-
-        // show shortcut inside status tip
-        QString stip = QString::fromLatin1("(%1)\t%2")
-            .arg(accel, pcAction->statusTip());
-        pcAction->setStatusTip(stip);
-    }
 
     if (preselect) {
         pcAction->setCheckable(true);

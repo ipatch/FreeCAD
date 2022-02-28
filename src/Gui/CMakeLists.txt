@@ -403,6 +403,7 @@ set(Gui_MOC_HDRS
     DlgAddProperty.h
     View3DInventorViewer.h
     DlgIconBrowser.h
+    ShortcutManager.h
     ${FreeCADGui_SDK_MOC_HDRS}
 )
 
@@ -517,6 +518,7 @@ SET(Command_CPP_SRCS
     CommandStructure.cpp
     CommandLink.cpp
     CommandPyImp.cpp
+    ShortcutManager.cpp
 )
 SET(Command_SRCS
     ${Command_CPP_SRCS}
@@ -524,6 +526,7 @@ SET(Command_SRCS
     ActionFunction.h
     Command.h
     CommandT.h
+    ShortcutManager.h
 )
 SOURCE_GROUP("Command" FILES ${Command_SRCS})
 
