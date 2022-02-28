@@ -85,16 +85,15 @@ DlgCustomKeyboardImp::DlgCustomKeyboardImp( QWidget* parent  )
     connect(completer, SIGNAL(commandActivated(QByteArray)), this, SLOT(onCommandActivated(QByteArray)));
 
     QStringList labels;
-    labels << tr("Icon") << tr("Command");
+    labels << tr("Icon") << tr("Command") << tr("Shortcut");
     ui->commandTreeWidget->setHeaderLabels(labels);
-    ui->commandTreeWidget->header()->hide();
     ui->commandTreeWidget->setIconSize(QSize(32, 32));
     ui->commandTreeWidget->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
 
     labels.clear();
     labels << tr("Name") << tr("Title");
     ui->assignedTreeWidget->setHeaderLabels(labels);
-    ui->commandTreeWidget->header()->hide();
+    ui->assignedTreeWidget->header()->hide();
     ui->assignedTreeWidget->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     ui->assignedTreeWidget->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
 
@@ -139,6 +138,7 @@ void DlgCustomKeyboardImp::populateCategories()
             groupMap.push_back(std::make_pair(group, text));
         }
     }
+    groupMap.push_back(std::make_pair(QLatin1String("All"), tr("All")));
 
     for (GroupMap::iterator it = groupMap.begin(); it != groupMap.end(); ++it) {
         if (ui->categoryBox->findData(it->first) < 0) {
@@ -248,6 +248,24 @@ void DlgCustomKeyboardImp::on_categoryBox_activated(int index)
             item->setSizeHint(0, QSize(32, 32));
             if ((*it)->getPixmap())
                 item->setIcon(0, BitmapFactory().iconFromTheme((*it)->getPixmap()));
+            item->setText(2, (*it)->getShortcut());
+        }
+    }
+    else if (group == QLatin1String("All")) {
+        for (const Command *cmd : Application::Instance->commandManager().getAllCommands()) {
+            QTreeWidgetItem* item = new QTreeWidgetItem(ui->commandTreeWidget);
+            if (dynamic_cast<const MacroCommand*>(cmd)) {
+                item->setText(1, QString::fromUtf8(cmd->getMenuText()));
+                item->setToolTip(1, QString::fromUtf8(cmd->getToolTipText()));
+            } else {
+                item->setText(1, qApp->translate(cmd->className(), cmd->getMenuText()));
+                item->setToolTip(1, qApp->translate(cmd->className(), cmd->getToolTipText()));
+            }
+            item->setData(1, Qt::UserRole, QByteArray(cmd->getName()));
+            item->setSizeHint(0, QSize(32, 32));
+            if (cmd->getPixmap())
+                item->setIcon(0, BitmapFactory().iconFromTheme(cmd->getPixmap()));
+            item->setText(2, cmd->getShortcut());
         }
     }
     else {
@@ -259,6 +277,7 @@ void DlgCustomKeyboardImp::on_categoryBox_activated(int index)
             item->setSizeHint(0, QSize(32, 32));
             if ((*it)->getPixmap())
                 item->setIcon(0, BitmapFactory().iconFromTheme((*it)->getPixmap()));
+            item->setText(2, (*it)->getShortcut());
         }
     }
 }
