@@ -348,12 +348,15 @@ Action * StdCmdFreezeViews::createAction(void)
 
 void StdCmdFreezeViews::setShortcut(const QString &shortcut)
 {
-    freezeView->setShortcut(shortcut);
+    if (freezeView)
+        freezeView->setShortcut(shortcut);
 }
 
 QString StdCmdFreezeViews::getShortcut() const
 {
-    return freezeView->shortcut().toString();
+    if (freezeView)
+        return freezeView->shortcut().toString();
+    return Command::getShortcut();
 }
 
 void StdCmdFreezeViews::activated(int iMsg)

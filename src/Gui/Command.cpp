@@ -158,19 +158,6 @@ Action* CommandBase::getAction() const
     return _pcAction;
 }
 
-void CommandBase::setShortcut(const QString &shortcut)
-{
-    if (_pcAction)
-        _pcAction->setShortcut(shortcut);
-}
-
-QString CommandBase::getShortcut() const
-{
-    if (_pcAction)
-        _pcAction->shortcut().toString();
-    return QString();
-}
-
 Action * CommandBase::createAction()
 {
     // does nothing
@@ -249,6 +236,19 @@ Command::Command(const char* name)
 
 Command::~Command()
 {
+}
+
+void Command::setShortcut(const QString &shortcut)
+{
+    if (_pcAction)
+        _pcAction->setShortcut(shortcut);
+}
+
+QString Command::getShortcut() const
+{
+    if (_pcAction)
+        return _pcAction->shortcut().toString();
+    return ShortcutManager::instance()->getShortcut(getName());
 }
 
 bool Command::isViewOfType(Base::Type t) const

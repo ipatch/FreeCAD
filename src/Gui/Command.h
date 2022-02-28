@@ -32,6 +32,7 @@
 #include <vector>
 
 #include <Base/Type.h>
+#include <Gui/Application.h>
 
 /** @defgroup CommandMacros Helper macros for running commands through Python interpreter */
 //@{
@@ -245,11 +246,6 @@ public:
      * Returns the Action object of this command, or 0 if it doesn't exist.
      */
     Action*  getAction() const;
-
-    /// Override shortcut of this command
-    virtual void setShortcut (const QString &);
-    /// Obtain the current shortcut of this command
-    virtual QString getShortcut() const;
 
     /** @name Methods to override when creating a new command */
     //@{
@@ -579,6 +575,11 @@ public:
     //@}
 
     virtual void refreshIcon();
+
+    /// Override shortcut of this command
+    virtual void setShortcut (const QString &);
+    /// Obtain the current shortcut of this command
+    virtual QString getShortcut() const;
 
     /** @name arbitrary helper methods */
     //@{
