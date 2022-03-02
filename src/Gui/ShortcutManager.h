@@ -158,6 +158,10 @@ private:
     };
     std::vector<ActionInfo> pendingActions;
 
+    QKeySequence pendingSequence;
+
+    QPointer<QWidget> lastFocus;
+
     QTimer timer;
     int timeout;
 };
