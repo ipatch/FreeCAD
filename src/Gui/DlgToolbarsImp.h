@@ -24,8 +24,9 @@
 #ifndef GUI_DIALOG_DLGTOOLBARS_IMP_H
 #define GUI_DIALOG_DLGTOOLBARS_IMP_H
 
-#include "PropertyPage.h"
+#include <boost/signals2/connection.hpp>
 #include <memory>
+#include "PropertyPage.h"
 
 class QTreeWidgetItem;
 
@@ -55,7 +56,7 @@ protected:
     virtual ~DlgCustomToolbars();
 
 protected Q_SLOTS:
-    void on_categoryBox_currentIndexChanged(int index);
+    void on_categoryBox_activated(int index);
     void on_workbenchBox_currentIndexChanged(int index);
     void on_moveActionRightButton_clicked();
     void on_moveActionLeftButton_clicked();
@@ -90,14 +91,12 @@ private:
     void importCustomToolbars(const QByteArray&);
     void exportCustomToolbars(const QByteArray&, QTreeWidgetItem *item=nullptr);
 
-protected Q_SLOTS:
-    void onCommandActivated(const QByteArray &);
-
 protected:
     std::unique_ptr<Ui_DlgCustomToolbars> ui;
 private:
     Type type;
     std::unique_ptr<Gui::PrefWidgetStates> widgetStates;
+    boost::signals2::scoped_connection conn;
 };
 
 /** This class implements the creation of user defined toolbars.
