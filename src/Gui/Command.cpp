@@ -151,6 +151,11 @@ CommandBase::~CommandBase()
     //Note: The Action object becomes a children of MainWindow which gets destroyed _before_ the
     //command manager hence before any command object. So the action pointer is a dangling pointer
     //at this state.
+
+    // Command can be destroyed before the the MainWindow, for example, dynamic
+    // command created (and later deleted) by user for a pie menu.
+    if (getMainWindow())
+        delete _pcAction;
 }
 
 Action* CommandBase::getAction() const
@@ -2108,13 +2113,13 @@ bool CommandManager::onInvokeCommand(const char *cmd, int i) const
 
 void CommandManager::addCommand(Command* pCom)
 {
-    ++_revision;
     auto &cmd = _sCommands[pCom->getName()];
     if (cmd) {
         if(FC_LOG_INSTANCE.isEnabled(FC_LOGLEVEL_LOG))
             FC_ERR("duplicate command " << pCom->getName());
         return;
     }
+    ++_revision;
     cmd = pCom;
 
     const char *workbench = Application::Instance->initializingWorkbench();
@@ -2127,6 +2132,7 @@ void CommandManager::addCommand(Command* pCom)
     else
         hGrp->RemoveASCII(pCom->getName());
     CmdMacroPreselectCommands::instance()->add(pCom);
+    signalChanged();
 }
 
 void CommandManager::removeCommand(Command* pCom)
@@ -2139,6 +2145,7 @@ void CommandManager::removeCommand(Command* pCom)
         ++_revision;
         delete It->second;
         _sCommands.erase(It);
+        signalChanged();
     }
 }
 
@@ -2149,6 +2156,7 @@ void CommandManager::clearCommands()
         delete it->second;
     _sCommands.clear();
     ++_revision;
+    signalChanged();
 }
 
 bool CommandManager::addTo(const char* Name, QWidget *pcWidget)
@@ -2259,6 +2267,7 @@ void CommandManager::addCommandMode(const char* sContext, const char* sName)
 void CommandManager::updateCommands(const char* sContext, int mode)
 {
     std::map<std::string, std::list<std::string> >::iterator it = _sCommandModes.find(sContext);
+    int rev = _revision;
     if (it != _sCommandModes.end()) {
         for (std::list<std::string>::iterator jt = it->second.begin(); jt != it->second.end(); ++jt) {
             Command* cmd = getCommandByName(jt->c_str());
@@ -2268,4 +2277,6 @@ void CommandManager::updateCommands(const char* sContext, int mode)
             }
         }
     }
+    if (rev != _revision)
+        signalChanged();
 }

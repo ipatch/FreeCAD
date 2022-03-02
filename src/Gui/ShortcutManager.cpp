@@ -52,8 +52,14 @@ ShortcutManager::ShortcutManager()
 
     QObject::connect(&timer, &QTimer::timeout, [this](){onTimer();});
 
-    for (const auto &v : hPriorities->GetIntMap())
+    topPriority = 0;
+    for (const auto &v : hPriorities->GetIntMap()) {
         priorities[v.first] = v.second;
+        if (topPriority < v.second)
+            topPriority = v.second;
+    }
+    if (topPriority == 0)
+        topPriority = 100;
 
     QApplication::instance()->installEventFilter(this);
 }
@@ -96,6 +102,9 @@ void ShortcutManager::OnChange(Base::Subject<const char*> &src, const char *reas
             priorities.erase(reason);
         else
             priorities[reason] = p;
+        if (topPriority < p)
+            topPriority = p;
+        priorityChanged(reason, p);
         return;
     }
 
@@ -104,28 +113,46 @@ void ShortcutManager::OnChange(Base::Subject<const char*> &src, const char *reas
     if (cmd) {
         auto accel = cmd->getAccel();
         if (!accel) accel = "";
-        cmd->setShortcut(getShortcut(reason, accel));
+        QKeySequence oldShortcut = cmd->getShortcut();
+        QKeySequence newShortcut = getShortcut(reason, accel);
+        if (oldShortcut != newShortcut) {
+            cmd->setShortcut(newShortcut.toString());
+            shortcutChanged(reason, oldShortcut);
+        }
     }
 }
 
 void ShortcutManager::reset(const char *cmd)
 {
-    hShortcuts->RemoveASCII(cmd);
-    hPriorities->RemoveInt(cmd);
+    if (cmd && cmd[0]) {
+        QKeySequence oldShortcut = getShortcut(cmd);
+        hShortcuts->RemoveASCII(cmd);
+        if (oldShortcut != getShortcut(cmd))
+            shortcutChanged(cmd, oldShortcut);
+
+        int oldPriority = getPriority(cmd);
+        hPriorities->RemoveInt(cmd);
+        if (oldPriority != getPriority(cmd))
+            priorityChanged(cmd, oldPriority);
+    }
 }
 
 void ShortcutManager::resetAll()
 {
-    Base::StateLocker lock(busy);
-    hShortcuts->Clear();
-    hPriorities->Clear();
-    for (auto cmd : Application::Instance->commandManager().getAllCommands()) {
-        if (cmd->getAction()) {
-            auto accel = cmd->getAccel();
-            if (!accel) accel = "";
-            cmd->setShortcut(getShortcut(nullptr, accel));
+    {
+        Base::StateLocker lock(busy);
+        hShortcuts->Clear();
+        hPriorities->Clear();
+        for (auto cmd : Application::Instance->commandManager().getAllCommands()) {
+            if (cmd->getAction()) {
+                auto accel = cmd->getAccel();
+                if (!accel) accel = "";
+                cmd->setShortcut(getShortcut(nullptr, accel));
+            }
         }
     }
+    shortcutChanged("", QKeySequence());
+    priorityChanged("", 0);
 }
 
 QString ShortcutManager::getShortcut(const char *cmdName, const char *accel)
@@ -148,6 +175,7 @@ QString ShortcutManager::getShortcut(const char *cmdName, const char *accel)
 void ShortcutManager::setShortcut(const char *cmdName, const char *accel)
 {
     if (cmdName && cmdName[0]) {
+        setTopPriority(cmdName);
         if (!accel)
             accel = "";
         if (auto cmd = Application::Instance->commandManager().getCommandByName(cmdName)) {
@@ -160,16 +188,6 @@ void ShortcutManager::setShortcut(const char *cmdName, const char *accel)
            }
         }
         hShortcuts->SetASCII(cmdName, accel);
-
-        if (accel[0]) {
-            int priority = 0;
-            for (const auto &v :  getActionsByShortcut(QString::fromLatin1(accel))) {
-                int p = getPriority(v.first.constData());
-                if (v.first != cmdName && priority <= p)
-                    priority = p+1;
-            }
-            setPriority(cmdName, priority);
-        }
     }
 }
 
@@ -275,8 +293,11 @@ bool ShortcutManager::eventFilter(QObject *o, QEvent *ev)
             auto &index = actionMap.get<0>();
             auto it = index.find(reinterpret_cast<intptr_t>(action));
             if (action->shortcut().isEmpty()) {
-                if (it != index.end())
+                if (it != index.end()) {
+                    QKeySequence oldShortcut = it->key.shortcut;
                     index.erase(it);
+                    actionShortcutChanged(action, oldShortcut);
+                }
                 break;
             }
 
@@ -296,13 +317,16 @@ bool ShortcutManager::eventFilter(QObject *o, QEvent *ev)
             if (it != index.end()) {
                 if (it->key.shortcut == action->shortcut() && it->key.name == name)
                     break;
+                QKeySequence oldShortcut = it->key.shortcut;
                 index.replace(it, {action, name});
                 FC_LOG("replace " << name.constData() << ": "
                         <<  action->shortcut().toString().toLatin1().constData());
+                actionShortcutChanged(action, oldShortcut);
             } else {
                 index.insert({action, name});
                 FC_LOG(actionMap.size() << " " << name.constData() << ": "
                         <<  action->shortcut().toString().toLatin1().constData());
+                actionShortcutChanged(action, QKeySequence());
             }
         }
         break;
@@ -316,7 +340,7 @@ std::vector<std::pair<QByteArray, QAction*>> ShortcutManager::getActionsByShortc
 {
     const auto &index = actionMap.get<1>();
     std::vector<std::pair<QByteArray, QAction*>> res;
-    std::multimap<int, const ActionData*> map;
+    std::multimap<int, const ActionData*, std::greater<int>> map;
     for (auto it = index.lower_bound(ActionKey(shortcut)); it != index.end(); ++it) {
         if (it->key.shortcut != shortcut)
             break;
@@ -328,16 +352,27 @@ std::vector<std::pair<QByteArray, QAction*>> ShortcutManager::getActionsByShortc
     return res;
 }
 
-void ShortcutManager::setPriority(const std::vector<QByteArray> &actions)
+void ShortcutManager::setPriorities(const std::vector<QByteArray> &actions)
 {
+    if (actions.empty())
+        return;
+    // Keep the same top priority of the given action, and adjust the rest. Can
+    // go negative if necessary
     int current = 0;
+    for (const auto &name : actions)
+        current = std::max(current, getPriority(name));
+    if (current == 0)
+        current = (int)actions.size();
+    setPriority(actions.front(), current);
+    ++current;
     for (const auto &name : actions) {
         int p = getPriority(name);
-        if (p < current) {
+        if (p <= 0 || p >= current) {
+            if (--current == 0)
+                --current;
             setPriority(name, current);
-            ++current;
         } else
-            current = p + 1;
+            current = p;
     }
 }
 
@@ -357,6 +392,12 @@ void ShortcutManager::setPriority(const char *cmdName, int p)
         hPriorities->RemoveInt(cmdName);
     else
         hPriorities->SetInt(cmdName, p);
+}
+
+void ShortcutManager::setTopPriority(const char *cmdName)
+{
+    ++topPriority;
+    hPriorities->SetInt(cmdName, topPriority);
 }
 
 void ShortcutManager::onTimer()

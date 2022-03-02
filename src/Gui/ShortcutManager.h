@@ -62,25 +62,37 @@ public:
     /// Set shortcut of a given command
     void setShortcut(const char *cmd, const char *accel);
     /** Get shortcut of a given command
-     * @cmd: command name
-     * @defaultAccel: default shortcut
+     * @param cmd: command name
+     * @param defaultAccel: default shortcut
      */
     QString getShortcut(const char *cmd, const char *defaultAccel = nullptr);
 
-    /// Return actions having a given shortcut in order of increasing priority
+    /// Return actions having a given shortcut in order of decreasing priority
     std::vector<std::pair<QByteArray, QAction*>> getActionsByShortcut(const QKeySequence &shortcut);
 
-    /// Set properties for a given list of actions in order of increasing priority
-    void setPriority(const std::vector<QByteArray> &actions);
+    /// Set properties for a given list of actions in order of decreasing priority
+    void setPriorities(const std::vector<QByteArray> &actions);
 
     /** Set the priority of a given command
-     * @cmd: command name
-     * @priority: priority of the command, bigger value means higher priority
+     * @param cmd: command name
+     * @param priority: priority of the command, bigger value means higher priority
      */
     void setPriority(const char *cmd, int priority);
 
     /// Get the priority of a given command
     int getPriority(const char *cmd);
+
+    /** Set the top priority of a given command
+     * Make the given command the top priority of all commands.
+     *
+     * @param cmd: command name
+     */
+    void setTopPriority(const char *cmd);
+
+Q_SIGNALS:
+    void shortcutChanged(const char *name, const QKeySequence &oldShortcut);
+    void actionShortcutChanged(QAction *, const QKeySequence &oldShortcut);
+    void priorityChanged(const char *name, int priority);
 
 protected:
     bool eventFilter(QObject *, QEvent *ev) override;
@@ -131,6 +143,7 @@ private:
     > actionMap;
 
     std::unordered_map<std::string, int> priorities;
+    int topPriority;
 
     struct ActionInfo {
         QPointer<QAction> action;

@@ -30,6 +30,7 @@
 #include <string>
 #include <functional>
 #include <vector>
+#include <boost_signals2.hpp>
 
 #include <Base/Type.h>
 #include <Gui/Application.h>
@@ -924,8 +925,11 @@ public:
 
     void refreshIcons();
 
-    /// Return a revision number to check for any changes in commands
+    /// Return a revision number to check for addition or removal of any command
     int getRevision() { return _revision; }
+
+    /// Signal on any addition or removal of command
+    boost::signals2::signal<void ()> signalChanged;
 
     typedef std::function<bool (const char *, int)> CallbackFunction;
 
