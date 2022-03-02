@@ -503,12 +503,16 @@ PrefWidgetStates::~PrefWidgetStates()
 
 void PrefWidgetStates::addSplitter(QSplitter *splitter, const char *name)
 {
-  std::string _name;
+  QByteArray _name;
   if (!name) {
-    _name = "Splitter";
-    if (splitters.size())
-      _name += std::to_string(splitters.size());
-    name = _name.c_str();
+    if (splitter->objectName().size())
+      _name = splitter->objectName().toUtf8();
+    else {
+      _name = "Splitter";
+      if (splitters.size())
+        _name += QByteArray::number((int)splitters.size());
+    }
+    name = _name.constData();
   }
   splitters[splitter] = name;
 }
