@@ -1409,7 +1409,7 @@ QVariant Cell::getEditData(bool silent) const {
                 if(title.size())
                     return QString::fromUtf8(title.c_str());
                 else if(isUsed(ALIAS_SET))
-                    return QString::fromLatin1(alias.c_str());
+                    return QString::fromUtf8(alias.c_str());
                 else
                     return QString::fromLatin1(address.toString().c_str());
             } catch (Py::Exception &) {
@@ -1896,8 +1896,6 @@ void Cell::applyAutoAlias()
     auto pos = alias.find('\n');
     if (pos != std::string::npos)
         alias.resize(pos);
-    if (alias.size() && alias[0] >= '0' && alias[0] <= '9')
-        alias.insert(alias.begin(), '_');
 
     PropertySheet::AtomicPropertyChange signaller(*owner, false);
 

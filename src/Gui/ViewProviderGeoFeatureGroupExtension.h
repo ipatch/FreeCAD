@@ -69,6 +69,9 @@ public:
 
     virtual void extensionModeSwitchChange(void) override;
 
+    virtual bool extensionGetToolTip(const QByteArray &, QString &) const override;
+    virtual bool extensionIconMouseEvent(QMouseEvent *, const QByteArray &) override;
+
     static bool needUpdateChildren(App::DocumentObject *obj);
 
 protected:

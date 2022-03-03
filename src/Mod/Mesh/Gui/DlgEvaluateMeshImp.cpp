@@ -193,7 +193,7 @@ void DlgEvaluateMeshImp::slotCreatedObject(const App::DocumentObject& Obj)
     // add new mesh object to the list
     if (Obj.getTypeId().isDerivedFrom(Mesh::Feature::getClassTypeId())) {
         QString label = QString::fromUtf8(Obj.Label.getValue());
-        QString name = QString::fromLatin1(Obj.getNameInDocument());
+        QString name = QString::fromUtf8(Obj.getNameInDocument());
         d->ui.meshNameButton->addItem(label, name);
     }
 }
@@ -202,7 +202,7 @@ void DlgEvaluateMeshImp::slotDeletedObject(const App::DocumentObject& Obj)
 {
     // remove mesh objects from the list
     if (Obj.getTypeId().isDerivedFrom(Mesh::Feature::getClassTypeId())) {
-        int index = d->ui.meshNameButton->findData(QString::fromLatin1(Obj.getNameInDocument()));
+        int index = d->ui.meshNameButton->findData(QString::fromUtf8(Obj.getNameInDocument()));
         if (index > 0) {
             d->ui.meshNameButton->removeItem(index);
             d->ui.meshNameButton->setDisabled(d->ui.meshNameButton->count() < 2);
@@ -233,7 +233,7 @@ void DlgEvaluateMeshImp::slotChangedObject(const App::DocumentObject& Obj, const
         if (Prop.getTypeId() == App::PropertyString::getClassTypeId() &&
             strcmp(Prop.getName(), "Label") == 0) {
                 QString label = QString::fromUtf8(Obj.Label.getValue());
-                QString name = QString::fromLatin1(Obj.getNameInDocument());
+                QString name = QString::fromUtf8(Obj.getNameInDocument());
                 int index = d->ui.meshNameButton->findData(name);
                 d->ui.meshNameButton->setItemText(index, label);
         }
@@ -266,7 +266,7 @@ void DlgEvaluateMeshImp::setMesh(Mesh::Feature* m)
     refreshList();
 
     int ct = d->ui.meshNameButton->count();
-    QString objName = QString::fromLatin1(m->getNameInDocument());
+    QString objName = QString::fromUtf8(m->getNameInDocument());
     for (int i=1; i<ct; i++) {
         if (d->ui.meshNameButton->itemData(i).toString() == objName) {
             d->ui.meshNameButton->setCurrentIndex(i);
@@ -318,7 +318,7 @@ void DlgEvaluateMeshImp::on_meshNameButton_activated(int i)
     d->meshFeature = 0;
     std::vector<App::DocumentObject*> objs = getDocument()->getObjectsOfType(Mesh::Feature::getClassTypeId());
     for (std::vector<App::DocumentObject*>::iterator it = objs.begin(); it != objs.end(); ++it) {
-        if (item == QLatin1String((*it)->getNameInDocument())) {
+        if (item == QString::fromUtf8((*it)->getNameInDocument())) {
             d->meshFeature = (Mesh::Feature*)(*it);
             break;
         }
@@ -339,7 +339,7 @@ void DlgEvaluateMeshImp::refreshList()
         std::vector<App::DocumentObject*> objs = this->getDocument()->getObjectsOfType(Mesh::Feature::getClassTypeId());
         for (std::vector<App::DocumentObject*>::iterator it = objs.begin(); it != objs.end(); ++it) {
             items.push_back(qMakePair(QString::fromUtf8((*it)->Label.getValue()),
-                                      QString::fromLatin1((*it)->getNameInDocument())));
+                                      QString::fromUtf8((*it)->getNameInDocument())));
         }
     }
 

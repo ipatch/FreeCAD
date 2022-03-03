@@ -175,12 +175,12 @@ static void addItem(QTreeWidget *tree, const App::SubObjectT &objT)
     auto* item = new QTreeWidgetItem(tree);
     item->setText(LabelIndex, QString::fromUtf8(obj->Label.getStrValue().c_str()));
 
-    item->setText(ElementIndex, QString::fromLatin1(objT.getOldElementName().c_str()));
+    item->setText(ElementIndex, QString::fromUtf8(objT.getOldElementName().c_str()));
 
-    item->setText(PathIndex, QString::fromLatin1("%1#%2.%3").arg(
-                QString::fromLatin1(objT.getDocumentName().c_str()),
-                QString::fromLatin1(objT.getObjectName().c_str()),
-                QString::fromLatin1(objT.getSubName().c_str())));
+    item->setText(PathIndex, QStringLiteral("%1#%2.%3").arg(
+                QString::fromUtf8(objT.getDocumentName().c_str()),
+                QString::fromUtf8(objT.getObjectName().c_str()),
+                QString::fromUtf8(objT.getSubName().c_str())));
 
     auto vp = Application::Instance->getViewProvider(obj);
     if(vp)
@@ -195,6 +195,7 @@ void SelectionView::onSelectionChanged(const SelectionChanges &Reason)
 {
     QString selObject;
     QTextStream str(&selObject);
+    str.setCodec("UTF-8");
     if (Reason.Type == SelectionChanges::AddSelection) {
         addItem(selectionView, Reason.Object);
     }
@@ -458,27 +459,27 @@ void SelectionView::onItemContextMenu(const QPoint& point)
 
     QMenu menu;
     QAction *selectAction = menu.addAction(tr("Select only"),this,SLOT(select()));
-    selectAction->setIcon(QIcon::fromTheme(QString::fromLatin1("view-select")));
+    selectAction->setIcon(QIcon::fromTheme(QStringLiteral("view-select")));
     selectAction->setToolTip(tr("Selects only this object"));
     QAction *deselectAction = menu.addAction(tr("Deselect"),this,SLOT(deselect()));
-    deselectAction->setIcon(QIcon::fromTheme(QString::fromLatin1("view-unselectable")));
+    deselectAction->setIcon(QIcon::fromTheme(QStringLiteral("view-unselectable")));
     deselectAction->setToolTip(tr("Deselects this object"));
     QAction *zoomAction = menu.addAction(tr("Zoom fit"),this,SLOT(zoom()));
-    zoomAction->setIcon(QIcon::fromTheme(QString::fromLatin1("zoom-fit-best")));
+    zoomAction->setIcon(QIcon::fromTheme(QStringLiteral("zoom-fit-best")));
     zoomAction->setToolTip(tr("Selects and fits this object in the 3D window"));
     QAction *gotoAction = menu.addAction(tr("Go to selection"),this,SLOT(treeSelect()));
     gotoAction->setToolTip(tr("Selects and locates this object in the tree view"));
     QAction *touchAction = menu.addAction(tr("Mark to recompute"),this,SLOT(touch()));
-    touchAction->setIcon(QIcon::fromTheme(QString::fromLatin1("view-refresh")));
+    touchAction->setIcon(QIcon::fromTheme(QStringLiteral("view-refresh")));
     touchAction->setToolTip(tr("Mark this object to be recomputed"));
     QAction *toPythonAction = menu.addAction(tr("To python console"),this,SLOT(toPython()));
-    toPythonAction->setIcon(QIcon::fromTheme(QString::fromLatin1("applications-python")));
+    toPythonAction->setIcon(QIcon::fromTheme(QStringLiteral("applications-python")));
     toPythonAction->setToolTip(tr("Reveals this object and its subelements in the python console."));
 
     if (objT.getOldElementName().size()) {
         // subshape-specific entries
         QAction *showPart = menu.addAction(tr("Duplicate subshape"),this,SLOT(showPart()));
-        showPart->setIcon(QIcon(QString::fromLatin1(":/icons/ClassBrowser/member.svg")));
+        showPart->setIcon(QIcon(QStringLiteral(":/icons/ClassBrowser/member.svg")));
         showPart->setToolTip(tr("Creates a standalone copy of this subshape in the document"));
     }
     menu.exec(selectionView->mapToGlobal(point));
@@ -530,7 +531,7 @@ void SelectionView::onEnablePickList() {
 
 ////////////////////////////////////////////////////////////////////////
 
-static QString _DefaultStyle = QLatin1String("QMenu {menu-scrollable:1}");
+static QString _DefaultStyle = QStringLiteral("QMenu {menu-scrollable:1}");
 
 namespace Gui {
 void setupMenuStyle(QWidget *menu)
@@ -545,14 +546,14 @@ void setupMenuStyle(QWidget *menu)
     QString name = QString::fromUtf8(hGrp->GetASCII("MenuStyleSheet").c_str());
     if(name.isEmpty()) {
         QString mainstyle = QString::fromUtf8(hGrp->GetASCII("StyleSheet").c_str());
-        if(mainstyle.indexOf(QLatin1String("dark"),0,Qt::CaseInsensitive)>=0)
-            name = QString::fromLatin1("qssm:Dark.qss");
-        else if(mainstyle.indexOf(QLatin1String("light"),0,Qt::CaseInsensitive)>=0)
-            name = QString::fromLatin1("qssm:Light.qss");
+        if(mainstyle.indexOf(QStringLiteral("dark"),0,Qt::CaseInsensitive)>=0)
+            name = QStringLiteral("qssm:Dark.qss");
+        else if(mainstyle.indexOf(QStringLiteral("light"),0,Qt::CaseInsensitive)>=0)
+            name = QStringLiteral("qssm:Light.qss");
         else
-            name = QString::fromLatin1("qssm:Default.qss");
+            name = QStringLiteral("qssm:Default.qss");
     } else if (!QFile::exists(name))
-        name = QString::fromLatin1("qssm:%1").arg(name);
+        name = QStringLiteral("qssm:%1").arg(name);
     if(_Name != name) {
         _Name = name;
         _Stylesheet.clear();
@@ -571,7 +572,7 @@ void setupMenuStyle(QWidget *menu)
         return;
 
     menu->setStyleSheet(_Stylesheet);
-    if (_Stylesheet.indexOf(QLatin1String("background")) >= 0) {
+    if (_Stylesheet.indexOf(QStringLiteral("background")) >= 0) {
         menu->setWindowFlags(menu->windowFlags() | Qt::FramelessWindowHint);
         menu->setAttribute(Qt::WA_NoSystemBackground, true);
         menu->setAttribute(Qt::WA_TranslucentBackground, true);
@@ -673,12 +674,12 @@ App::SubObjectT SelectionMenu::doPick(const std::vector<App::SubObjectT> &sels) 
         auto &v = *it;
         auto &info = v.second;
         if (info.items.empty()) {
-            QAction *action = addAction(QLatin1String(v.first.c_str()));
+            QAction *action = addAction(QString::fromUtf8(v.first.c_str()));
             action->setDisabled(true);
             continue;
         }
 
-        info.menu = addMenu(QLatin1String(v.first.c_str()));
+        info.menu = addMenu(QString::fromUtf8(v.first.c_str()));
         info.menu->installEventFilter(this);
 
         bool groupMenu = false;
@@ -771,18 +772,18 @@ App::SubObjectT SelectionMenu::doPick(const std::vector<App::SubObjectT> &sels,
                 lastAction->setMenu(lastMenu);
                 auto prev = qvariant_cast<App::SubObjectT>(lastAction->data());
                 auto prevAction = lastMenu->addAction(
-                        QString::fromLatin1(prev.getOldElementName().c_str()));
+                        QString::fromUtf8(prev.getOldElementName().c_str()));
                 prevAction->setData(QVariant::fromValue(prev));
                 prev.setSubName(prev.getSubNameNoElement());
                 lastAction->setData(QVariant::fromValue(prev));
             }
-            action = lastMenu->addAction(QString::fromLatin1(sel.getOldElementName().c_str()));
+            action = lastMenu->addAction(QString::fromUtf8(sel.getOldElementName().c_str()));
         } else {
             lastObj = sobj;
             QString label = QString::fromUtf8(sobj->Label.getValue());
             auto element = sel.getOldElementName();
             if (element.size())
-                label += QStringLiteral(" (%2)").arg(QString::fromLatin1(element.c_str()));
+                label += QStringLiteral(" (%2)").arg(QString::fromUtf8(element.c_str()));
             action = addAction(vp ? vp->getIcon() : QIcon(), label);
             lastAction = action;
             lastMenu = nullptr;
@@ -850,17 +851,17 @@ static bool setPreselect(QMenu *menu,
     QString tooltip = QString::fromUtf8(sel.getSubObjectFullName().c_str());
 
     if (!needElement && sobj && sobj->Label2.getStrValue().size())
-        tooltip = QString::fromLatin1("%1\n\n%2").arg(
+        tooltip = QStringLiteral("%1\n\n%2").arg(
                 tooltip, QString::fromUtf8(sobj->Label2.getValue()));
 
-    tooltip = QString::fromLatin1("%1\n\n%2").arg(tooltip,
+    tooltip = QStringLiteral("%1\n\n%2").arg(tooltip,
                 QObject::tr("Left click to select the geometry.\n"
                             "CTRL + Left click for multiselection.\n"
                             "Shift + left click to edit the object.\n"
                             "Right click to bring up the hierarchy menu.\n"
                             "Shift + right click to bring up the object context menu."));
     if (sel.hasSubElement())
-        tooltip = QString::fromLatin1("%1\n%2").arg(tooltip,
+        tooltip = QStringLiteral("%1\n%2").arg(tooltip,
                 QObject::tr("CTRL + right click to trace geometry history.\n"
                              "CTRL + Shift + right click to list derived geometries."));
 

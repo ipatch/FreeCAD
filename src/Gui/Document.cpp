@@ -1231,9 +1231,9 @@ static bool checkCanonicalPath(const std::map<App::Document*, bool> &docs)
 
     auto docName = [](App::Document *doc) -> QString {
         if (doc->Label.getStrValue() == doc->getName())
-            return QString::fromLatin1(doc->getName());
-        return QString::fromLatin1("%1 (%2)").arg(QString::fromUtf8(doc->Label.getValue()),
-                                                  QString::fromLatin1(doc->getName()));
+            return QString::fromUtf8(doc->getName());
+        return QStringLiteral("%1 (%2)").arg(QString::fromUtf8(doc->Label.getValue()),
+                                             QString::fromUtf8(doc->getName()));
     };
     int count = 0;
     for (auto &v : paths) {
@@ -1334,7 +1334,8 @@ bool Document::save(void)
         }
         catch (const Base::Exception& e) {
             QMessageBox::critical(getMainWindow(), QObject::tr("Saving document failed"),
-                QString::fromLatin1(e.what()));
+                QString::fromUtf8(e.what()));
+            return false;
         }
         return true;
     }
@@ -1351,7 +1352,8 @@ bool Document::saveAs(void)
     QString exe = qApp->applicationName();
     QString fn = FileDialog::getSaveFileName(getMainWindow(), QObject::tr("Save %1 Document").arg(exe),
         QString::fromUtf8(getDocument()->FileName.getValue()),
-        QString::fromLatin1("%1 %2 (*.FCStd)").arg(exe).arg(QObject::tr("Document")));
+        QStringLiteral("%1 %2 (*.FCStd)").arg(exe).arg(QObject::tr("Document")));
+
     if (!fn.isEmpty()) {
         QFileInfo fi;
         fi.setFile(fn);
@@ -1379,7 +1381,7 @@ bool Document::saveAs(void)
         }
         catch (const Base::Exception& e) {
             QMessageBox::critical(getMainWindow(), QObject::tr("Saving document failed"),
-                QString::fromLatin1(e.what()));
+                QString::fromUtf8(e.what()));
         }
         return true;
     }
@@ -1439,8 +1441,8 @@ void Document::saveAll()
         catch (const Base::Exception& e) {
             QMessageBox::critical(getMainWindow(),
                     QObject::tr("Failed to save document") +
-                        QString::fromLatin1(": %1").arg(QString::fromUtf8(doc->getName())),
-                    QString::fromLatin1(e.what()));
+                        QStringLiteral(": %1").arg(QString::fromUtf8(doc->getName())),
+                    QString::fromUtf8(e.what()));
             break;
         }
     }
@@ -2028,7 +2030,7 @@ MDIView *Document::createView(const Base::Type& typeId)
         }
 
         const char* name = getDocument()->Label.getValue();
-        QString title = QString::fromLatin1("%1 : %2[*]")
+        QString title = QStringLiteral("%1 : %2[*]")
             .arg(QString::fromUtf8(name)).arg(d->_iWinCount++);
 
         view3D->setWindowTitle(title);
@@ -2569,7 +2571,7 @@ bool Document::checkTransactionID(bool undo, int iSteps) {
         }
         int ret = QMessageBox::warning(getMainWindow(),
                     undo?QObject::tr("Undo"):QObject::tr("Redo"),
-                    QString::fromLatin1("%1,\n%2%3")
+                    QStringLiteral("%1,\n%2%3")
                         .arg(QObject::tr(
                             "There are grouped transactions in the following documents with "
                             "other preceding transactions"))

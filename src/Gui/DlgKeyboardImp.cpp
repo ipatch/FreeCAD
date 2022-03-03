@@ -50,12 +50,12 @@ FC_LOG_LEVEL_INIT("Gui", true, true)
 using namespace Gui::Dialog;
 
 namespace Gui { namespace Dialog {
-typedef std::vector< std::pair<QLatin1String, QString> > GroupMap;
+typedef std::vector< std::pair<QString, QString> > GroupMap;
 
 struct GroupMap_find {
-    const QLatin1String& item;
-    GroupMap_find(const QLatin1String& item) : item(item) {}
-    bool operator () (const std::pair<QLatin1String, QString>& elem) const
+    const QString& item;
+    GroupMap_find(const QString& item) : item(item) {}
+    bool operator () (const std::pair<QString, QString>& elem) const
     {
         return elem.first == item;
     }
@@ -112,7 +112,7 @@ void DlgCustomKeyboardImp::initCommandCompleter(QLineEdit *edit, QComboBox *comb
             if (!cmd)
                 return;
 
-            QString group = QString::fromLatin1(cmd->getGroupName());
+            QString group = QString::fromUtf8(cmd->getGroupName());
             int index = combo->findData(group);
             if (index < 0)
                 return;
@@ -150,7 +150,7 @@ DlgCustomKeyboardImp::initCommandList(QTreeWidget *commandTreeWidget, QComboBox 
         CommandManager & cCmdMgr = Application::Instance->commandManager();
         QString group = combo->itemData(index, Qt::UserRole).toString();
         auto cmds = group == QStringLiteral("All") ? cCmdMgr.getAllCommands()
-                                                   : cCmdMgr.getGroupCommands(group.toLatin1());
+                                                   : cCmdMgr.getGroupCommands(group.toUtf8());
         QTreeWidgetItem *currentItem = nullptr;
         for (const Command *cmd : cmds) {
             QTreeWidgetItem* item = new QTreeWidgetItem(commandTreeWidget);
@@ -305,14 +305,14 @@ void DlgCustomKeyboardImp::populateCommandGroups(QComboBox *combo)
     std::map<std::string,Command*> sCommands = cCmdMgr.getCommands();
 
     GroupMap groupMap;
-    groupMap.push_back(std::make_pair(QLatin1String("File"), QString()));
-    groupMap.push_back(std::make_pair(QLatin1String("Edit"), QString()));
-    groupMap.push_back(std::make_pair(QLatin1String("View"), QString()));
-    groupMap.push_back(std::make_pair(QLatin1String("Standard-View"), QString()));
-    groupMap.push_back(std::make_pair(QLatin1String("Tools"), QString()));
-    groupMap.push_back(std::make_pair(QLatin1String("Window"), QString()));
-    groupMap.push_back(std::make_pair(QLatin1String("Help"), QString()));
-    groupMap.push_back(std::make_pair(QLatin1String("Macros"), qApp->translate("Gui::MacroCommand", "Macros")));
+    groupMap.push_back(std::make_pair(QStringLiteral("File"), QString()));
+    groupMap.push_back(std::make_pair(QStringLiteral("Edit"), QString()));
+    groupMap.push_back(std::make_pair(QStringLiteral("View"), QString()));
+    groupMap.push_back(std::make_pair(QStringLiteral("Standard-View"), QString()));
+    groupMap.push_back(std::make_pair(QStringLiteral("Tools"), QString()));
+    groupMap.push_back(std::make_pair(QStringLiteral("Window"), QString()));
+    groupMap.push_back(std::make_pair(QStringLiteral("Help"), QString()));
+    groupMap.push_back(std::make_pair(QStringLiteral("Macros"), qApp->translate("Gui::MacroCommand", "Macros")));
 
     for (std::map<std::string,Command*>::iterator it = sCommands.begin(); it != sCommands.end(); ++it) {
         QLatin1String group(it->second->getGroupName());
@@ -327,7 +327,7 @@ void DlgCustomKeyboardImp::populateCommandGroups(QComboBox *combo)
             groupMap.push_back(std::make_pair(group, text));
         }
     }
-    groupMap.push_back(std::make_pair(QLatin1String("All"), tr("All")));
+    groupMap.push_back(std::make_pair(QStringLiteral("All"), tr("All")));
 
     for (GroupMap::iterator it = groupMap.begin(); it != groupMap.end(); ++it) {
         if (combo->findData(it->first) < 0) {
@@ -470,7 +470,7 @@ void DlgCustomKeyboardImp::onAddMacroAction(const QByteArray& macro)
 {
     QVariant data = ui->categoryBox->itemData(ui->categoryBox->currentIndex(), Qt::UserRole);
     QString group = data.toString();
-    if (group == QLatin1String("Macros"))
+    if (group == QStringLiteral("Macros"))
     {
         CommandManager & cCmdMgr = Application::Instance->commandManager();
         Command* pCmd = cCmdMgr.getCommandByName(macro);
@@ -487,7 +487,7 @@ void DlgCustomKeyboardImp::onRemoveMacroAction(const QByteArray& macro)
 {
     QVariant data = ui->categoryBox->itemData(ui->categoryBox->currentIndex(), Qt::UserRole);
     QString group = data.toString();
-    if (group == QLatin1String("Macros"))
+    if (group == QStringLiteral("Macros"))
     {
         for (int i=0; i<ui->commandTreeWidget->topLevelItemCount(); i++) {
             QTreeWidgetItem* item = ui->commandTreeWidget->topLevelItem(i);
@@ -505,7 +505,7 @@ void DlgCustomKeyboardImp::onModifyMacroAction(const QByteArray& macro)
 {
     QVariant data = ui->categoryBox->itemData(ui->categoryBox->currentIndex(), Qt::UserRole);
     QString group = data.toString();
-    if (group == QLatin1String("Macros"))
+    if (group == QStringLiteral("Macros"))
     {
         CommandManager & cCmdMgr = Application::Instance->commandManager();
         Command* pCmd = cCmdMgr.getCommandByName(macro);

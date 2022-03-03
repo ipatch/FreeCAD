@@ -142,7 +142,7 @@ void LoftWidget::findShapes()
             shape.ShapeType() == TopAbs_EDGE ||
             shape.ShapeType() == TopAbs_VERTEX) {
             QString label = QString::fromUtf8((*it)->Label.getValue());
-            QString name = QString::fromLatin1((*it)->getNameInDocument());
+            QString name = QString::fromUtf8((*it)->getNameInDocument());
             
             QTreeWidgetItem* child = new QTreeWidgetItem();
             child->setText(0, label);
@@ -159,19 +159,19 @@ bool LoftWidget::accept()
 {
     QString list, solid, ruled, closed;
     if (d->ui.checkSolid->isChecked())
-        solid = QString::fromLatin1("True");
+        solid = QStringLiteral("True");
     else
-        solid = QString::fromLatin1("False");
+        solid = QStringLiteral("False");
 
     if (d->ui.checkRuledSurface->isChecked())
-        ruled = QString::fromLatin1("True");
+        ruled = QStringLiteral("True");
     else
-        ruled = QString::fromLatin1("False");
+        ruled = QStringLiteral("False");
 
     if (d->ui.checkClosed->isChecked())
-        closed = QString::fromLatin1("True");
+        closed = QStringLiteral("True");
     else
-        closed = QString::fromLatin1("False");
+        closed = QStringLiteral("False");
 
     QTextStream str(&list);
 
@@ -188,13 +188,13 @@ bool LoftWidget::accept()
 
     try {
         QString cmd;
-        cmd = QString::fromLatin1(
+        cmd = QStringLiteral(
             "App.getDocument('%5').addObject('Part::Loft','Loft')\n"
             "App.getDocument('%5').ActiveObject.Sections=[%1]\n"
             "App.getDocument('%5').ActiveObject.Solid=%2\n"
             "App.getDocument('%5').ActiveObject.Ruled=%3\n"
             "App.getDocument('%5').ActiveObject.Closed=%4\n"
-            ).arg(list).arg(solid).arg(ruled).arg(closed).arg(QString::fromLatin1(d->document.c_str()));
+            ).arg(list).arg(solid).arg(ruled).arg(closed).arg(QString::fromUtf8(d->document.c_str()));
 
         Gui::Document* doc = Gui::Application::Instance->getDocument(d->document.c_str());
         if (!doc)
@@ -211,7 +211,7 @@ bool LoftWidget::accept()
         doc->commitCommand();
     }
     catch (const Base::Exception& e) {
-        QMessageBox::warning(this, tr("Input error"), QString::fromLatin1(e.what()));
+        QMessageBox::warning(this, tr("Input error"), QString::fromUtf8(e.what()));
         return false;
     }
 

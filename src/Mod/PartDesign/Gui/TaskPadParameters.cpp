@@ -375,8 +375,8 @@ void TaskPadParameters::onSelectionChanged(const Gui::SelectionChanges& msg)
             ui->lineFaceName->blockSignals(true);
             ui->lineFaceName->setText(refText);
             QStringList list(refText.split(QLatin1Char(':')));
-            ui->lineFaceName->setProperty("FeatureName", list[0].toLatin1());
-            ui->lineFaceName->setProperty("FaceName", list.size()>1 ? list[1].toLatin1() : QByteArray());
+            ui->lineFaceName->setProperty("FeatureName", list[0].toUtf8());
+            ui->lineFaceName->setProperty("FaceName", list.size()>1 ? list[1].toUtf8() : QByteArray());
             ui->lineFaceName->blockSignals(false);
             // Turn off reference selection mode
             onButtonFace(false);

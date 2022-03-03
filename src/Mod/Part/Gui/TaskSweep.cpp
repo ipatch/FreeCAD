@@ -198,7 +198,7 @@ void SweepWidget::findShapes()
             shape.ShapeType() == TopAbs_EDGE ||
             shape.ShapeType() == TopAbs_VERTEX) {
             QString label = QString::fromUtf8((*it)->Label.getValue());
-            QString name = QString::fromLatin1((*it)->getNameInDocument());
+            QString name = QString::fromUtf8((*it)->getNameInDocument());
             
             QTreeWidgetItem* child = new QTreeWidgetItem();
             child->setText(0, label);
@@ -293,14 +293,14 @@ bool SweepWidget::accept()
 
     QString list, solid, frenet;
     if (d->ui.checkSolid->isChecked())
-        solid = QString::fromLatin1("True");
+        solid = QStringLiteral("True");
     else
-        solid = QString::fromLatin1("False");
+        solid = QStringLiteral("False");
 
     if (d->ui.checkFrenet->isChecked())
-        frenet = QString::fromLatin1("True");
+        frenet = QStringLiteral("True");
     else
-        frenet = QString::fromLatin1("False");
+        frenet = QStringLiteral("False");
 
     QTextStream str(&list);
 
@@ -312,7 +312,7 @@ bool SweepWidget::accept()
     for (int i=0; i<count; i++) {
         QTreeWidgetItem* child = d->ui.selector->selectedTreeWidget()->topLevelItem(i);
         QString name = child->data(0, Qt::UserRole).toString();
-        if (name == QLatin1String(spineObject.c_str())) {
+        if (name == QString::fromUtf8(spineObject.c_str())) {
             QMessageBox::critical(this, tr("Wrong selection"), tr("'%1' cannot be used as profile and path.")
                 .arg(QString::fromUtf8(spineLabel.c_str())));
             return false;
@@ -323,7 +323,7 @@ bool SweepWidget::accept()
     try {
         Gui::WaitCursor wc;
         QString cmd;
-        cmd = QString::fromLatin1(
+        cmd = QStringLiteral(
             "App.getDocument('%5').addObject('Part::Sweep','Sweep')\n"
             "App.getDocument('%5').ActiveObject.Sections=[%1]\n"
             "App.getDocument('%5').ActiveObject.Spine=%2\n"
@@ -331,16 +331,16 @@ bool SweepWidget::accept()
             "App.getDocument('%5').ActiveObject.Frenet=%4\n"
             )
             .arg(list)
-            .arg(QLatin1String(selection.c_str()))
+            .arg(QString::fromUtf8(selection.c_str()))
             .arg(solid)
             .arg(frenet)
-            .arg(QString::fromLatin1(d->document.c_str()));
+            .arg(QString::fromUtf8(d->document.c_str()));
 
         Gui::Document* doc = Gui::Application::Instance->getDocument(d->document.c_str());
         if (!doc)
             throw Base::RuntimeError("Document doesn't exist anymore");
         doc->openCommand(QT_TRANSLATE_NOOP("Command", "Sweep"));
-        Gui::Command::runCommand(Gui::Command::App, cmd.toLatin1());
+        Gui::Command::runCommand(Gui::Command::App, cmd.toUtf8());
         doc->getDocument()->recompute();
         App::DocumentObject* obj = doc->getDocument()->getActiveObject();
         if (obj && !obj->isValid()) {
@@ -351,7 +351,7 @@ bool SweepWidget::accept()
         doc->commitCommand();
     }
     catch (const Base::Exception& e) {
-        QMessageBox::warning(this, tr("Input error"), QString::fromLatin1(e.what()));
+        QMessageBox::warning(this, tr("Input error"), QString::fromUtf8(e.what()));
         return false;
     }
 

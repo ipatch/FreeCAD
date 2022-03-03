@@ -74,18 +74,18 @@ DlgBindSheet::DlgBindSheet(Sheet *sheet, const std::vector<Range> &ranges, QWidg
         }
     }
 
-    ui->lineEditFromStart->setText(QString::fromLatin1(range.from().toString().c_str()));
-    ui->lineEditFromEnd->setText(QString::fromLatin1(range.to().toString().c_str()));
+    ui->lineEditFromStart->setText(QString::fromUtf8(range.from().toString().c_str()));
+    ui->lineEditFromEnd->setText(QString::fromUtf8(range.to().toString().c_str()));
 
     ui->lineEditToStart->setDocumentObject(sheet,false);
     ui->lineEditToStart->setLeadChar('=');
     ui->lineEditToEnd->setDocumentObject(sheet,false);
     ui->lineEditToEnd->setLeadChar('=');
 
-    ui->lineEditToStart->setText(QLatin1String(toStart.c_str()));
-    ui->lineEditToEnd->setText(QLatin1String(toEnd.c_str()));
+    ui->lineEditToStart->setText(QString::fromUtf8(toStart.c_str()));
+    ui->lineEditToEnd->setText(QString::fromUtf8(toEnd.c_str()));
 
-    ui->comboBox->addItem(QString::fromLatin1(". (%1)").arg(
+    ui->comboBox->addItem(QStringLiteral(". (%1)").arg(
                 QString::fromUtf8(sheet->Label.getValue())), QByteArray(""));
 
     for(auto obj : sheet->getDocument()->getObjectsOfType<Sheet>()) {
@@ -93,11 +93,11 @@ DlgBindSheet::DlgBindSheet(Sheet *sheet, const std::vector<Range> &ranges, QWidg
             continue;
         QString label;
         if(obj->Label.getStrValue() != obj->getNameInDocument())
-            label = QString::fromLatin1("%1 (%2)").arg(
-                                QString::fromLatin1(obj->getNameInDocument()),
+            label = QStringLiteral("%1 (%2)").arg(
+                                QString::fromUtf8(obj->getNameInDocument()),
                                 QString::fromUtf8(obj->Label.getValue()));
         else
-            label = QLatin1String(obj->getNameInDocument());
+            label = QString::fromUtf8(obj->getNameInDocument());
         ui->comboBox->addItem(label, QByteArray(obj->getNameInDocument()));
     }
     for(auto doc : GetApplication().getDocuments()) {
@@ -109,11 +109,11 @@ DlgBindSheet::DlgBindSheet(Sheet *sheet, const std::vector<Range> &ranges, QWidg
             std::string fullname = obj->getFullName();
             QString label;
             if(obj->Label.getStrValue() != obj->getNameInDocument())
-                label = QString::fromLatin1("%1 (%2)").arg(
-                                    QString::fromLatin1(fullname.c_str()),
+                label = QStringLiteral("%1 (%2)").arg(
+                                    QString::fromUtf8(fullname.c_str()),
                                     QString::fromUtf8(obj->Label.getValue()));
             else
-                label = QLatin1String(fullname.c_str());
+                label = QString::fromUtf8(fullname.c_str());
             ui->comboBox->addItem(label, QByteArray(fullname.c_str()));
         }
     }
@@ -146,16 +146,16 @@ void DlgBindSheet::accept()
                 FC_THROWM(Base::RuntimeError, "Cannot find Spreadsheet '" << ref << "'");
         }
 
-        std::string fromStart(ui->lineEditFromStart->text().trimmed().toLatin1().constData());
-        std::string fromEnd(ui->lineEditFromEnd->text().trimmed().toLatin1().constData());
+        std::string fromStart(ui->lineEditFromStart->text().trimmed().toUtf8().constData());
+        std::string fromEnd(ui->lineEditFromEnd->text().trimmed().toUtf8().constData());
 
-        std::string toStart(ui->lineEditToStart->text().trimmed().toLatin1().constData());
+        std::string toStart(ui->lineEditToStart->text().trimmed().toUtf8().constData());
         if(boost::starts_with(toStart,"=")) 
             toStart.erase(toStart.begin());
         else
             toStart = std::string("<<") + toStart + ">>";
 
-        std::string toEnd(ui->lineEditToEnd->text().trimmed().toLatin1().constData());
+        std::string toEnd(ui->lineEditToEnd->text().trimmed().toUtf8().constData());
         if(boost::starts_with(toEnd,"=")) 
             toEnd.erase(toEnd.begin());
         else
@@ -185,8 +185,8 @@ void DlgBindSheet::accept()
 
 void DlgBindSheet::onDiscard() {
     try {
-        std::string fromStart(ui->lineEditFromStart->text().trimmed().toLatin1().constData());
-        std::string fromEnd(ui->lineEditFromEnd->text().trimmed().toLatin1().constData());
+        std::string fromStart(ui->lineEditFromStart->text().trimmed().toUtf8().constData());
+        std::string fromEnd(ui->lineEditFromEnd->text().trimmed().toUtf8().constData());
         Gui::Command::openCommand("Unbind cells");
         Gui::cmdAppObjectArgs(sheet, "setExpression('.cells.Bind.%s.%s', None)", fromStart, fromEnd);
         Gui::Command::doCommand(Gui::Command::Doc, "App.ActiveDocument.recompute()");

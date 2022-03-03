@@ -28,6 +28,7 @@
 #ifndef _PreComp_
 #endif
 
+#include <Base/Console.h>
 #include "ViewProviderGeoFeatureGroupExtension.h"
 #include "ViewProviderLink.h"
 #include "ViewParams.h"
@@ -39,6 +40,8 @@
 #include <App/DocumentObserver.h>
 #include <App/GeoFeatureGroupExtension.h>
 #include "SoFCUnifiedSelection.h"
+
+FC_LOG_LEVEL_INIT("Gui", true, true)
 
 using namespace Gui;
 
@@ -241,6 +244,8 @@ void ViewProviderGeoFeatureGroupExtension::buildExport() const {
         if (!vp || vp == getExtendedViewProvider()) { continue; }
 
         auto children = vp->claimChildren();
+        for (auto child : children)
+            FC_MSG(obj->Label.getValue() << ": " << child->Label.getValue());
         filterLinksByScope(obj,children);
         outSet.insert(children.begin(),children.end());
     }
@@ -294,6 +299,16 @@ bool ViewProviderGeoFeatureGroupExtension::needUpdateChildren(App::DocumentObjec
             found = true;
     }
     return found;
+}
+
+bool ViewProviderGeoFeatureGroupExtension::extensionGetToolTip(const QByteArray &, QString &) const
+{
+    return false; // Skip ViewProviderGroupExtension::extensionGetToolTip()
+}
+
+bool ViewProviderGeoFeatureGroupExtension::extensionIconMouseEvent(QMouseEvent *, const QByteArray &)
+{
+    return false; // Skip ViewProviderGroupExtension::extensionIconMouseEvent()
 }
 
 namespace Gui {

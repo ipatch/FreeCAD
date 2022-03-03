@@ -123,11 +123,11 @@ QVariant SceneModel::data(const QModelIndex & index, int role) const
     if (obj) {
         stream << QLatin1String(" -> ");
         if (obj->getDocument() != App::GetApplication().getActiveDocument())
-            stream << QString::fromLatin1(obj->getFullName().c_str());
+            stream << QString::fromUtf8(obj->getFullName().c_str());
         else
-            stream << QString::fromLatin1(obj->getNameInDocument());
+            stream << QString::fromUtf8(obj->getNameInDocument());
         if (obj->Label.getStrValue() != obj->getNameInDocument())
-            stream << QString::fromLatin1(" (%1)").arg(QString::fromUtf8(obj->Label.getValue()));
+            stream << QStringLiteral(" (%1)").arg(QString::fromUtf8(obj->Label.getValue()));
     }
     else if (itName != nodeNames.end())
         stream << itName.value();
@@ -401,9 +401,9 @@ void DlgInspector::populateFieldView(QTreeWidgetItem *parent, SoNode *n)
         auto field = fields[i];
         SbName name;
         node->getFieldName(field, name);
-        QString sname = QString::fromLatin1(name);
+        QString sname = QString::fromUtf8(name);
         if (field->isIgnored())
-            sname += QLatin1String("*");
+            sname += QStringLiteral("*");
         item->setText(0, sname);
         item->setToolTip(0, QString::fromLatin1(field->getTypeId().getName()));
         item->setData(0, Qt::UserRole, QVariant::fromValue(node));
@@ -412,10 +412,11 @@ void DlgInspector::populateFieldView(QTreeWidgetItem *parent, SoNode *n)
         if (field->isOfType(SoSFNode::getClassTypeId())) {
             auto nfield = static_cast<SoSFNode*>(field);
             if (!nfield->getValue())
-                item->setText(1, QString::fromLatin1("NULL"));
+                item->setText(1, QStringLiteral("NULL"));
             else {
                 QString txt;
                 QTextStream stream(&txt);
+                stream.setCodec("UTF-8");
                 stream << nfield->getValue()->getTypeId().getName() << " " <<nfield->getValue();
                 item->setText(1, txt);
                 item->setChildIndicatorPolicy(QTreeWidgetItem::ShowIndicator);
@@ -469,14 +470,15 @@ void DlgInspector::populateFieldView(QTreeWidgetItem *parent, SoNode *n)
     if (parent && node && node->getChildren() && node->getChildren()->getLength()) {
         auto children = node->getChildren();
         auto item = new QTreeWidgetItem(parent);
-        item->setText(0, QString::fromLatin1("Children Nodes"));
-        item->setText(1, QString::fromLatin1("count: %1").arg(children->getLength()));
+        item->setText(0, tr("Children Nodes"));
+        item->setText(1, tr("count: %1").arg(children->getLength()));
         for (int i=0, c=children->getLength(); i<c; ++i) {
             auto child = new QTreeWidgetItem(item);
-            child->setText(0, QString::fromLatin1("%1").arg(i+1));
+            child->setText(0, QStringLiteral("%1").arg(i+1));
             CoinPtr<SoNode> childNode((*children)[i]);
             QString txt;
             QTextStream stream(&txt);
+            stream.setCodec("UTF-8");
             stream << childNode.get() << " " << childNode->getTypeId().getName();
             child->setText(1, txt);
             child->setData(0, Qt::UserRole, QVariant::fromValue(childNode));
@@ -529,9 +531,9 @@ void DlgInspector::expandItem(QTreeWidgetItem *item, bool force)
         auto &mfield = *static_cast<SoMFNode*>(field);
         for (int i=0, c=mfield.getNum(); i<c; ++i) {
             auto child = new QTreeWidgetItem(item);
-            child->setText(0, QString::fromLatin1("%1").arg(i+1));
+            child->setText(0, QStringLiteral("%1").arg(i+1));
             if (!mfield[i])
-                child->setText(1, QString::fromLatin1("NULL"));
+                child->setText(1, QStringLiteral("NULL"));
             else {
                 CoinPtr<SoNode> childNode(mfield[i]);
                 QString txt;

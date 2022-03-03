@@ -134,7 +134,7 @@ void TaskBooleanParameters::populate() {
     for (std::vector<App::DocumentObject*>::const_iterator it = bodies.begin(); it != bodies.end(); ++it) {
         QListWidgetItem* item = new QListWidgetItem(ui->listWidgetBodies);
         item->setText(QString::fromUtf8((*it)->Label.getValue()));
-        item->setData(Qt::UserRole, QString::fromLatin1((*it)->getNameInDocument()));
+        item->setData(Qt::UserRole, QString::fromUtf8((*it)->getNameInDocument()));
         auto vp = Application::Instance->getViewProvider(*it);
         if(vp)
             item->setIcon(vp->getIcon());
@@ -191,7 +191,7 @@ void TaskBooleanParameters::onItemMoved()
     for(int i=0,count=ui->listWidgetBodies->count();i<count;++i) {
         auto item = ui->listWidgetBodies->item(i);
         auto obj = pcBoolean->getDocument()->getObject(
-                item->data(Qt::UserRole).toString().toLatin1().constData());
+                item->data(Qt::UserRole).toString().toUtf8().constData());
         if (obj)
             group.push_back(obj);
     }
@@ -215,7 +215,7 @@ void TaskBooleanParameters::preselect(QListWidgetItem *item) {
     if(!parent)
         return;
     QString name = item->data(Qt::UserRole).toString();
-    subname += name.toLatin1().constData();
+    subname += name.toUtf8().constData();
     subname += ".";
 
     Gui::Selection().setPreselect(parent->getDocument()->getName(),
@@ -234,7 +234,7 @@ void TaskBooleanParameters::onItemSelection() {
     std::vector<std::string> subs;
     for(auto item : ui->listWidgetBodies->selectedItems()) {
         QString name = item->data(Qt::UserRole).toString();
-        subs.emplace_back(subname + name.toLatin1().constData() + ".");
+        subs.emplace_back(subname + name.toUtf8().constData() + ".");
     }
 
     Gui::Selection().addSelections(parent->getDocument()->getName(),
@@ -253,7 +253,7 @@ void TaskBooleanParameters::syncSelection() {
     for(int i=0,count=ui->listWidgetBodies->count();i<count;++i) {
         auto item = ui->listWidgetBodies->item(i);
         QString name = item->data(Qt::UserRole).toString();
-        std::string sub = subname + name.toLatin1().constData() + ".";
+        std::string sub = subname + name.toUtf8().constData() + ".";
         auto sobj = parent->getSubObject(sub.c_str());
         bool selected = item->isSelected();
         if(selected != Gui::Selection().isSelected(sobj))

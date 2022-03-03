@@ -233,7 +233,7 @@ QMap<QString, CallTip> CallTipsList::extractTips(const QString& context) const
         }
 #else
         // Don't use hasattr & getattr because if a property is bound to a method this will be executed twice.
-        PyObject* code = Py_CompileString(static_cast<const char*>(context.toLatin1()), "<CallTipsList>", Py_eval_input);
+        PyObject* code = Py_CompileString(static_cast<const char*>(context.toUtf8()), "<CallTipsList>", Py_eval_input);
         if (!code) {
             PyErr_Clear();
             return tips;
@@ -406,7 +406,7 @@ void CallTipsList::extractTipsFromObject(Py::Object& obj, Py::List& list, QMap<Q
             }
 
             CallTip tip;
-            QString str = QString::fromLatin1(name.c_str());
+            QString str = QString::fromUtf8(name.c_str());
             tip.name = str;
 
             if (attr.isCallable()) {
@@ -476,7 +476,7 @@ void CallTipsList::extractTipsFromProperties(Py::Object& obj, QMap<QString, Call
 
     for (std::map<std::string,App::Property*>::const_iterator It=Map.begin();It!=Map.end();++It) {
         CallTip tip;
-        QString str = QString::fromLatin1(It->first.c_str());
+        QString str = QString::fromUtf8(It->first.c_str());
         tip.name = str;
         tip.type = CallTip::Property;
         QString longdoc = QString::fromUtf8(container->getPropertyDocumentation(It->second));

@@ -258,7 +258,7 @@ public:
             objID = obj->getID();
             doc = obj->getDocument();
 
-            name = QString::fromLatin1(obj->getNameInDocument());
+            name = QString::fromUtf8(obj->getNameInDocument());
             label = QString::fromUtf8(quote(obj->Label.getStrValue()).c_str());
 
             auto vp = Gui::Application::Instance->getViewProvider(obj);
@@ -349,7 +349,7 @@ public:
             if(row < (int)propList.size()) {
                 res.first = propList[row].c_str();
                 if(name)
-                    *name = QLatin1String(".") + propNameList[row];
+                    *name = QStringLiteral(".") + propNameList[row];
                 res.second = obj->getPropertyByName(res.first);
                 return res;
             }
@@ -380,7 +380,7 @@ public:
             if(row < pseudoSize) {
                 res = pseudoProps[row];
                 if(name)
-                    *name = QStringLiteral(".") + QString::fromLatin1(res.first);
+                    *name = QStringLiteral(".") + QString::fromUtf8(res.first);
                 return res;
             }
 
@@ -456,9 +456,9 @@ public:
             if(row & 1)
                 res = QString::fromUtf8(quote(doc->Label.getStrValue()).c_str());
             else
-                res = QString::fromLatin1(doc->getName());
+                res = QString::fromUtf8(doc->getName());
             if(sep)
-                res += QLatin1String("#");
+                res += QStringLiteral("#");
             return res;
         }
 
@@ -467,11 +467,11 @@ public:
             if(!obj || !obj->getNameInDocument())
                 return res;
             if(sep)
-                res = QLatin1String(".");
+                res = QStringLiteral(".");
             if(row & 1)
                 res += QString::fromUtf8(quote(obj->Label.getStrValue()).c_str());
             else
-                res += QString::fromLatin1(obj->getNameInDocument());
+                res += QString::fromUtf8(obj->getNameInDocument());
             return res;
         }
 
@@ -511,11 +511,11 @@ public:
                 else {
                     if(getModel()->inList.count(obj))
                         txt = QObject::tr("Warning! Cyclic reference may occur if you reference this object\n\n");
-                    txt += QString::fromLatin1("%1: %2\n%3: %4").arg(
-                            QObject::tr("Internal name"), QString::fromLatin1(obj->getNameInDocument()),
+                    txt += QStringLiteral("%1: %2\n%3: %4").arg(
+                            QObject::tr("Internal name"), QString::fromUtf8(obj->getNameInDocument()),
                             QObject::tr("Label"), QString::fromUtf8(obj->Label.getValue()));
                     if(obj->Label2.getStrValue().size()) {
-                        txt += QString::fromLatin1("\n%1: %2").arg(
+                        txt += QStringLiteral("\n%1: %2").arg(
                                 QObject::tr("Description"), QString::fromUtf8(obj->Label2.getValue()));
                     }
                 }
@@ -545,16 +545,16 @@ public:
                     && !(row & 1))
             {
                 if(role == Qt::EditRole)
-                    return QString::fromLatin1("%1").arg(
-                        QString::fromLatin1(sobj->getNameInDocument()));
+                    return QStringLiteral("%1").arg(
+                        QString::fromUtf8(sobj->getNameInDocument()));
                 else if(role == Qt::UserRole) {
                     if (obj->getPropertyByName(sobj->getNameInDocument())) {
                         // sub object name clash with property, use special syntax for disambiguation
-                        return QString::fromLatin1(".<<%1.>>").arg(
-                                QString::fromLatin1(sobj->getNameInDocument()));
+                        return QStringLiteral(".<<%1.>>").arg(
+                                QString::fromUtf8(sobj->getNameInDocument()));
                     }
-                    return QString::fromLatin1(".%1").arg(
-                            QString::fromLatin1(sobj->getNameInDocument()));
+                    return QStringLiteral(".%1").arg(
+                            QString::fromUtf8(sobj->getNameInDocument()));
                 }
             }
             return objData(sobj, row, role, local, false);
@@ -585,10 +585,10 @@ public:
                 if(local && !propName.startsWith(QLatin1Char('.'))) {
                     auto obj = getModel()->currentObj.getObject();
                     if(obj && obj->getDocument()
-                           && obj->getDocument()->getObject(propName.toLatin1().constData()))
+                           && obj->getDocument()->getObject(propName.toUtf8().constData()))
                     {
                         // property name clash with object name, use leading '.' to disambiguate
-                        return QLatin1String(".") + propName;
+                        return QStringLiteral(".") + propName;
                     }
                 }
                 else if (propName.startsWith(QLatin1Char('.')))
@@ -604,9 +604,9 @@ public:
                 if (prop->getName()) {
                     static QIcon icon(BitmapFactory().pixmap("ClassBrowser/alias.svg"));
                     if(propName.startsWith(QLatin1Char('.'))) {
-                        if (propName != QString::fromLatin1(".%1").arg(QLatin1String(prop->getName())))
+                        if (propName != QStringLiteral(".%1").arg(QString::fromUtf8(prop->getName())))
                             return icon;
-                    } else if (propName != QString::fromLatin1(prop->getName()))
+                    } else if (propName != QString::fromUtf8(prop->getName()))
                         return icon;
                 }
                 return CallTipsList::iconOfType(CallTip::Property);
@@ -639,11 +639,11 @@ public:
                 return QVariant();
             }
             case Qt::UserRole:
-                return QString::fromLatin1(".<<.%1%2>>").arg(QLatin1String(element)).arg(eindex+1);
+                return QStringLiteral(".<<.%1%2>>").arg(QString::fromUtf8(element)).arg(eindex+1);
             case Qt::EditRole:
-                return QString::fromLatin1(".%1%2").arg(QLatin1String(element)).arg(eindex+1);
+                return QStringLiteral(".%1%2").arg(QString::fromUtf8(element)).arg(eindex+1);
             case Qt::DisplayRole:
-                return QString::fromLatin1("%1%2").arg(QLatin1String(element)).arg(eindex+1);
+                return QStringLiteral("%1%2").arg(QString::fromUtf8(element)).arg(eindex+1);
             default:
                 return QVariant();
             }
@@ -736,9 +736,9 @@ public:
             switch(role) {
             case Qt::EditRole:
             case Qt::UserRole:
-                return QString::fromLatin1("%1(").arg(QLatin1String(info.name));
+                return QStringLiteral("%1(").arg(QString::fromUtf8(info.name));
             case Qt::DisplayRole:
-                return QString::fromLatin1("%1()").arg(QLatin1String(info.name));
+                return QStringLiteral("%1()").arg(QString::fromUtf8(info.name));
             case Qt::ToolTipRole:
                 return QApplication::translate("App::Expression", info.description);
             case Qt::DecorationRole: {
@@ -1308,17 +1308,17 @@ public:
             // Assumes caller already holds Python GIL
 
             if(!pyObj) {
-                FC_TRACE("No parent for " << name.toLatin1().constData());
+                FC_TRACE("No parent for " << name.toUtf8().constData());
                 return false;
             }
-            FC_TRACE("Evaluate attribute " << name.toLatin1().constData() << '.'
-                    << child.name.toLatin1().constData());
+            FC_TRACE("Evaluate attribute " << name.toUtf8().constData() << '.'
+                    << child.name.toUtf8().constData());
 
             try {
-                Py::Object attr = Py::Object(pyObj).getAttr(child.name.toLatin1().constData());
+                Py::Object attr = Py::Object(pyObj).getAttr(child.name.toUtf8().constData());
                 if(!attr.ptr()) {
-                    FC_TRACE("Invalid attribute name: " << name.toLatin1().constData()
-                            << child.name.toLatin1().constData());
+                    FC_TRACE("Invalid attribute name: " << name.toUtf8().constData()
+                            << child.name.toUtf8().constData());
                     return false;
                 }
                 child.pyObj = Py::new_reference_to(attr);
@@ -1327,19 +1327,19 @@ public:
                 Base::PyException e;
                 if(FC_LOG_INSTANCE.isEnabled(FC_LOGLEVEL_LOG)) {
                     e.ReportException();
-                    FC_ERR("Failed to obtain attribute " << name.toLatin1().constData()
-                            << child.name.toLatin1().constData());
+                    FC_ERR("Failed to obtain attribute " << name.toUtf8().constData()
+                            << child.name.toUtf8().constData());
                 }
             } catch (Base::Exception &e) {
                 if(FC_LOG_INSTANCE.isEnabled(FC_LOGLEVEL_LOG)) {
                     e.ReportException();
-                    FC_ERR("Failed to list attribute " << name.toLatin1().constData()
-                            << child.name.toLatin1().constData());
+                    FC_ERR("Failed to list attribute " << name.toUtf8().constData()
+                            << child.name.toUtf8().constData());
                 }
             } catch (...) {
                 if(FC_LOG_INSTANCE.isEnabled(FC_LOGLEVEL_LOG))
-                    FC_ERR("Failed to list attribute " << name.toLatin1().constData()
-                            << child.name.toLatin1().constData());
+                    FC_ERR("Failed to list attribute " << name.toUtf8().constData()
+                            << child.name.toUtf8().constData());
             }
             return false;
         }
@@ -1352,7 +1352,7 @@ public:
             if(!pyObj) {
                 auto pdata = dynamic_cast<PythonData*>(getModel()->parentData(mindex));
                 if(!pdata) {
-                    FC_TRACE("No parent for " << name.toLatin1().constData());
+                    FC_TRACE("No parent for " << name.toUtf8().constData());
                     return;
                 }
                 if(!pdata->initChild(*this))
@@ -1367,23 +1367,23 @@ public:
                     if(tip.name.isEmpty())
                         continue;
                     if(FC_LOG_INSTANCE.level() > FC_LOGLEVEL_TRACE)
-                        FC_TRACE(tip.name.toLatin1().constData());
+                        FC_TRACE(tip.name.toUtf8().constData());
                     tipArray.emplace_back(tip);
                 }
             } catch (Py::Exception &) {
                 Base::PyException e;
                 if(FC_LOG_INSTANCE.isEnabled(FC_LOGLEVEL_LOG)) {
                     e.ReportException();
-                    FC_ERR("Failed to list attribute of " << name.toLatin1().constData());
+                    FC_ERR("Failed to list attribute of " << name.toUtf8().constData());
                 }
             } catch (Base::Exception &e) {
                 if(FC_LOG_INSTANCE.isEnabled(FC_LOGLEVEL_LOG)) {
                     e.ReportException();
-                    FC_ERR("Failed to list attribute of " << name.toLatin1().constData());
+                    FC_ERR("Failed to list attribute of " << name.toUtf8().constData());
                 }
             } catch (...) {
                 if(FC_LOG_INSTANCE.isEnabled(FC_LOGLEVEL_LOG))
-                    FC_ERR("Failed to list attribute of " << name.toLatin1().constData());
+                    FC_ERR("Failed to list attribute of " << name.toUtf8().constData());
             }
         }
 
@@ -1401,7 +1401,7 @@ public:
             switch(role) {
             case Qt::UserRole:
             case Qt::EditRole:
-                return QLatin1String(".") + tipArray[row].name;
+                return QStringLiteral(".") + tipArray[row].name;
             case Qt::DisplayRole:
                 return tipArray[row].name;
             case Qt::ToolTipRole:
@@ -1592,9 +1592,9 @@ public:
             case Qt::UserRole:
                 if(pathInfo.pathName.startsWith(QLatin1Char('[')))
                     return pathInfo.pathName;
-                return QLatin1String(".") + pathInfo.pathName;
+                return QStringLiteral(".") + pathInfo.pathName;
             case Qt::EditRole:
-                return QLatin1String(".") + pathInfo.displayName;
+                return QStringLiteral(".") + pathInfo.displayName;
             case Qt::DisplayRole:
                 return pathInfo.displayName;
             case Qt::DecorationRole: {
@@ -2156,15 +2156,15 @@ QString ExpressionCompleter::pathFromIndex ( const QModelIndex & index ) const
                                || res.startsWith(QLatin1Char('[')))
             res = data + res;
         else
-            res = data + QLatin1String(".") + res;
+            res = data + QStringLiteral(".") + res;
         parent = parent.parent();
     }while(parent.isValid());
 
     if(closeString) {
         if(!res.endsWith(QLatin1Char('.')))
-            res += QLatin1String(".<<");
+            res += QStringLiteral(".<<");
         else
-            res += QLatin1String("<<");
+            res += QStringLiteral("<<");
     }
 
     FC_TRACE("join path " << static_cast<ExpressionCompleterModel*>(m)->indexToString(index)
@@ -2184,10 +2184,10 @@ QStringList ExpressionCompleter::splitPath ( const QString & input ) const
 
     QString ending;
     if(path.back() == '.') {
-        ending = QLatin1String(".");
+        ending = QStringLiteral(".");
         path.pop_back();
     } else if (boost::ends_with(path, ".<<")) {
-        ending = QLatin1String(".<<");
+        ending = QStringLiteral(".<<");
         path.resize(path.size()-3);
     } else if(path.back() == '#') {
         l << input;
@@ -2195,9 +2195,9 @@ QStringList ExpressionCompleter::splitPath ( const QString & input ) const
         return l;
     } else if (boost::ends_with(path, "#<<")) {
         l << input.mid(0,input.size()-2);
-        l << QLatin1String("<<");
+        l << QStringLiteral("<<");
         FC_TRACE("split path " << path
-                << " -> " << l.join(QLatin1String("/")).toUtf8().constData());
+                << " -> " << l.join(QStringLiteral("/")).toUtf8().constData());
         return l;
     }
 
@@ -2258,11 +2258,11 @@ QStringList ExpressionCompleter::splitPath ( const QString & input ) const
             auto m = dynamic_cast<ExpressionCompleterModel*>(model());
             if(m && m->setPath(l, vexpr)) {
                 FC_TRACE("adjust path " << path
-                        << " -> " << l.join(QLatin1String("/")).toUtf8().constData());
+                        << " -> " << l.join(QStringLiteral("/")).toUtf8().constData());
             }
 
             FC_TRACE("split path " << path
-                    << " -> " << l.join(QLatin1String("/")).toUtf8().constData());
+                    << " -> " << l.join(QStringLiteral("/")).toUtf8().constData());
             return l;
         }
         catch (const Base::Exception &e) {
@@ -2299,7 +2299,7 @@ QStringList ExpressionCompleter::splitPath ( const QString & input ) const
     } else
         l << input;
     FC_TRACE("split path bail out -> "
-            << l.join(QLatin1String("/")).toUtf8().constData());
+            << l.join(QStringLiteral("/")).toUtf8().constData());
     return l;
 }
 

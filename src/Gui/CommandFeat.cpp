@@ -144,21 +144,21 @@ void StdCmdSendToPythonConsole::activated(int iMsg)
     if (sels.empty())
         return;
     const App::DocumentObject *obj = sels[0].getObject();
-    QString docname = QString::fromLatin1(obj->getDocument()->getName());
-    QString objname = QString::fromLatin1(obj->getNameInDocument());
+    QString docname = QString::fromUtf8(obj->getDocument()->getName());
+    QString objname = QString::fromUtf8(obj->getNameInDocument());
     try {
-        QString cmd = QString::fromLatin1("obj = App.getDocument(\"%1\").getObject(\"%2\")").arg(docname,objname);
-        Gui::Command::runCommand(Gui::Command::Gui,cmd.toLatin1());
+        QString cmd = QStringLiteral("obj = App.getDocument(\"%1\").getObject(\"%2\")").arg(docname,objname);
+        Gui::Command::runCommand(Gui::Command::Gui,cmd.toUtf8());
         if (sels[0].hasSubNames()) {
             std::vector<std::string> subnames = sels[0].getSubNames();
             if (obj->getPropertyByName("Shape")) {
-                QString subname = QString::fromLatin1(subnames[0].c_str());
-                cmd = QString::fromLatin1("shp = App.getDocument(\"%1\").getObject(\"%2\").Shape")
+                QString subname = QString::fromUtf8(subnames[0].c_str());
+                cmd = QStringLiteral("shp = App.getDocument(\"%1\").getObject(\"%2\").Shape")
                     .arg(docname, objname);
-                Gui::Command::runCommand(Gui::Command::Gui,cmd.toLatin1());
-                cmd = QString::fromLatin1("elt = App.getDocument(\"%1\").getObject(\"%2\").Shape.%4")
+                Gui::Command::runCommand(Gui::Command::Gui,cmd.toUtf8());
+                cmd = QStringLiteral("elt = App.getDocument(\"%1\").getObject(\"%2\").Shape.%4")
                     .arg(docname,objname,subname);
-                Gui::Command::runCommand(Gui::Command::Gui,cmd.toLatin1());
+                Gui::Command::runCommand(Gui::Command::Gui,cmd.toUtf8());
             }
         }
     }

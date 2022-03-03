@@ -662,9 +662,9 @@ void DlgExpressionInput::setupColors()
 
     //Unless something very wrong happens, empty style name means no style sheet
     //And having dark in the name means dark style (this *needs* to be improved in the future)
-    QString styleName = QString::fromLatin1(hGrp->GetASCII("StyleSheet").c_str());
+    QString styleName = QString::fromUtf8(hGrp->GetASCII("StyleSheet").c_str());
     bool hasStyleSheet = !styleName.isEmpty();
-    bool isDarkStyle = hasStyleSheet && styleName.indexOf(QLatin1String("dark"), 0, Qt::CaseInsensitive) >= 0;
+    bool isDarkStyle = hasStyleSheet && styleName.indexOf(QStringLiteral("dark"), 0, Qt::CaseInsensitive) >= 0;
 
     hGrp = App::GetApplication().GetParameterGroupByPath(
            "User parameter:BaseApp/Preferences/OutputWindow");
@@ -724,7 +724,7 @@ void DlgExpressionInput::setupColors()
             this->borderColor.setRgb(0xc3c3c3);
             this->backgroundColor.setRgb(0xf5f5f5);
         }
-        QString checkboxStyle = QString::fromLatin1(
+        QString checkboxStyle = QStringLiteral(
             "%1;border:1px solid %2;border-radius:3px")
             .arg(this->textColorStyle, this->borderColor.name(QColor::HexArgb));
         this->ui->checkBoxWantReturn->setStyleSheet(checkboxStyle);
@@ -774,7 +774,7 @@ QString DlgExpressionInput::colorPriority(QRgb userColor, QRgb fcDefaultColor,
     }
 
     //Style string includes some layout information what might be better suited in the .ui
-    QString formmatString = QString::fromLatin1("color:%1;background-color:%2;border:none;margin:0px");
+    QString formmatString = QStringLiteral("color:%1;background-color:%2;border:none;margin:0px");
 
     return formmatString.arg(color.name(QColor::HexArgb), backgroundColor.name(QColor::HexArgb));
 }

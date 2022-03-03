@@ -48,8 +48,8 @@ DlgSheetConf::DlgSheetConf(Sheet *sheet, Range range, QWidget *parent)
         range = Range(range.from(),to);
     }
 
-    ui->lineEditStart->setText(QString::fromLatin1(range.from().toString().c_str()));
-    ui->lineEditEnd->setText(QString::fromLatin1(range.to().toString().c_str()));
+    ui->lineEditStart->setText(QString::fromUtf8(range.from().toString().c_str()));
+    ui->lineEditEnd->setText(QString::fromUtf8(range.to().toString().c_str()));
 
     ui->lineEditProp->setDocumentObject(sheet,false);
 
@@ -65,8 +65,8 @@ DlgSheetConf::DlgSheetConf(Sheet *sheet, Range range, QWidget *parent)
             ui->lineEditGroup->setText(QString::fromUtf8(group));
     }
 
-    ui->lineEditStart->setText(QString::fromLatin1(from.toString().c_str()));
-    ui->lineEditEnd->setText(QString::fromLatin1(to.toString().c_str()));
+    ui->lineEditStart->setText(QString::fromUtf8(from.toString().c_str()));
+    ui->lineEditEnd->setText(QString::fromUtf8(to.toString().c_str()));
 }
 
 DlgSheetConf::~DlgSheetConf()
@@ -78,9 +78,9 @@ App::Property *DlgSheetConf::prepare(CellAddress &from, CellAddress &to,
     std::string &rangeConf, ObjectIdentifier &path, bool init)
 {
     from = sheet->getCellAddress(
-            ui->lineEditStart->text().trimmed().toLatin1().constData());
+            ui->lineEditStart->text().trimmed().toUtf8().constData());
     to = sheet->getCellAddress(
-            ui->lineEditEnd->text().trimmed().toLatin1().constData());
+            ui->lineEditEnd->text().trimmed().toUtf8().constData());
 
     if(from.col()>=to.col())
         FC_THROWM(Base::RuntimeError, "Invalid cell range");

@@ -724,7 +724,7 @@ void PropertyEditor::contextMenuEvent(QContextMenuEvent *ev) {
     if(props.size() == 1) {
         auto item = static_cast<PropertyItem*>(contextIndex.internalPointer());
         auto prop = props.begin()->getProperty();
-        if(item->isBound() 
+        if(item && item->isBound() 
             && prop
             && !prop->isDerivedFrom(App::PropertyExpressionEngine::getClassTypeId())
             && !prop->isReadOnly() 

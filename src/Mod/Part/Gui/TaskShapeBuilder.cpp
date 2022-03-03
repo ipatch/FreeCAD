@@ -217,6 +217,7 @@ void ShapeBuilderWidget::createEdgeFromVertex()
         for (jt=it->getSubNames().begin();jt!=it->getSubNames().end();++jt) {
             QString line;
             QTextStream str(&line);
+            str.setCodec("UTF-8");
             str << "App.ActiveDocument." << it->getFeatName() << ".Shape." << jt->c_str() << ".Point";
             elements.push_back(line);
         }
@@ -229,7 +230,7 @@ void ShapeBuilderWidget::createEdgeFromVertex()
     }
 
     QString cmd;
-    cmd = QString::fromLatin1(
+    cmd = QStringLiteral(
         "_=Part.makeLine(%1, %2)\n"
         "if _.isNull(): raise RuntimeError('Failed to create edge')\n"
         "App.ActiveDocument.addObject('Part::Feature','Edge').Shape=_\n"
@@ -238,7 +239,7 @@ void ShapeBuilderWidget::createEdgeFromVertex()
 
     try {
         Gui::Application::Instance->activeDocument()->openCommand(QT_TRANSLATE_NOOP("Command", "Edge"));
-        Gui::Command::runCommand(Gui::Command::App, cmd.toLatin1());
+        Gui::Command::runCommand(Gui::Command::App, cmd.toUtf8());
         Gui::Application::Instance->activeDocument()->commitCommand();
     }
     catch (const Base::Exception&) {
@@ -262,6 +263,7 @@ void ShapeBuilderWidget::createWireFromEdge()
 
     QString list;
     QTextStream str(&list);
+    str.setCodec("UTF-8");
     str << "[";
     for (it=sel.begin();it!=sel.end();++it) {
         for (jt=it->getSubNames().begin();jt!=it->getSubNames().end();++jt) {
@@ -271,7 +273,7 @@ void ShapeBuilderWidget::createWireFromEdge()
     str << "]";
 
     QString cmd;
-    cmd = QString::fromLatin1(
+    cmd = QStringLiteral(
         "_=Part.Wire(Part.__sortEdges__(%1))\n"
         "if _.isNull(): raise RuntimeError('Failed to create a wire')\n"
         "App.ActiveDocument.addObject('Part::Feature','Wire').Shape=_\n"
@@ -279,7 +281,7 @@ void ShapeBuilderWidget::createWireFromEdge()
     ).arg(list);
     try {
         Gui::Application::Instance->activeDocument()->openCommand(QT_TRANSLATE_NOOP("Command", "Wire"));
-        Gui::Command::runCommand(Gui::Command::App, cmd.toLatin1());
+        Gui::Command::runCommand(Gui::Command::App, cmd.toUtf8());
         Gui::Application::Instance->activeDocument()->commitCommand();
     }
     catch (const Base::Exception&) {
@@ -303,6 +305,7 @@ void ShapeBuilderWidget::createFaceFromVertex()
 
     QString list;
     QTextStream str(&list);
+    str.setCodec("UTF-8");
     str << "[";
     for (it=sel.begin();it!=sel.end();++it) {
         for (jt=it->getSubNames().begin();jt!=it->getSubNames().end();++jt) {
@@ -313,7 +316,7 @@ void ShapeBuilderWidget::createFaceFromVertex()
 
     QString cmd;
     if (d->ui.checkPlanar->isChecked()) {
-        cmd = QString::fromLatin1(
+        cmd = QStringLiteral(
             "_=Part.Face(Part.makePolygon(%1, True))\n"
             "if _.isNull(): raise RuntimeError('Failed to create face')\n"
             "App.ActiveDocument.addObject('Part::Feature','Face').Shape=_\n"
@@ -321,7 +324,7 @@ void ShapeBuilderWidget::createFaceFromVertex()
         ).arg(list);
     }
     else {
-        cmd = QString::fromLatin1(
+        cmd = QStringLiteral(
             "_=Part.makeFilledFace(Part.makePolygon(%1, True).Edges)\n"
             "if _.isNull(): raise RuntimeError('Failed to create face')\n"
             "App.ActiveDocument.addObject('Part::Feature','Face').Shape=_\n"
@@ -331,7 +334,7 @@ void ShapeBuilderWidget::createFaceFromVertex()
 
     try {
         Gui::Application::Instance->activeDocument()->openCommand(QT_TRANSLATE_NOOP("Command", "Face"));
-        Gui::Command::runCommand(Gui::Command::App, cmd.toLatin1());
+        Gui::Command::runCommand(Gui::Command::App, cmd.toUtf8());
         Gui::Application::Instance->activeDocument()->commitCommand();
     }
     catch (const Base::Exception&) {
@@ -355,6 +358,7 @@ void ShapeBuilderWidget::createFaceFromEdge()
 
     QString list;
     QTextStream str(&list);
+    str.setCodec("UTF-8");
     str << "[";
     for (it=sel.begin();it!=sel.end();++it) {
         for (jt=it->getSubNames().begin();jt!=it->getSubNames().end();++jt) {
@@ -365,7 +369,7 @@ void ShapeBuilderWidget::createFaceFromEdge()
 
     QString cmd;
     if (d->ui.checkPlanar->isChecked()) {
-        cmd = QString::fromLatin1(
+        cmd = QStringLiteral(
             "_=Part.Face(Part.Wire(Part.__sortEdges__(%1)))\n"
             "if _.isNull(): raise RuntimeError('Failed to create face')\n"
             "App.ActiveDocument.addObject('Part::Feature','Face').Shape=_\n"
@@ -373,7 +377,7 @@ void ShapeBuilderWidget::createFaceFromEdge()
         ).arg(list);
     }
     else {
-        cmd = QString::fromLatin1(
+        cmd = QStringLiteral(
             "_=Part.makeFilledFace(Part.__sortEdges__(%1))\n"
             "if _.isNull(): raise RuntimeError('Failed to create face')\n"
             "App.ActiveDocument.addObject('Part::Feature','Face').Shape=_\n"
@@ -383,7 +387,7 @@ void ShapeBuilderWidget::createFaceFromEdge()
 
     try {
         Gui::Application::Instance->activeDocument()->openCommand(QT_TRANSLATE_NOOP("Command", "Face"));
-        Gui::Command::runCommand(Gui::Command::App, cmd.toLatin1());
+        Gui::Command::runCommand(Gui::Command::App, cmd.toUtf8());
         Gui::Application::Instance->activeDocument()->commitCommand();
     }
     catch (const Base::Exception&) {
@@ -407,6 +411,7 @@ void ShapeBuilderWidget::createShellFromFace()
 
     QString list;
     QTextStream str(&list);
+    str.setCodec("UTF-8");
     if (d->ui.checkFaces->isChecked()) {
         std::set<App::DocumentObject*> obj;
         for (it=sel.begin();it!=sel.end();++it)
@@ -428,7 +433,7 @@ void ShapeBuilderWidget::createShellFromFace()
 
     QString cmd;
     if (d->ui.checkRefine->isEnabled() && d->ui.checkRefine->isChecked()) {
-        cmd = QString::fromLatin1(
+        cmd = QStringLiteral(
             "_=Part.Shell(%1)\n"
             "if _.isNull(): raise RuntimeError('Failed to create shell')\n"
             "App.ActiveDocument.addObject('Part::Feature','Shell').Shape=_.removeSplitter()\n"
@@ -436,7 +441,7 @@ void ShapeBuilderWidget::createShellFromFace()
         ).arg(list);
     }
     else {
-        cmd = QString::fromLatin1(
+        cmd = QStringLiteral(
             "_=Part.Shell(%1)\n"
             "if _.isNull(): raise RuntimeError('Failed to create shell')\n"
             "App.ActiveDocument.addObject('Part::Feature','Shell').Shape=_\n"
@@ -446,7 +451,7 @@ void ShapeBuilderWidget::createShellFromFace()
 
     try {
         Gui::Application::Instance->activeDocument()->openCommand(QT_TRANSLATE_NOOP("Command", "Shell"));
-        Gui::Command::runCommand(Gui::Command::App, cmd.toLatin1());
+        Gui::Command::runCommand(Gui::Command::App, cmd.toUtf8());
         Gui::Application::Instance->activeDocument()->commitCommand();
     }
     catch (const Base::Exception&) {
@@ -466,6 +471,7 @@ void ShapeBuilderWidget::createSolidFromShell()
 
     QString line;
     QTextStream str(&line);
+    str.setCodec("UTF-8");
 
     std::vector<Gui::SelectionObject> sel = partFilter.Result[0];
     std::vector<Gui::SelectionObject>::iterator it;
@@ -476,7 +482,7 @@ void ShapeBuilderWidget::createSolidFromShell()
 
     QString cmd;
     if (d->ui.checkRefine->isEnabled() && d->ui.checkRefine->isChecked()) {
-        cmd = QString::fromLatin1(
+        cmd = QStringLiteral(
             "shell=%1\n"
             "if shell.ShapeType != 'Shell': raise RuntimeError('Part object is not a shell')\n"
             "_=Part.Solid(shell)\n"
@@ -486,7 +492,7 @@ void ShapeBuilderWidget::createSolidFromShell()
         ).arg(line);
     }
     else {
-        cmd = QString::fromLatin1(
+        cmd = QStringLiteral(
             "shell=%1\n"
             "if shell.ShapeType != 'Shell': raise RuntimeError('Part object is not a shell')\n"
             "_=Part.Solid(shell)\n"
@@ -498,7 +504,7 @@ void ShapeBuilderWidget::createSolidFromShell()
 
     try {
         Gui::Application::Instance->activeDocument()->openCommand(QT_TRANSLATE_NOOP("Command", "Solid"));
-        Gui::Command::runCommand(Gui::Command::App, cmd.toLatin1());
+        Gui::Command::runCommand(Gui::Command::App, cmd.toUtf8());
         Gui::Application::Instance->activeDocument()->commitCommand();
     }
     catch (const Base::Exception&) {

@@ -183,7 +183,7 @@ void DlgExtrusion::on_btnSelectEdge_clicked()
 
         //visibility automation
         try{
-            QString code = QString::fromLatin1(
+            QString code = QStringLiteral(
                         "import Show\n"
                         "tv = Show.TempoVis(App.ActiveDocument, tag= 'PartGui::DlgExtrusion')\n"
                         "tv.hide([%1])"
@@ -193,9 +193,9 @@ void DlgExtrusion::on_btnSelectEdge_clicked()
             for (App::DocumentObject* obj: sources){
                 if (!obj)
                     continue;
-                features_to_hide.append(QString::fromLatin1("App.ActiveDocument."));
-                features_to_hide.append(QString::fromLatin1(obj->getNameInDocument()));
-                features_to_hide.append(QString::fromLatin1(", \n"));
+                features_to_hide.append(QStringLiteral("App.ActiveDocument."));
+                features_to_hide.append(QString::fromUtf8(obj->getNameInDocument()));
+                features_to_hide.append(QStringLiteral(", \n"));
             }
             QByteArray code_2 = code.arg(features_to_hide).toLatin1();
             Base::Interpreter().runString(code_2.constData());
@@ -363,7 +363,7 @@ void DlgExtrusion::findShapes()
         if (canExtrude(shape)) {
             QTreeWidgetItem* item = new QTreeWidgetItem(ui->treeWidget);
             item->setText(0, QString::fromUtf8((*it)->Label.getValue()));
-            item->setData(0, Qt::UserRole, QString::fromLatin1((*it)->getNameInDocument()));
+            item->setData(0, Qt::UserRole, QString::fromUtf8((*it)->getNameInDocument()));
             Gui::ViewProvider* vp = activeGui->getViewProvider(*it);
             if (vp)
                 item->setIcon(0, vp->getIcon());
@@ -569,9 +569,9 @@ void DlgExtrusion::setAxisLink(const App::PropertyLinkSub& lnk)
 void DlgExtrusion::setAxisLink(const char* objname, const char* subname)
 {
     if(objname && strlen(objname) > 0){
-        QString txt = QString::fromLatin1(objname);
+        QString txt = QString::fromUtf8(objname);
         if (subname && strlen(subname) > 0){
-            txt = txt + QString::fromLatin1(":") + QString::fromLatin1(subname);
+            txt = txt + QStringLiteral(":") + QString::fromUtf8(subname);
         }
         ui->txtLink->setText(txt);
     } else {
@@ -588,7 +588,7 @@ std::vector<App::DocumentObject*> DlgExtrusion::getShapesToExtrude() const
 
     std::vector<App::DocumentObject*> objects;
     for (int i = 0; i < items.size(); i++) {
-        App::DocumentObject* obj = doc->getObject(items[i]->data(0, Qt::UserRole).toString().toLatin1());
+        App::DocumentObject* obj = doc->getObject(items[i]->data(0, Qt::UserRole).toString().toUtf8());
         if (!obj)
             throw Base::RuntimeError("Object not found");
         objects.push_back(obj);

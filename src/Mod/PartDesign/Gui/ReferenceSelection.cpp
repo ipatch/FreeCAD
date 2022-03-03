@@ -237,10 +237,10 @@ QString getRefStr(const App::DocumentObject* obj, const std::vector<std::string>
         return QString::fromLatin1("");
 
     if (PartDesign::Feature::isDatum(obj))
-        return QString::fromLatin1(obj->getNameInDocument());
+        return QString::fromUtf8(obj->getNameInDocument());
     else if (sub.size()>0)
-        return QString::fromLatin1(obj->getNameInDocument()) + QString::fromLatin1(":") +
-               QString::fromLatin1(sub.front().c_str());
+        return QString::fromUtf8(obj->getNameInDocument()) + QString::fromLatin1(":") +
+               QString::fromUtf8(sub.front().c_str());
     else
         return QString();
 }
@@ -263,7 +263,7 @@ bool populateRefElement(App::PropertyLinkSub *prop, QLabel *label, bool canTouch
     // first=new style topo name, second=old index based name
     std::pair<std::string, std::string> sub = subs.front();
 
-    QString fmt = QString::fromLatin1("%1:%2");
+    QString fmt = QStringLiteral("%1:%2");
 
     // Check if the element is missing
     bool touched = false;
@@ -278,12 +278,12 @@ bool populateRefElement(App::PropertyLinkSub *prop, QLabel *label, bool canTouch
             }
         }
         if(!touched)
-            fmt = QLatin1String("<font color='red'>%1:%2</font>");
+            fmt = QStringLiteral("<font color='red'>%1:%2</font>");
     }
 
     // Display the shorter index based name
-    label->setText(fmt.arg(QLatin1String(obj->getNameInDocument()),
-                           QLatin1String(sub.second.c_str())));
+    label->setText(fmt.arg(QString::fromUtf8(obj->getNameInDocument()),
+                           QString::fromUtf8(sub.second.c_str())));
     return touched;
 }
 

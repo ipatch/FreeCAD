@@ -80,7 +80,7 @@ FeaturePickDialog::FeaturePickDialog(std::vector<App::DocumentObject*>& objects,
 
     std::vector<featureStatus>::const_iterator st = status.begin();
     for (std::vector<App::DocumentObject*>::const_iterator o = objects.begin(); o != objects.end(); ++o) {
-        QListWidgetItem* item = new QListWidgetItem(QString::fromLatin1((*o)->getNameInDocument()) +
+        QListWidgetItem* item = new QListWidgetItem(QString::fromUtf8((*o)->getNameInDocument()) +
                                                     QString::fromLatin1(" (") + getFeatureStatusString(*st) + QString::fromLatin1(")"));
         ui->listWidget->addItem(item);
         st++;

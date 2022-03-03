@@ -103,22 +103,22 @@ const QString makeRefString(const App::DocumentObject* obj, const std::string& s
     if (obj->getTypeId().isDerivedFrom(App::OriginFeature::getClassTypeId()) ||
         obj->getTypeId().isDerivedFrom(Part::Datum::getClassTypeId()))
         // App::Plane, Line or Datum feature
-        return QString::fromLatin1(obj->getNameInDocument());
+        return QString::fromUtf8(obj->getNameInDocument());
 
     if ((sub.size() > 4) && (sub.substr(0,4) == "Face")) {
         int subId = std::atoi(&sub[4]);
-        return QString::fromLatin1(obj->getNameInDocument()) + QString::fromLatin1(":") + QObject::tr("Face") + QString::number(subId);
+        return QString::fromUtf8(obj->getNameInDocument()) + QString::fromLatin1(":") + QObject::tr("Face") + QString::number(subId);
     } else if ((sub.size() > 4) && (sub.substr(0,4) == "Edge")) {
         int subId = std::atoi(&sub[4]);
-        return QString::fromLatin1(obj->getNameInDocument()) + QString::fromLatin1(":") + QObject::tr("Edge") + QString::number(subId);
+        return QString::fromUtf8(obj->getNameInDocument()) + QString::fromLatin1(":") + QObject::tr("Edge") + QString::number(subId);
     } else if ((sub.size() > 6) && (sub.substr(0,6) == "Vertex")) {
         int subId = std::atoi(&sub[6]);
-        return QString::fromLatin1(obj->getNameInDocument()) + QString::fromLatin1(":") + QObject::tr("Vertex") + QString::number(subId);
+        return QString::fromUtf8(obj->getNameInDocument()) + QString::fromLatin1(":") + QObject::tr("Vertex") + QString::number(subId);
     } else {
         //something else that face/edge/vertex. Can be empty string.
-        return QString::fromLatin1(obj->getNameInDocument())
+        return QString::fromUtf8(obj->getNameInDocument())
                 + (sub.length()>0 ? QString::fromLatin1(":") : QString())
-                + QString::fromLatin1(sub.c_str());
+                + QString::fromUtf8(sub.c_str());
     }
 }
 
@@ -399,9 +399,9 @@ bool TaskAttacher::updatePreview()
     try{
         attached = pcAttach->positionBySupport();
     } catch (Base::Exception &err){
-        errMessage = QString::fromLatin1(err.what());
+        errMessage = QString::fromUtf8(err.what());
     } catch (Standard_Failure &err){
-        errMessage = tr("OCC error: %1").arg(QString::fromLatin1(err.GetMessageString()));
+        errMessage = tr("OCC error: %1").arg(QString::fromUtf8(err.GetMessageString()));
     } catch (...) {
         errMessage = tr("unknown error");
     }
@@ -551,7 +551,7 @@ void TaskAttacher::onSelectionChanged(const Gui::SelectionChanges& msg)
         } catch(Base::Exception& e) {
             e.ReportException();
             //error = true;
-            ui->message->setText(QString::fromLatin1(e.what()));
+            ui->message->setText(QString::fromUtf8(e.what()));
             ui->message->setStyleSheet(QString::fromLatin1("QLabel{color: red;}"));
         }
 
@@ -596,7 +596,7 @@ void TaskAttacher::onAttachmentOffsetChanged(double /*val*/, int idx)
         updatePreview();
     } catch(Base::Exception& e) {
         e.ReportException();
-        ui->message->setText(QString::fromLatin1(e.what()));
+        ui->message->setText(QString::fromUtf8(e.what()));
         ui->message->setStyleSheet(QString::fromLatin1("QLabel{color: red;}"));
     }
 }
@@ -643,7 +643,7 @@ void TaskAttacher::onCheckFlip(bool on)
         updatePreview();
     } catch(Base::Exception& e) {
         e.ReportException();
-        ui->message->setText(QString::fromLatin1(e.what()));
+        ui->message->setText(QString::fromUtf8(e.what()));
         ui->message->setStyleSheet(QString::fromLatin1("QLabel{color: red;}"));
     }
 }
@@ -691,7 +691,7 @@ void TaskAttacher::onModeSelect()
         updatePreview();
     } catch (Base::Exception &e) {
         e.ReportException();
-        ui->message->setText(QString::fromLatin1(e.what()));
+        ui->message->setText(QString::fromUtf8(e.what()));
         ui->message->setStyleSheet(QString::fromLatin1("QLabel{color: red;}"));
     }
 }
@@ -747,7 +747,7 @@ void TaskAttacher::onRefName(const QString& text, unsigned idx)
         if (parts.length() < 2)
             parts.push_back(QString::fromLatin1(""));
         // Check whether this is the name of an App::Plane or Part::Datum feature
-        App::DocumentObject* obj = ViewProvider->getObject()->getDocument()->getObject(parts[0].toLatin1());
+        App::DocumentObject* obj = ViewProvider->getObject()->getDocument()->getObject(parts[0].toUtf8());
         if (obj == NULL) return;
 
         std::string subElement;
@@ -824,7 +824,7 @@ void TaskAttacher::onRefName(const QString& text, unsigned idx)
         updatePreview();
     } catch (Base::Exception &e) {
         e.ReportException();
-        ui->message->setText(QString::fromLatin1(e.what()));
+        ui->message->setText(QString::fromUtf8(e.what()));
         ui->message->setStyleSheet(QString::fromLatin1("QLabel{color: red;}"));
     }
 }
@@ -1117,7 +1117,7 @@ void TaskAttacher::visibilityAutomation(bool opening_not_closing)
                           App::DocumentObject *editObj,
                           const std::string& editSubName) {
         if (opening_not_closing) {
-            QString code = QString::fromLatin1(
+            QString code = QStringLiteral(
                 "import Show\n"
                 "from Show.Containers import isAContainer\n"
                 "_tv_%4 = Show.TempoVis(App.ActiveDocument, tag= 'PartGui::TaskAttacher')\n"
@@ -1136,17 +1136,17 @@ void TaskAttacher::visibilityAutomation(bool opening_not_closing)
                 "\t\t\t_tv_%4.show([lnk[0] for lnk in tvObj.Support])\n"
                 "del(tvObj)"
                 ).arg(
-                    QString::fromLatin1(Gui::Command::getObjectCmd(vp->getObject()).c_str()),
-                    QString::fromLatin1(Gui::Command::getObjectCmd(editObj).c_str()),
-                    QString::fromLatin1(editSubName.c_str()),
-                    QString::fromLatin1(postfix.c_str()));
-            Gui::Command::runCommand(Gui::Command::Gui,code.toLatin1().constData());
+                    QString::fromUtf8(Gui::Command::getObjectCmd(vp->getObject()).c_str()),
+                    QString::fromUtf8(Gui::Command::getObjectCmd(editObj).c_str()),
+                    QString::fromUtf8(editSubName.c_str()),
+                    QString::fromUtf8(postfix.c_str()));
+            Gui::Command::runCommand(Gui::Command::Gui,code.toUtf8().constData());
         } else if(postfix.size()) {
-            QString code = QString::fromLatin1(
+            QString code = QStringLiteral(
                 "_tv_%1.restore()\n"
                 "del(_tv_%1)"
-                ).arg(QString::fromLatin1(postfix.c_str()));
-            Gui::Command::runCommand(Gui::Command::Gui,code.toLatin1().constData());
+                ).arg(QString::fromUtf8(postfix.c_str()));
+            Gui::Command::runCommand(Gui::Command::Gui,code.toUtf8().constData());
         }
     };
 
@@ -1299,7 +1299,7 @@ bool TaskDlgAttacher::accept()
         document->commitCommand();
     }
     catch (const Base::Exception& e) {
-        QMessageBox::warning(parameter, tr("Datum dialog: Input error"), QString::fromLatin1(e.what()));
+        QMessageBox::warning(parameter, tr("Datum dialog: Input error"), QString::fromUtf8(e.what()));
         return false;
     }
 

@@ -189,17 +189,17 @@ QString DlgPropertyLink::formatObject(App::Document *ownerDoc, App::DocumentObje
 
     if(!sub || !sub[0]) {
         if(obj->Label.getStrValue() == obj->getNameInDocument())
-            return QLatin1String(objName);
-        return QString::fromLatin1("%1 (%2)").arg(QLatin1String(objName),
+            return QString::fromUtf8(objName);
+        return QString::fromLatin1("%1 (%2)").arg(QString::fromUtf8(objName),
                                                   QString::fromUtf8(obj->Label.getValue()));
     }
 
     auto sobj = obj->getSubObject(sub);
     if(!sobj || sobj->Label.getStrValue() == sobj->getNameInDocument())
-        return QString::fromLatin1("%1.%2").arg(QLatin1String(objName),
+        return QString::fromLatin1("%1.%2").arg(QString::fromUtf8(objName),
                                                 QString::fromUtf8(sub));
 
-    return QString::fromLatin1("%1.%2 (%3)").arg(QLatin1String(objName),
+    return QString::fromLatin1("%1.%2 (%3)").arg(QString::fromUtf8(objName),
                                                  QString::fromUtf8(sub),
                                                  QString::fromUtf8(sobj->Label.getValue()));
 }

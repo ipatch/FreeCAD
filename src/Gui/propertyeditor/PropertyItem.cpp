@@ -548,7 +548,7 @@ void PropertyItem::setPropertyName(QString name, QString realName)
             if (!upper) {
                 QChar last = display.at(display.length()-1);
                 if (!last.isSpace())
-                    display += QLatin1String(" ");
+                    display += QStringLiteral(" ");
             }
         }
         upper = name[i].isUpper();
@@ -568,24 +568,21 @@ void PropertyItem::setPropertyName(const App::Property &prop) {
     const char *group = prop.getGroup();
     if(!group)
         group = "Base";
-    std::size_t nameLen = std::strlen(name);
-    std::size_t groupLen = std::strlen(group);
-    if(nameLen>groupLen+1) {
-        if(boost::starts_with(name,group) && name[groupLen] == '_') {
+    QString propName = QString::fromUtf8(name);
+    QString prefix = QString::fromUtf8(group) + QStringLiteral("_");;
+    if(propName.size() > prefix.size()) {
+        if(propName.startsWith(prefix)) {
             // For property name with format <group_name>_<name>, it will be displayed as <name>
-            setPropertyName(QString::fromLatin1(name+groupLen+1),QString::fromLatin1(name));
+            setPropertyName(propName.right(propName.size()-prefix.size()), propName);
             return;
-        } else if(nameLen>groupLen+1
-                    && name[0] == '_'
-                    && name[groupLen+1] == '_'
-                    && boost::starts_with(name+1,group))
-        {
+        } else if(propName.startsWith(QStringLiteral("_"))
+                    && propName.midRef(1, prefix.size()) == prefix) {
             // For property name with format _<group_name>_<name>, it will be displayed as _<name>
-            setPropertyName(QString::fromLatin1(name+groupLen+1),QString::fromLatin1(name));
+            setPropertyName(QStringLiteral("_") + propName.right(propName.size() - 1 - prefix.size()), propName);
             return;
         }
     }
-    setPropertyName(QString::fromLatin1(name));
+    setPropertyName(propName);
 }
 
 
@@ -673,11 +670,11 @@ QVariant PropertyItem::data(int column, int role) const
             return QVariant();
         }
         else if (role == Qt::ToolTipRole) {
-            QString type = QString::fromLatin1("Type: %1\nName: %2").arg(
+            QString type = QStringLiteral("Type: %1\nName: %2").arg(
                     QString::fromLatin1(propertyItems[0]->getTypeId().getName()), objectName());
             QString doc = QApplication::translate("App::Property", propertyItems[0]->getDocumentation());
             if(doc.size())
-                return type + QLatin1String("\n\n") + doc;
+                return type + QStringLiteral("\n\n") + doc;
             return type;
         }
 
@@ -827,7 +824,7 @@ void PropertyStringItem::setValue(const QVariant& value)
             return;
         QString val = value.toString();
         val = QString::fromUtf8(Base::Interpreter().strToPython(val.toUtf8()).c_str());
-        QString data = QString::fromLatin1("\"%1\"").arg(val);
+        QString data = QStringLiteral("\"%1\"").arg(val);
         setPropertyValue(data);
     }
 }
@@ -879,7 +876,7 @@ void PropertyFontItem::setValue(const QVariant& value)
     if (hasExpression() || !value.canConvert(QVariant::String))
         return;
     QString val = value.toString();
-    QString data = QString::fromLatin1("\"%1\"").arg(val);
+    QString data = QStringLiteral("\"%1\"").arg(val);
     setPropertyValue(data);
 }
 
@@ -944,7 +941,7 @@ void PropertyIntegerItem::setValue(const QVariant& value)
         if (!value.canConvert(QVariant::Int))
             return;
         int val = value.toInt();
-        QString data = QString::fromLatin1("%1").arg(val);
+        QString data = QStringLiteral("%1").arg(val);
         setPropertyValue(data);
     }
 }
@@ -983,7 +980,7 @@ QVariant PropertyIntegerItem::toString(const QVariant& v) const
     QString string(PropertyItem::toString(v).toString());
 
     if (hasExpression())
-        string += QString::fromLatin1("  ( %1 )").arg(QString::fromStdString(getExpressionString()));
+        string += QStringLiteral("  ( %1 )").arg(QString::fromStdString(getExpressionString()));
 
     return QVariant(string);
 }
@@ -1013,7 +1010,7 @@ void PropertyIntegerConstraintItem::setValue(const QVariant& value)
         if (!value.canConvert(QVariant::Int))
             return;
         int val = value.toInt();
-        QString data = QString::fromLatin1("%1").arg(val);
+        QString data = QStringLiteral("%1").arg(val);
         setPropertyValue(data);
     }
 }
@@ -1068,7 +1065,7 @@ QVariant PropertyIntegerConstraintItem::toString(const QVariant& v) const
     QString string(PropertyItem::toString(v).toString());
 
     if (hasExpression())
-        string += QString::fromLatin1("  ( %1 )").arg(QString::fromStdString(getExpressionString()));
+        string += QStringLiteral("  ( %1 )").arg(QString::fromStdString(getExpressionString()));
 
     return QVariant(string);
 }
@@ -1089,7 +1086,7 @@ QVariant PropertyFloatItem::toString(const QVariant& prop) const
     QString data = QLocale().toString(value, 'f', decimals());
 
     if (hasExpression())
-        data += QString::fromLatin1("  ( %1 )").arg(QString::fromStdString(getExpressionString()));
+        data += QStringLiteral("  ( %1 )").arg(QString::fromStdString(getExpressionString()));
 
     return QVariant(data);
 }
@@ -1109,7 +1106,7 @@ void PropertyFloatItem::setValue(const QVariant& value)
         if (!value.canConvert(QVariant::Double))
             return;
         double val = value.toDouble();
-        QString data = QString::fromLatin1("%1").arg(val,0,'f',decimals());
+        QString data = QStringLiteral("%1").arg(val,0,'f',decimals());
         setPropertyValue(data);
     }
 }
@@ -1162,7 +1159,7 @@ QVariant PropertyUnitItem::toString(const QVariant& prop) const
     unit.setFormat(format);
     QString string = unit.getUserString();
     if (hasExpression())
-        string += QString::fromLatin1("  ( %1 )").arg(QString::fromStdString(getExpressionString()));
+        string += QStringLiteral("  ( %1 )").arg(QString::fromStdString(getExpressionString()));
 
     return QVariant(string);
 }
@@ -1291,7 +1288,7 @@ void PropertyFloatConstraintItem::setValue(const QVariant& value)
         if (!value.canConvert(QVariant::Double))
             return;
         double val = value.toDouble();
-        QString data = QString::fromLatin1("%1").arg(val,0,'f',decimals());
+        QString data = QStringLiteral("%1").arg(val,0,'f',decimals());
         setPropertyValue(data);
     }
 }
@@ -1393,7 +1390,7 @@ void PropertyBoolItem::setValue(const QVariant& value)
     if (hasExpression() || !value.canConvert(QVariant::Bool))
         return;
     bool val = value.toBool();
-    QString data = (val ? QLatin1String("True") : QLatin1String("False"));
+    QString data = (val ? QStringLiteral("True") : QStringLiteral("False"));
     setPropertyValue(data);
 }
 
@@ -1401,8 +1398,8 @@ QWidget* PropertyBoolItem::createEditor(QWidget* parent, const QObject* receiver
 {
     QComboBox *cb = new QComboBox(parent);
     cb->setFrame(false);
-    cb->addItem(QLatin1String("false"));
-    cb->addItem(QLatin1String("true"));
+    cb->addItem(QStringLiteral("false"));
+    cb->addItem(QStringLiteral("true"));
     cb->setDisabled(isReadOnly());
     QObject::connect(cb, SIGNAL(activated(int)), receiver, method);
     return cb;
@@ -1439,7 +1436,7 @@ public:
             if (data.canConvert<Base::Vector3d>()) {
                 const Base::Vector3d& value = data.value<Base::Vector3d>();
 
-                QString str = QString::fromLatin1("(%1, %2, %3)")
+                QString str = QStringLiteral("(%1, %2, %3)")
                                 .arg(value.x,0,'f',decimals)
                                 .arg(value.y,0,'f',decimals)
                                 .arg(value.z,0,'f',decimals);
@@ -1462,15 +1459,15 @@ PropertyVectorItem::PropertyVectorItem()
 {
     m_x = static_cast<PropertyFloatItem*>(PropertyFloatItem::create());
     m_x->setParent(this);
-    m_x->setPropertyName(QLatin1String("x"));
+    m_x->setPropertyName(QStringLiteral("x"));
     this->appendChild(m_x);
     m_y = static_cast<PropertyFloatItem*>(PropertyFloatItem::create());
     m_y->setParent(this);
-    m_y->setPropertyName(QLatin1String("y"));
+    m_y->setPropertyName(QStringLiteral("y"));
     this->appendChild(m_y);
     m_z = static_cast<PropertyFloatItem*>(PropertyFloatItem::create());
     m_z->setParent(this);
-    m_z->setPropertyName(QLatin1String("z"));
+    m_z->setPropertyName(QStringLiteral("z"));
     this->appendChild(m_z);
 
     QByteArray entryName("PropertyVector");
@@ -1483,12 +1480,12 @@ QVariant PropertyVectorItem::toString(const QVariant& prop) const
 {
     QLocale loc;
     const Base::Vector3d& value = prop.value<Base::Vector3d>();
-    QString data = QString::fromLatin1("[%1 %2 %3]")
+    QString data = QStringLiteral("[%1 %2 %3]")
         .arg(loc.toString(value.x, 'f', 2),
              loc.toString(value.y, 'f', 2),
              loc.toString(value.z, 'f', 2));
     if (hasExpression())
-        data += QString::fromLatin1("  ( %1 )").arg(QString::fromStdString(getExpressionString()));
+        data += QStringLiteral("  ( %1 )").arg(QString::fromStdString(getExpressionString()));
     return QVariant(data);
 }
 
@@ -1505,7 +1502,7 @@ void PropertyVectorItem::setValue(const QVariant& value)
     if (hasExpression() || !value.canConvert<Base::Vector3d>())
         return;
     const Base::Vector3d& val = value.value<Base::Vector3d>();
-    QString data = QString::fromLatin1("(%1, %2, %3)")
+    QString data = QStringLiteral("(%1, %2, %3)")
                     .arg(val.x,0,'f',decimals())
                     .arg(val.y,0,'f',decimals())
                     .arg(val.z,0,'f',decimals());
@@ -1531,7 +1528,7 @@ void PropertyVectorItem::setEditorData(QWidget *editor, const QVariant& data) co
     QLocale loc;
     QLineEdit* le = qobject_cast<QLineEdit*>(editor);
     const Base::Vector3d& value = data.value<Base::Vector3d>();
-    QString text = QString::fromLatin1("[%1 %2 %3]")
+    QString text = QStringLiteral("[%1 %2 %3]")
         .arg(loc.toString(value.x, 'f', 2),
              loc.toString(value.y, 'f', 2),
              loc.toString(value.z, 'f', 2));
@@ -1595,7 +1592,7 @@ PropertyEditorWidget::PropertyEditorWidget (QWidget * parent)
     lineEdit->setReadOnly(true);
     layout->addWidget(lineEdit);
 
-    button = new QPushButton(QLatin1String("..."), this);
+    button = new QPushButton(QStringLiteral("..."), this);
 #if defined (Q_OS_MAC)
     button->setAttribute(Qt::WA_LayoutUsesWidgetRect); // layout size from QMacStyle was not correct
 #endif
@@ -1667,10 +1664,10 @@ void VectorListWidget::showValue(const QVariant& d)
     QString data;
     const QList<Base::Vector3d>& value = d.value<QList<Base::Vector3d>>();
     if (value.isEmpty()) {
-        data = QString::fromLatin1("[]");
+        data = QStringLiteral("[]");
     }
     else {
-        data = QString::fromLatin1("[%1 %2 %3], ...")
+        data = QStringLiteral("[%1 %2 %3], ...")
             .arg(loc.toString(value[0].x, 'f', 2),
                  loc.toString(value[0].y, 'f', 2),
                  loc.toString(value[0].z, 'f', 2));
@@ -1692,17 +1689,17 @@ QVariant PropertyVectorListItem::toString(const QVariant& prop) const
     QString data;
     const QList<Base::Vector3d>& value = prop.value<QList<Base::Vector3d>>();
     if (value.isEmpty()) {
-        data = QString::fromLatin1("[]");
+        data = QStringLiteral("[]");
     }
     else {
-        data = QString::fromLatin1("[%1 %2 %3], ...")
+        data = QStringLiteral("[%1 %2 %3], ...")
             .arg(loc.toString(value[0].x, 'f', 2),
                  loc.toString(value[0].y, 'f', 2),
                  loc.toString(value[0].z, 'f', 2));
     }
 
     if (hasExpression())
-        data += QString::fromLatin1("  ( %1 )").arg(QString::fromStdString(getExpressionString()));
+        data += QStringLiteral("  ( %1 )").arg(QString::fromStdString(getExpressionString()));
     return QVariant(data);
 }
 
@@ -1725,7 +1722,7 @@ void PropertyVectorListItem::setValue(const QVariant& value)
     QTextStream str(&data);
     str << "[";
     for (const auto& it : val) {
-        str << QString::fromLatin1("(%1, %2, %3), ")
+        str << QStringLiteral("(%1, %2, %3), ")
                .arg(it.x,0,'f',decimals())
                .arg(it.y,0,'f',decimals())
                .arg(it.z,0,'f',decimals());
@@ -1762,15 +1759,15 @@ PropertyVectorDistanceItem::PropertyVectorDistanceItem()
 {
     m_x = static_cast<PropertyUnitItem*>(PropertyUnitItem::create());
     m_x->setParent(this);
-    m_x->setPropertyName(QLatin1String("x"));
+    m_x->setPropertyName(QStringLiteral("x"));
     this->appendChild(m_x);
     m_y = static_cast<PropertyUnitItem*>(PropertyUnitItem::create());
     m_y->setParent(this);
-    m_y->setPropertyName(QLatin1String("y"));
+    m_y->setPropertyName(QStringLiteral("y"));
     this->appendChild(m_y);
     m_z = static_cast<PropertyUnitItem*>(PropertyUnitItem::create());
     m_z->setParent(this);
-    m_z->setPropertyName(QLatin1String("z"));
+    m_z->setPropertyName(QStringLiteral("z"));
     this->appendChild(m_z);
 
     setEntryName("PropertyUnit");
@@ -1779,12 +1776,12 @@ PropertyVectorDistanceItem::PropertyVectorDistanceItem()
 QVariant PropertyVectorDistanceItem::toString(const QVariant& prop) const
 {
     const Base::Vector3d& value = prop.value<Base::Vector3d>();
-    QString data = QString::fromLatin1("[") +
-           Base::Quantity(value.x, Base::Unit::Length).getUserString() + QString::fromLatin1("  ") +
-           Base::Quantity(value.y, Base::Unit::Length).getUserString() + QString::fromLatin1("  ") +
-           Base::Quantity(value.z, Base::Unit::Length).getUserString() + QString::fromLatin1("]");
+    QString data = QStringLiteral("[") +
+           Base::Quantity(value.x, Base::Unit::Length).getUserString() + QStringLiteral("  ") +
+           Base::Quantity(value.y, Base::Unit::Length).getUserString() + QStringLiteral("  ") +
+           Base::Quantity(value.z, Base::Unit::Length).getUserString() + QStringLiteral("]");
     if (hasExpression())
-        data += QString::fromLatin1("  ( %1 )").arg(QString::fromStdString(getExpressionString()));
+        data += QStringLiteral("  ( %1 )").arg(QString::fromStdString(getExpressionString()));
     return QVariant(data);
 }
 
@@ -1892,82 +1889,82 @@ PropertyMatrixItem::PropertyMatrixItem()
     const int decimals=16;
     m_a11 = static_cast<PropertyFloatItem*>(PropertyFloatItem::create());
     m_a11->setParent(this);
-    m_a11->setPropertyName(QLatin1String("A11"));
+    m_a11->setPropertyName(QStringLiteral("A11"));
     m_a11->setDecimals(decimals);
     this->appendChild(m_a11);
     m_a12 = static_cast<PropertyFloatItem*>(PropertyFloatItem::create());
     m_a12->setParent(this);
-    m_a12->setPropertyName(QLatin1String("A12"));
+    m_a12->setPropertyName(QStringLiteral("A12"));
     m_a12->setDecimals(decimals);
     this->appendChild(m_a12);
     m_a13 = static_cast<PropertyFloatItem*>(PropertyFloatItem::create());
     m_a13->setParent(this);
-    m_a13->setPropertyName(QLatin1String("A13"));
+    m_a13->setPropertyName(QStringLiteral("A13"));
     m_a13->setDecimals(decimals);
     this->appendChild(m_a13);
     m_a14 = static_cast<PropertyFloatItem*>(PropertyFloatItem::create());
     m_a14->setParent(this);
-    m_a14->setPropertyName(QLatin1String("A14"));
+    m_a14->setPropertyName(QStringLiteral("A14"));
     m_a14->setDecimals(decimals);
     this->appendChild(m_a14);
     m_a21 = static_cast<PropertyFloatItem*>(PropertyFloatItem::create());
     m_a21->setParent(this);
-    m_a21->setPropertyName(QLatin1String("A21"));
+    m_a21->setPropertyName(QStringLiteral("A21"));
     m_a21->setDecimals(decimals);
     this->appendChild(m_a21);
     m_a22 = static_cast<PropertyFloatItem*>(PropertyFloatItem::create());
     m_a22->setParent(this);
-    m_a22->setPropertyName(QLatin1String("A22"));
+    m_a22->setPropertyName(QStringLiteral("A22"));
     m_a22->setDecimals(decimals);
     this->appendChild(m_a22);
     m_a23 = static_cast<PropertyFloatItem*>(PropertyFloatItem::create());
     m_a23->setParent(this);
-    m_a23->setPropertyName(QLatin1String("A23"));
+    m_a23->setPropertyName(QStringLiteral("A23"));
     m_a23->setDecimals(decimals);
     this->appendChild(m_a23);
     m_a24 = static_cast<PropertyFloatItem*>(PropertyFloatItem::create());
     m_a24->setParent(this);
-    m_a24->setPropertyName(QLatin1String("A24"));
+    m_a24->setPropertyName(QStringLiteral("A24"));
     m_a24->setDecimals(decimals);
     this->appendChild(m_a24);
     m_a31 = static_cast<PropertyFloatItem*>(PropertyFloatItem::create());
     m_a31->setParent(this);
-    m_a31->setPropertyName(QLatin1String("A31"));
+    m_a31->setPropertyName(QStringLiteral("A31"));
     m_a31->setDecimals(decimals);
     this->appendChild(m_a31);
     m_a32 = static_cast<PropertyFloatItem*>(PropertyFloatItem::create());
     m_a32->setParent(this);
-    m_a32->setPropertyName(QLatin1String("A32"));
+    m_a32->setPropertyName(QStringLiteral("A32"));
     m_a32->setDecimals(decimals);
     this->appendChild(m_a32);
     m_a33 = static_cast<PropertyFloatItem*>(PropertyFloatItem::create());
     m_a33->setParent(this);
-    m_a33->setPropertyName(QLatin1String("A33"));
+    m_a33->setPropertyName(QStringLiteral("A33"));
     m_a33->setDecimals(decimals);
     this->appendChild(m_a33);
     m_a34 = static_cast<PropertyFloatItem*>(PropertyFloatItem::create());
     m_a34->setParent(this);
-    m_a34->setPropertyName(QLatin1String("A34"));
+    m_a34->setPropertyName(QStringLiteral("A34"));
     m_a34->setDecimals(decimals);
     this->appendChild(m_a34);
     m_a41 = static_cast<PropertyFloatItem*>(PropertyFloatItem::create());
     m_a41->setParent(this);
-    m_a41->setPropertyName(QLatin1String("A41"));
+    m_a41->setPropertyName(QStringLiteral("A41"));
     m_a41->setDecimals(decimals);
     this->appendChild(m_a41);
     m_a42 = static_cast<PropertyFloatItem*>(PropertyFloatItem::create());
     m_a42->setParent(this);
-    m_a42->setPropertyName(QLatin1String("A42"));
+    m_a42->setPropertyName(QStringLiteral("A42"));
     m_a42->setDecimals(decimals);
     this->appendChild(m_a42);
     m_a43 = static_cast<PropertyFloatItem*>(PropertyFloatItem::create());
     m_a43->setParent(this);
-    m_a43->setPropertyName(QLatin1String("A43"));
+    m_a43->setPropertyName(QStringLiteral("A43"));
     m_a43->setDecimals(decimals);
     this->appendChild(m_a43);
     m_a44 = static_cast<PropertyFloatItem*>(PropertyFloatItem::create());
     m_a44->setParent(this);
-    m_a44->setPropertyName(QLatin1String("A44"));
+    m_a44->setPropertyName(QStringLiteral("A44"));
     m_a44->setDecimals(decimals);
     this->appendChild(m_a44);
 
@@ -1981,7 +1978,7 @@ QVariant PropertyMatrixItem::toString(const QVariant& prop) const
 {
     QLocale loc;
     const Base::Matrix4D& value = prop.value<Base::Matrix4D>();
-    QString text = QString::fromLatin1("[%1 %2 %3 %4 %5 %6 %7 %8 %9 %10 %11 %12 %13 %14 %15 %16]")
+    QString text = QStringLiteral("[%1 %2 %3 %4 %5 %6 %7 %8 %9 %10 %11 %12 %13 %14 %15 %16]")
        .arg(loc.toString(value[0][0], 'f', 2), //(unsigned short usNdx)
             loc.toString(value[0][1], 'f', 2),
             loc.toString(value[0][2], 'f', 2),
@@ -2023,7 +2020,7 @@ void PropertyMatrixItem::setValue(const QVariant& value)
         return;
     const Base::Matrix4D& val = value.value<Base::Matrix4D>();
     const int decimals=16;
-    QString data = QString::fromLatin1("FreeCAD.Matrix(%1, %2, %3, %4, %5, %6, %7, %8, %9, %10, %11, %12, %13, %14, %15, %16)")
+    QString data = QStringLiteral("FreeCAD.Matrix(%1, %2, %3, %4, %5, %6, %7, %8, %9, %10, %11, %12, %13, %14, %15, %16)")
         .arg(val[0][0],0, 'f', decimals)
         .arg(val[0][1],0, 'f', decimals)
         .arg(val[0][2],0, 'f', decimals)
@@ -2056,7 +2053,7 @@ void PropertyMatrixItem::setEditorData(QWidget *editor, const QVariant& data) co
     QLocale loc;
     QLineEdit* le = qobject_cast<QLineEdit*>(editor);
     const Base::Matrix4D& value = data.value<Base::Matrix4D>();
-    QString text = QString::fromLatin1("[%1 %2 %3 %4 %5 %6 %7 %8 %9 %10 %11 %12 %13 %14 %15 %16]")
+    QString text = QStringLiteral("[%1 %2 %3 %4 %5 %6 %7 %8 %9 %10 %11 %12 %13 %14 %15 %16]")
        .arg(loc.toString(value[0][0], 'f', 2), //(unsigned short usNdx)
             loc.toString(value[0][1], 'f', 2),
             loc.toString(value[0][2], 'f', 2),
@@ -2248,7 +2245,7 @@ PlacementEditor::PlacementEditor(const QString& name, QWidget * parent)
     : LabelButton(parent), _task(0)
 {
     propertyname = name;
-    propertyname.replace(QLatin1String(" "), QLatin1String(""));
+    propertyname.replace(QStringLiteral(" "), QStringLiteral(""));
 }
 
 PlacementEditor::~PlacementEditor()
@@ -2657,7 +2654,7 @@ void PropertyEnumItem::setValue(const QVariant& value)
     else if (value.canConvert(QVariant::String)) {
         QByteArray val = value.toString().toUtf8();
         std::string str = Base::Tools::escapedUnicodeFromUtf8(val);
-        data = QString::fromLatin1("u\"%1\"").arg(QString::fromStdString(str));
+        data = QStringLiteral("u\"%1\"").arg(QString::fromStdString(str));
     }
     else
         return;
@@ -2845,11 +2842,10 @@ QVariant PropertyStringListItem::toString(const QVariant& prop) const
     QStringList list = prop.toStringList();
     if (list.size() > 10) {
         list = list.mid(0, 10);
-        list.append(QLatin1String("..."));
+        list.append(QStringLiteral("..."));
     }
 
-    QString text = QString::fromUtf8("[%1]").arg(list.join(QLatin1String(",")));
-    text.replace(QString::fromUtf8("'"),QString::fromUtf8("\\'"));
+    QString text = QStringLiteral("[%1]").arg(list.join(QStringLiteral(",")));
 
     return QVariant(text);
 }
@@ -2926,9 +2922,9 @@ QVariant PropertyFloatListItem::toString(const QVariant& prop) const
     QStringList list = prop.toStringList();
     if (list.size() > 10) {
         list = list.mid(0, 10);
-        list.append(QLatin1String("..."));
+        list.append(QStringLiteral("..."));
     }
-    QString text = QString::fromUtf8("[%1]").arg(list.join(QLatin1String(",")));
+    QString text = QStringLiteral("[%1]").arg(list.join(QStringLiteral(",")));
     return QVariant(text);
 }
 
@@ -3000,9 +2996,9 @@ QVariant PropertyIntegerListItem::toString(const QVariant& prop) const
     QStringList list = prop.toStringList();
     if (list.size() > 10) {
         list = list.mid(0, 10);
-        list.append(QLatin1String("..."));
+        list.append(QStringLiteral("..."));
     }
-    QString text = QString::fromUtf8("[%1]").arg(list.join(QLatin1String(",")));
+    QString text = QStringLiteral("[%1]").arg(list.join(QStringLiteral(",")));
 
     return QVariant(text);
 }
@@ -3059,7 +3055,7 @@ QVariant PropertyColorItem::decoration(const QVariant& value) const
 QVariant PropertyColorItem::toString(const QVariant& prop) const
 {
     QColor value = prop.value<QColor>();
-    QString color = QString::fromLatin1("[%1, %2, %3]")
+    QString color = QStringLiteral("[%1, %2, %3]")
         .arg(value.red()).arg(value.green()).arg(value.blue());
     return QVariant(color);
 }
@@ -3078,7 +3074,7 @@ void PropertyColorItem::setValue(const QVariant& value)
         return;
     QColor col = value.value<QColor>();
     App::Color val; val.setValue<QColor>(col);
-    QString data = QString::fromLatin1("(%1,%2,%3)")
+    QString data = QStringLiteral("(%1,%2,%3)")
                     .arg(val.r,0,'f',decimals())
                     .arg(val.g,0,'f',decimals())
                     .arg(val.b,0,'f',decimals());
@@ -3132,32 +3128,32 @@ PropertyMaterialItem::PropertyMaterialItem()
 {
     diffuse = static_cast<PropertyColorItem*>(PropertyColorItem::create());
     diffuse->setParent(this);
-    diffuse->setPropertyName(QLatin1String("DiffuseColor"));
+    diffuse->setPropertyName(QStringLiteral("DiffuseColor"));
     this->appendChild(diffuse);
 
     ambient = static_cast<PropertyColorItem*>(PropertyColorItem::create());
     ambient->setParent(this);
-    ambient->setPropertyName(QLatin1String("AmbientColor"));
+    ambient->setPropertyName(QStringLiteral("AmbientColor"));
     this->appendChild(ambient);
 
     specular = static_cast<PropertyColorItem*>(PropertyColorItem::create());
     specular->setParent(this);
-    specular->setPropertyName(QLatin1String("SpecularColor"));
+    specular->setPropertyName(QStringLiteral("SpecularColor"));
     this->appendChild(specular);
 
     emissive = static_cast<PropertyColorItem*>(PropertyColorItem::create());
     emissive->setParent(this);
-    emissive->setPropertyName(QLatin1String("EmissiveColor"));
+    emissive->setPropertyName(QStringLiteral("EmissiveColor"));
     this->appendChild(emissive);
 
     shininess = static_cast<PropertyFloatItem*>(PropertyFloatItem::create());
     shininess->setParent(this);
-    shininess->setPropertyName(QLatin1String("Shininess"));
+    shininess->setPropertyName(QStringLiteral("Shininess"));
     this->appendChild(shininess);
 
     transparency = static_cast<PropertyFloatItem*>(PropertyFloatItem::create());
     transparency->setParent(this);
-    transparency->setPropertyName(QLatin1String("Transparency"));
+    transparency->setPropertyName(QStringLiteral("Transparency"));
     this->appendChild(transparency);
 }
 
@@ -3313,7 +3309,7 @@ QVariant PropertyMaterialItem::toString(const QVariant& prop) const
     // use the diffuse color
     Material val = prop.value<Material>();
     QColor value = val.diffuseColor;
-    QString color = QString::fromLatin1("[%1, %2, %3]")
+    QString color = QStringLiteral("[%1, %2, %3]")
         .arg(value.red()).arg(value.green()).arg(value.blue());
     return QVariant(color);
 }
@@ -3377,7 +3373,7 @@ void PropertyMaterialItem::setValue(const QVariant& value)
     float s = mat.shininess;
     float t = mat.transparency;
 
-    QString data = QString::fromLatin1(
+    QString data = QStringLiteral(
         "App.Material("
         "DiffuseColor=(%1,%2,%3),"
         "AmbientColor=(%4,%5,%6),"
@@ -3445,32 +3441,32 @@ PropertyMaterialListItem::PropertyMaterialListItem()
     // This editor gets a list of materials but it only edits the first item.
     diffuse = static_cast<PropertyColorItem*>(PropertyColorItem::create());
     diffuse->setParent(this);
-    diffuse->setPropertyName(QLatin1String("DiffuseColor"));
+    diffuse->setPropertyName(QStringLiteral("DiffuseColor"));
     this->appendChild(diffuse);
 
     ambient = static_cast<PropertyColorItem*>(PropertyColorItem::create());
     ambient->setParent(this);
-    ambient->setPropertyName(QLatin1String("AmbientColor"));
+    ambient->setPropertyName(QStringLiteral("AmbientColor"));
     this->appendChild(ambient);
 
     specular = static_cast<PropertyColorItem*>(PropertyColorItem::create());
     specular->setParent(this);
-    specular->setPropertyName(QLatin1String("SpecularColor"));
+    specular->setPropertyName(QStringLiteral("SpecularColor"));
     this->appendChild(specular);
 
     emissive = static_cast<PropertyColorItem*>(PropertyColorItem::create());
     emissive->setParent(this);
-    emissive->setPropertyName(QLatin1String("EmissiveColor"));
+    emissive->setPropertyName(QStringLiteral("EmissiveColor"));
     this->appendChild(emissive);
 
     shininess = static_cast<PropertyFloatItem*>(PropertyFloatItem::create());
     shininess->setParent(this);
-    shininess->setPropertyName(QLatin1String("Shininess"));
+    shininess->setPropertyName(QStringLiteral("Shininess"));
     this->appendChild(shininess);
 
     transparency = static_cast<PropertyFloatItem*>(PropertyFloatItem::create());
     transparency->setParent(this);
-    transparency->setPropertyName(QLatin1String("Transparency"));
+    transparency->setPropertyName(QStringLiteral("Transparency"));
     this->appendChild(transparency);
 }
 
@@ -3736,7 +3732,7 @@ QVariant PropertyMaterialListItem::toString(const QVariant& prop) const
     // use the diffuse color
     Material mat = list[0].value<Material>();
     QColor value = mat.diffuseColor;
-    QString color = QString::fromLatin1("[%1, %2, %3]")
+    QString color = QStringLiteral("[%1, %2, %3]")
         .arg(value.red()).arg(value.green()).arg(value.blue());
     return QVariant(color);
 }
@@ -3818,7 +3814,7 @@ void PropertyMaterialListItem::setValue(const QVariant& value)
         float s = mat.shininess;
         float t = mat.transparency;
 
-        QString item = QString::fromLatin1(
+        QString item = QStringLiteral(
             "App.Material("
             "DiffuseColor=(%1,%2,%3),"
             "AmbientColor=(%4,%5,%6),"
@@ -3922,7 +3918,7 @@ void PropertyFileItem::setValue(const QVariant& value)
     if (hasExpression() || !value.canConvert(QVariant::String))
         return;
     QString val = value.toString();
-    QString data = QString::fromLatin1("\"%1\"").arg(val);
+    QString data = QStringLiteral("\"%1\"").arg(val);
     setPropertyValue(data);
 }
 
@@ -3979,7 +3975,7 @@ void PropertyPathItem::setValue(const QVariant& value)
     if (hasExpression() || !value.canConvert(QVariant::String))
         return;
     QString val = value.toString();
-    QString data = QString::fromLatin1("\"%1\"").arg(val);
+    QString data = QStringLiteral("\"%1\"").arg(val);
     setPropertyValue(data);
 }
 
@@ -4031,7 +4027,7 @@ void PropertyTransientFileItem::setValue(const QVariant& value)
     if (hasExpression() || !value.canConvert(QVariant::String))
         return;
     QString val = value.toString();
-    QString data = QString::fromLatin1("\"%1\"").arg(val);
+    QString data = QStringLiteral("\"%1\"").arg(val);
     setPropertyValue(data);
 }
 
@@ -4103,7 +4099,7 @@ LinkLabel::LinkLabel (QWidget * parent, const App::Property *prop)
     label->setTextInteractionFlags(Qt::TextBrowserInteraction);
     layout->addWidget(label);
 
-    editButton = new QPushButton(QLatin1String("..."), this);
+    editButton = new QPushButton(QStringLiteral("..."), this);
 #if defined (Q_OS_MAC)
     editButton->setAttribute(Qt::WA_LayoutUsesWidgetRect); // layout size from QMacStyle was not correct
 #endif
@@ -4161,7 +4157,7 @@ void LinkLabel::updatePropertyLink()
             auto &sobj = links.front();
             link = QVariant::fromValue(sobj);
             QString linkcolor = QApplication::palette().color(QPalette::Link).name();
-            text = QString::fromLatin1(
+            text = QStringLiteral(
                     "<html><head><style type=\"text/css\">"
                     "p, li { white-space: pre-wrap; }"
                     "</style></head><body>"
@@ -4169,8 +4165,8 @@ void LinkLabel::updatePropertyLink()
                     "<a href=\"%1#%2.%3\"><span style=\" text-decoration: underline; color:%4;\">%5</span></a>"
                     "</p></body></html>"
                     )
-                .arg(QLatin1String(sobj.getDocumentName().c_str()),
-                     QLatin1String(sobj.getObjectName().c_str()),
+                .arg(QString::fromUtf8(sobj.getDocumentName().c_str()),
+                     QString::fromUtf8(sobj.getObjectName().c_str()),
                      QString::fromUtf8(sobj.getSubName().c_str()),
                      linkcolor,
                      DlgPropertyLink::formatObject(
@@ -4259,14 +4255,14 @@ QVariant PropertyLinkItem::data(int column, int role) const {
                     if (tooltip.isEmpty()) {
                         const char *objname = xlink->getObjectName();
                         if (objname && objname[0])
-                            tooltip = QString::fromLatin1("Object: %1").arg(QString::fromUtf8(objname));
+                            tooltip = QStringLiteral("Object: %1").arg(QString::fromUtf8(objname));
                     }
                     const char *filePath = xlink->getFilePath();
                     if(filePath && filePath[0]) {
                         if (tooltip.isEmpty())
                             tooltip = QString::fromUtf8(filePath);
                         else
-                            tooltip = QString::fromLatin1("%1\nFile: %2").arg(tooltip, QString::fromUtf8(filePath));
+                            tooltip = QStringLiteral("%1\nFile: %2").arg(tooltip, QString::fromUtf8(filePath));
                     }
                     if (!tooltip.isEmpty())
                         return tooltip;

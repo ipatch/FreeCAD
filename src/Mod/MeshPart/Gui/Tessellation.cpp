@@ -233,7 +233,7 @@ bool Tessellation::accept()
         return false;
     }
 
-    this->document = QString::fromLatin1(activeDoc->getName());
+    this->document = QString::fromUtf8(activeDoc->getName());
 
     for (auto &sel : Gui::Selection().getSelection("*",0)) {
         auto shape = Part::Feature::getTopoShape(sel.pObject,sel.SubName);
@@ -280,8 +280,8 @@ bool Tessellation::accept()
 
         activeDoc->openTransaction("Meshing");
         for (auto &info : shapeObjects) {
-            subname = QString::fromLatin1(info.subname.c_str());
-            objname = QString::fromLatin1(info.obj.getObjectName().c_str());
+            subname = QString::fromUtf8(info.subname.c_str());
+            objname = QString::fromUtf8(info.obj.getObjectName().c_str());
 
             auto obj = info.obj.getObject();
             if (!obj)

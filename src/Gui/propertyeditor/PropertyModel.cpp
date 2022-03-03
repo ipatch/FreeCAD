@@ -230,12 +230,19 @@ QModelIndex PropertyModel::propertyIndexFromPath(const QStringList& path) const
 }
 
 static void setPropertyItemName(PropertyItem *item, const char *propName, QString groupName) {
-    QString name = QString::fromLatin1(propName);
+    QString name = QString::fromUtf8(propName);
     QString realName = name;
-    if(name.size()>groupName.size()+1 
-            && name.startsWith(groupName + QLatin1Char('_')))
-        name = name.right(name.size()-groupName.size()-1);
-
+    QString prefix = groupName + QStringLiteral("_");;
+    if(name.size() > prefix.size()) {
+        if(name.startsWith(prefix)) {
+            // For property name with format <group_name>_<name>, it will be displayed as <name>
+            name = name.right(name.size()-prefix.size());
+        } else if(name.startsWith(QStringLiteral("_"))
+                    && name.midRef(1, prefix.size()) == prefix) {
+            // For property name with format _<group_name>_<name>, it will be displayed as _<name>
+            name = QStringLiteral("_") + name.right(name.size() - 1 - prefix.size());
+        }
+    }
     item->setPropertyName(name, realName);
 }
 
@@ -260,7 +267,7 @@ PropertyModel::GroupInfo &PropertyModel::getGroupInfo(App::Property *prop)
 {
     const char* group = prop->getGroup();
     bool isEmpty = (group == 0 || group[0] == '\0');
-    QString groupName = QString::fromLatin1(
+    QString groupName = QString::fromUtf8(
             isEmpty ? QT_TRANSLATE_NOOP("App::Property", "Base") : group);
 
     auto res = groupItems.insert(std::make_pair(groupName, GroupInfo()));

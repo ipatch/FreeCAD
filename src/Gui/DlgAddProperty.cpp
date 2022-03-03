@@ -72,7 +72,7 @@ DlgAddProperty::DlgAddProperty(QWidget* parent,
             ui->comboType->setCurrentIndex(ui->comboType->count()-1);
     }
 
-    ui->edtGroup->setText(QString::fromLatin1(
+    ui->edtGroup->setText(QString::fromUtf8(
                 hGrp->GetASCII("NewPropertyGroup","Base").c_str()));
     ui->chkAppend->setChecked(hGrp->GetBool("NewPropertyAppend",true));
 }
@@ -122,8 +122,8 @@ void DlgAddProperty::accept()
             QMessageBox::critical(getMainWindow(),
                 QObject::tr("Invalid name"),
                 QObject::tr("The property '%1' already exists in '%2'").arg(
-                    QString::fromLatin1(name.c_str()),
-                    QString::fromLatin1(containerName(c).c_str())));
+                    QString::fromUtf8(name.c_str()),
+                    QString::fromUtf8(containerName(c).c_str())));
             return;
         }
     }
@@ -146,7 +146,7 @@ void DlgAddProperty::accept()
             QMessageBox::critical(getMainWindow(),
                 QObject::tr("Add property"),
                 QObject::tr("Failed to add property to '%1': %2").arg(
-                    QString::fromLatin1(containerName(*it).c_str()),
+                    QString::fromUtf8(containerName(*it).c_str()),
                     QString::fromUtf8(e.what())));
             return;
         }

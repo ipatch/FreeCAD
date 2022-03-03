@@ -119,14 +119,14 @@ TaskFeaturePick::TaskFeaturePick(std::vector<App::DocumentObject*>& objects,
         auto vp = Gui::Application::Instance->getViewProvider(*objIt);
         QListWidgetItem* item = new QListWidgetItem(
                 vp ? vp->getIcon() : QIcon(),
-                QString::fromLatin1("%1 (%2)")
+                QStringLiteral("%1 (%2)")
                     .arg(QString::fromUtf8((*objIt)->Label.getValue()))
                     .arg(getFeatureStatusString(*statusIt)
                 )
         );
         if (*statusIt != validFeature)
             item->setForeground(Qt::red);
-        item->setData(Qt::UserRole, QString::fromLatin1((*objIt)->getNameInDocument()));
+        item->setData(Qt::UserRole, QString::fromUtf8((*objIt)->getNameInDocument()));
         ui->listWidget->addItem(item);
 
         App::Document* pDoc = (*objIt)->getDocument();
@@ -254,7 +254,7 @@ std::vector<App::DocumentObject*> TaskFeaturePick::buildFeatures()
 
             if (item->isSelected() && !item->isHidden()) {
                 QString t = item->data(Qt::UserRole).toString();
-                auto obj = App::GetApplication().getDocument(documentName.c_str())->getObject(t.toLatin1().data());
+                auto obj = App::GetApplication().getDocument(documentName.c_str())->getObject(t.toUtf8().data());
 
                 //build the dependent copy or reference if wanted by the user
                 if (*st == otherBody || *st == otherPart || *st == notInBody) {
@@ -460,7 +460,7 @@ void TaskFeaturePick::onSelectionChanged(const Gui::SelectionChanges& /*msg*/)
         for (int row = 0; row < ui->listWidget->count(); row++) {
             QListWidgetItem *item = ui->listWidget->item(row);
             QString t = item->data(Qt::UserRole).toString();
-            if (t.compare(QString::fromLatin1(obj.FeatName))==0) {
+            if (t.compare(QString::fromUtf8(obj.FeatName))==0) {
                 item->setSelected(true);
             }
         }
@@ -479,7 +479,7 @@ void TaskFeaturePick::onItemSelectionChanged()
         QListWidgetItem *item = ui->listWidget->item(row);
         QString t = item->data(Qt::UserRole).toString();
         if (item->isSelected()) {
-            Gui::Selection().addSelection(documentName.c_str(), t.toLatin1());
+            Gui::Selection().addSelection(documentName.c_str(), t.toUtf8());
         }
     }
     ui->listWidget->blockSignals(false);
@@ -492,7 +492,7 @@ void TaskFeaturePick::onDoubleClick(QListWidgetItem *item)
         return;
     doSelection = true;
     QString t = item->data(Qt::UserRole).toString();
-    Gui::Selection().addSelection(documentName.c_str(), t.toLatin1());
+    Gui::Selection().addSelection(documentName.c_str(), t.toUtf8());
     doSelection = false;
 
     QMetaObject::invokeMethod(qobject_cast<Gui::ControlSingleton*>(&Gui::Control()), "accept", Qt::QueuedConnection);

@@ -2343,11 +2343,8 @@ bool TreeWidget::event(QEvent *e)
 }
 
 bool TreeWidget::eventFilter(QObject *o, QEvent *ev) {
-    if (!_DraggingActive) {
-        if (ev->type() == QEvent::Shortcut)
-            FC_MSG("triggered " << static_cast<QShortcutEvent*>(ev)->key().toString().toLatin1().constData());
+    if (!_DraggingActive)
         return QTreeWidget::eventFilter(o, ev);
-    }
 
     switch (ev->type()) {
     case QEvent::KeyPress:
@@ -2759,7 +2756,7 @@ void TreeWidget::onToolTipTimer()
 
     QString tooltip = QStringLiteral("%1\n%2%3%4").arg(
             QString::fromUtf8(Obj->Label.getValue()),
-            QString::fromLatin1(Obj->getFullName().c_str()),
+            QString::fromUtf8(Obj->getFullName().c_str()),
             info.size() ? QStringLiteral("\n\n") : QString(),
             info);
 
@@ -5129,10 +5126,10 @@ QIcon TreeWidget::Private::getItemIcon(App::Document *doc, const ViewProviderDoc
 static QString getItemStatus(const App::SubObjectT objT)
 {
     auto sobj = objT.getSubObject();
-    return QString::fromLatin1("%1%2\n\n%3").arg(
+    return QStringLiteral("%1%2\n\n%3").arg(
             QString::fromUtf8(objT.getSubObjectFullName().c_str()),
             sobj && sobj->Label2.getStrValue().size() ?
-                QString::fromLatin1("\n") + QString::fromUtf8(sobj->Label2.getValue()) : QString(),
+                QStringLiteral("\n") + QString::fromUtf8(sobj->Label2.getValue()) : QString(),
             QObject::tr("Left click to select.\n"
                         "Right click to show children.\n"
                         "Shift + Left click to edit.\n"
@@ -5635,7 +5632,7 @@ void DocumentItem::setDocumentLabel() {
     auto doc = document()->getDocument();
     if(!doc)
         return;
-    setText(0, QString::fromLatin1("%1%2").arg(
+    setText(0, QStringLiteral("%1%2").arg(
                 QString::fromUtf8(doc->Label.getValue()),
                 QString::fromLatin1(document()->isModified()?" *":"")));
 }

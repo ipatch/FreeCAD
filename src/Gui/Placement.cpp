@@ -294,22 +294,22 @@ void Placement::applyPlacement(const QString& data, bool incremental)
                 if (jt != props.end()) {
                     QString cmd;
                     if (incremental)
-                        cmd = QString::fromLatin1(
+                        cmd = QStringLiteral(
                             "App.getDocument(\"%1\").%2.%3=%4.multiply(App.getDocument(\"%1\").%2.%3)")
-                            .arg(QLatin1String((*it)->getDocument()->getName()))
-                            .arg(QLatin1String((*it)->getNameInDocument()))
-                            .arg(QLatin1String(this->propertyName.c_str()))
+                            .arg(QString::fromUtf8((*it)->getDocument()->getName()))
+                            .arg(QString::fromUtf8((*it)->getNameInDocument()))
+                            .arg(QString::fromUtf8(this->propertyName.c_str()))
                             .arg(data);
                     else {
-                        cmd = QString::fromLatin1(
+                        cmd = QStringLiteral(
                             "App.getDocument(\"%1\").%2.%3=%4")
-                            .arg(QLatin1String((*it)->getDocument()->getName()))
-                            .arg(QLatin1String((*it)->getNameInDocument()))
-                            .arg(QLatin1String(this->propertyName.c_str()))
+                            .arg(QString::fromUtf8((*it)->getDocument()->getName()))
+                            .arg(QString::fromUtf8((*it)->getNameInDocument()))
+                            .arg(QString::fromUtf8(this->propertyName.c_str()))
                             .arg(data);
                     }
 
-                    Gui::Command::runCommand(Gui::Command::App, cmd.toLatin1());
+                    Gui::Command::runCommand(Gui::Command::App, cmd.toUtf8());
                 }
             }
 
@@ -790,7 +790,7 @@ QString Placement::getPlacementString() const
 
     if (index == 0) {
         Base::Vector3d dir = getDirection();
-        cmd = QString::fromLatin1(
+        cmd = QStringLiteral(
             "App.Placement(App.Vector(%1,%2,%3), App.Rotation(App.Vector(%4,%5,%6),%7), App.Vector(%8,%9,%10))")
             .arg(ui->xPos->value().getValue())
             .arg(ui->yPos->value().getValue())
@@ -804,7 +804,7 @@ QString Placement::getPlacementString() const
             .arg(cnt.z);
     }
     else if (index == 1) {
-        cmd = QString::fromLatin1(
+        cmd = QStringLiteral(
             "App.Placement(App.Vector(%1,%2,%3), App.Rotation(%4,%5,%6), App.Vector(%7,%8,%9))")
             .arg(ui->xPos->value().getValue())
             .arg(ui->yPos->value().getValue())
@@ -897,7 +897,7 @@ void TaskPlacement::open()
 
 void TaskPlacement::setPropertyName(const QString& name)
 {
-    widget->propertyName = (const char*)name.toLatin1();
+    widget->propertyName = (const char*)name.toUtf8();
 }
 
 QDialogButtonBox::StandardButtons TaskPlacement::getStandardButtons() const

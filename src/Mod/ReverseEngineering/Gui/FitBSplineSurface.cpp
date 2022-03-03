@@ -155,7 +155,7 @@ void FitBSplineSurfaceWidget::on_makePlacement_clicked()
 
                     Gui::Command::openCommand(QT_TRANSLATE_NOOP("Command", "Placement"));
                     Gui::Command::runCommand(Gui::Command::Doc, "from FreeCAD import Base");
-                    Gui::Command::runCommand(Gui::Command::Doc, command.toLatin1());
+                    Gui::Command::runCommand(Gui::Command::Doc, command.toUtf8());
                     Gui::Command::commitCommand();
                     Gui::Command::updateActive();
                 }
@@ -226,7 +226,7 @@ bool FitBSplineSurfaceWidget::accept()
         Gui::WaitCursor wc;
         Gui::Command::addModule(Gui::Command::App, "ReverseEngineering");
         Gui::Command::openCommand(QT_TRANSLATE_NOOP("Command", "Fit B-Spline"));
-        Gui::Command::runCommand(Gui::Command::Doc, command.toLatin1());
+        Gui::Command::runCommand(Gui::Command::Doc, command.toUtf8());
         Gui::Command::commitCommand();
         Gui::Command::updateActive();
     }

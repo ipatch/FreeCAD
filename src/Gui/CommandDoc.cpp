@@ -1459,11 +1459,11 @@ void StdCmdDelete::activated(int iMsg)
                             autoDeletion = false;
                             QString label;
                             if(parent->getDocument() != obj->getDocument())
-                                label = QLatin1String(parent->getFullName().c_str());
+                                label = QString::fromUtf8(parent->getFullName().c_str());
                             else
-                                label = QLatin1String(parent->getNameInDocument());
+                                label = QString::fromUtf8(parent->getNameInDocument());
                             if(parent->Label.getStrValue() != parent->getNameInDocument())
-                                label += QString::fromLatin1(" (%1)").arg(
+                                label += QStringLiteral(" (%1)").arg(
                                         QString::fromUtf8(parent->Label.getValue()));
                             affectedLabels.insert(label);
                             if(affectedLabels.size()>=10) {
@@ -1555,11 +1555,11 @@ void StdCmdDelete::activated(int iMsg)
         }
     } catch (const Base::Exception& e) {
         QMessageBox::critical(getMainWindow(), QObject::tr("Delete failed"),
-                QString::fromLatin1(e.what()));
+                QString::fromUtf8(e.what()));
         e.ReportException();
     } catch (...) {
         QMessageBox::critical(getMainWindow(), QObject::tr("Delete failed"),
-                QString::fromLatin1("Unknown error"));
+                QStringLiteral("Unknown error"));
     }
     commitCommand();
     Gui::getMainWindow()->setUpdatesEnabled(true);

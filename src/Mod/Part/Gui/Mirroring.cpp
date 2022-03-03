@@ -94,7 +94,7 @@ void Mirroring::findShapes()
     Gui::Document* activeGui = Gui::Application::Instance->getDocument(activeDoc);
     if (!activeGui) return;
 
-    this->document = QString::fromLatin1(activeDoc->getName());
+    this->document = QString::fromUtf8(activeDoc->getName());
     std::vector<App::DocumentObject*> objs = activeDoc->getObjectsOfType
         (Part::Feature::getClassTypeId());
 
@@ -102,7 +102,7 @@ void Mirroring::findShapes()
         const TopoDS_Shape& shape = static_cast<Part::Feature*>(*it)->Shape.getValue();
         if (!shape.IsNull()) {
             QString label = QString::fromUtf8((*it)->Label.getValue());
-            QString name = QString::fromLatin1((*it)->getNameInDocument());
+            QString name = QString::fromUtf8((*it)->getNameInDocument());
             
             QTreeWidgetItem* child = new QTreeWidgetItem();
             child->setText(0, label);
@@ -123,7 +123,7 @@ bool Mirroring::accept()
         return false;
     }
 
-    App::Document* activeDoc = App::GetApplication().getDocument((const char*)this->document.toLatin1());
+    App::Document* activeDoc = App::GetApplication().getDocument((const char*)this->document.toUtf8());
     if (!activeDoc) {
         QMessageBox::critical(this, windowTitle(),
             tr("No such document '%1'.").arg(this->document));
@@ -135,7 +135,7 @@ bool Mirroring::accept()
     activeDoc->openTransaction("Mirroring");
 
     QString shape, label;
-    QRegExp rx(QString::fromLatin1(" \\(Mirror #\\d+\\)$"));
+    QRegExp rx(QStringLiteral(" \\(Mirror #\\d+\\)$"));
     QList<QTreeWidgetItem *> items = ui->shapes->selectedItems();
     float normx=0, normy=0, normz=0;
     int index = ui->comboBox->currentIndex();
@@ -157,9 +157,9 @@ bool Mirroring::accept()
         int pos = label.indexOf(rx);
         if (pos > -1)
             label = label.left(pos);
-        label.append(QString::fromLatin1(" (Mirror #%1)").arg(++count));
+        label.append(QStringLiteral(" (Mirror #%1)").arg(++count));
 
-        QString code = QString::fromLatin1(
+        QString code = QStringLiteral(
             "__doc__=FreeCAD.getDocument(\"%1\")\n"
             "__doc__.addObject(\"Part::Mirroring\")\n"
             "__doc__.ActiveObject.Source=__doc__.getObject(\"%2\")\n"
@@ -170,8 +170,8 @@ bool Mirroring::accept()
             .arg(this->document).arg(shape).arg(label)
             .arg(normx).arg(normy).arg(normz)
             .arg(basex).arg(basey).arg(basez);
-        Gui::Command::runCommand(Gui::Command::App, code.toLatin1());
-        QByteArray from = shape.toLatin1();
+        Gui::Command::runCommand(Gui::Command::App, code.toUtf8());
+        QByteArray from = shape.toUtf8();
         Gui::Command::copyVisual("ActiveObject", "ShapeColor", from);
         Gui::Command::copyVisual("ActiveObject", "LineColor", from);
         Gui::Command::copyVisual("ActiveObject", "PointColor", from);

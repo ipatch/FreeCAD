@@ -979,11 +979,11 @@ void CmdPartImport::activated(int iMsg)
 {
     Q_UNUSED(iMsg);
     QStringList filter;
-    filter << QString::fromLatin1("STEP (*.stp *.step)");
-    filter << QString::fromLatin1("STEP with colors (*.stp *.step)");
-    filter << QString::fromLatin1("IGES (*.igs *.iges)");
-    filter << QString::fromLatin1("IGES with colors (*.igs *.iges)");
-    filter << QString::fromLatin1("BREP (*.brp *.brep)");
+    filter << QStringLiteral("STEP (*.stp *.step)");
+    filter << QStringLiteral("STEP with colors (*.stp *.step)");
+    filter << QStringLiteral("IGES (*.igs *.iges)");
+    filter << QStringLiteral("IGES with colors (*.igs *.iges)");
+    filter << QStringLiteral("BREP (*.brp *.brep)");
 
     QString select;
     QString fn = Gui::FileDialog::getOpenFileName(Gui::getMainWindow(), QString(), QString(), filter.join(QLatin1String(";;")), &select);
@@ -1041,11 +1041,11 @@ void CmdPartExport::activated(int iMsg)
 {
     Q_UNUSED(iMsg);
     QStringList filter;
-    filter << QString::fromLatin1("STEP (*.stp *.step)");
-    filter << QString::fromLatin1("STEP with colors (*.stp *.step)");
-    filter << QString::fromLatin1("IGES (*.igs *.iges)");
-    filter << QString::fromLatin1("IGES with colors (*.igs *.iges)");
-    filter << QString::fromLatin1("BREP (*.brp *.brep)");
+    filter << QStringLiteral("STEP (*.stp *.step)");
+    filter << QStringLiteral("STEP with colors (*.stp *.step)");
+    filter << QStringLiteral("IGES (*.igs *.iges)");
+    filter << QStringLiteral("IGES with colors (*.igs *.iges)");
+    filter << QStringLiteral("BREP (*.brp *.brep)");
 
     QString select;
     QString fn = Gui::FileDialog::getSaveFileName(Gui::getMainWindow(), QString(), QString(), filter.join(QLatin1String(";;")), &select);
@@ -1088,20 +1088,20 @@ void CmdPartImportCurveNet::activated(int iMsg)
 {
     Q_UNUSED(iMsg);
     QStringList filter;
-    filter << QString::fromLatin1("%1 (*.stp *.step *.igs *.iges *.brp *.brep)")
+    filter << QStringLiteral("%1 (*.stp *.step *.igs *.iges *.brp *.brep)")
                  .arg(QObject::tr("All CAD Files"));
-    filter << QString::fromLatin1("STEP (*.stp *.step)");
-    filter << QString::fromLatin1("IGES (*.igs *.iges)");
-    filter << QString::fromLatin1("BREP (*.brp *.brep)");
-    filter << QString::fromLatin1("%1 (*.*)")
+    filter << QStringLiteral("STEP (*.stp *.step)");
+    filter << QStringLiteral("IGES (*.igs *.iges)");
+    filter << QStringLiteral("BREP (*.brp *.brep)");
+    filter << QStringLiteral("%1 (*.*)")
                  .arg(QObject::tr("All Files"));
 
     QString fn = Gui::FileDialog::getOpenFileName(Gui::getMainWindow(), QString(), QString(), filter.join(QLatin1String(";;")));
     if (!fn.isEmpty()) {
         QFileInfo fi; fi.setFile(fn);
         openCommand(QT_TRANSLATE_NOOP("Command", "Part Import Curve Net"));
-        doCommand(Doc,"f = App.activeDocument().addObject(\"Part::CurveNet\",\"%s\")", (const char*)fi.baseName().toLatin1());
-        doCommand(Doc,"f.FileName = \"%s\"",(const char*)fn.toLatin1());
+        doCommand(Doc,"f = App.activeDocument().addObject(\"Part::CurveNet\",\"%s\")", (const char*)fi.baseName().toUtf8());
+        doCommand(Doc,"f.FileName = \"%s\"",(const char*)fn.toUtf8());
         commitCommand();
         updateActive();
     }
@@ -1148,7 +1148,7 @@ void CmdPartMakeSolid::activated(int iMsg)
                     (*it)->Label.getValue());
             }
             else if (type == TopAbs_COMPOUND || type == TopAbs_COMPSOLID) {
-                str = QString::fromLatin1(
+                str = QStringLiteral(
                     "__s__=App.ActiveDocument.%1.Shape.Faces\n"
                     "__s__=Part.Solid(Part.Shell(__s__))\n"
                     "__o__=App.ActiveDocument.addObject(\"Part::Feature\",\"%1_solid\")\n"
@@ -1156,11 +1156,11 @@ void CmdPartMakeSolid::activated(int iMsg)
                     "__o__.Shape=__s__\n"
                     "del __s__, __o__"
                     )
-                    .arg(QLatin1String((*it)->getNameInDocument()))
-                    .arg(QLatin1String((*it)->Label.getValue()));
+                    .arg(QString::fromUtf8((*it)->getNameInDocument()))
+                    .arg(QString::fromUtf8((*it)->Label.getValue()));
             }
             else if (type == TopAbs_SHELL) {
-                str = QString::fromLatin1(
+                str = QStringLiteral(
                     "__s__=App.ActiveDocument.%1.Shape\n"
                     "__s__=Part.Solid(__s__)\n"
                     "__o__=App.ActiveDocument.addObject(\"Part::Feature\",\"%1_solid\")\n"
@@ -1168,8 +1168,8 @@ void CmdPartMakeSolid::activated(int iMsg)
                     "__o__.Shape=__s__\n"
                     "del __s__, __o__"
                     )
-                    .arg(QLatin1String((*it)->getNameInDocument()))
-                    .arg(QLatin1String((*it)->Label.getValue()));
+                    .arg(QString::fromUtf8((*it)->getNameInDocument()))
+                    .arg(QString::fromUtf8((*it)->Label.getValue()));
             }
             else {
                 Base::Console().Message("%s is ignored because it is neither a shell nor a compound.\n",
@@ -1178,7 +1178,7 @@ void CmdPartMakeSolid::activated(int iMsg)
 
             try {
                 if (!str.isEmpty())
-                    runCommand(Doc, str.toLatin1());
+                    runCommand(Doc, str.toUtf8());
             }
             catch (const Base::Exception& e) {
                 Base::Console().Error("Cannot convert %s because %s.\n",
@@ -1224,18 +1224,18 @@ void CmdPartReverseShape::activated(int iMsg)
             name += "_rev";
             name = getUniqueObjectName(name.c_str());
 
-            QString str = QString::fromLatin1(
+            QString str = QStringLiteral(
                 "__o__=App.ActiveDocument.addObject(\"Part::Reverse\",\"%1\")\n"
                 "__o__.Source=App.ActiveDocument.%2\n"
                 "__o__.Label=\"%3 (Rev)\"\n"
                 "del __o__"
                 )
-                .arg(QString::fromLatin1(name.c_str()),
-                     QString::fromLatin1((*it)->getNameInDocument()),
-                     QString::fromLatin1((*it)->Label.getValue()));
+                .arg(QString::fromUtf8(name.c_str()),
+                     QString::fromUtf8((*it)->getNameInDocument()),
+                     QString::fromUtf8((*it)->Label.getValue()));
 
             try {
-                runCommand(Doc, str.toLatin1());
+                runCommand(Doc, str.toUtf8());
                 copyVisual(name.c_str(), "ShapeColor", (*it)->getNameInDocument());
                 copyVisual(name.c_str(), "LineColor" , (*it)->getNameInDocument());
                 copyVisual(name.c_str(), "PointColor", (*it)->getNameInDocument());

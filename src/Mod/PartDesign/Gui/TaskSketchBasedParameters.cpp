@@ -272,11 +272,11 @@ const QString TaskSketchBasedParameters::onAddSelection(const Gui::SelectionChan
         recomputeFeature();
         auto subElement = objT.getOldElementName();
         if (subElement.size()) {
-            return QString::fromLatin1("%1:%2").arg(
-                    QString::fromLatin1(sobj->getNameInDocument()),
-                    QString::fromLatin1(subElement.c_str()));
+            return QStringLiteral("%1:%2").arg(
+                    QString::fromUtf8(sobj->getNameInDocument()),
+                    QString::fromUtf8(subElement.c_str()));
         } else
-            return QString::fromLatin1(sobj->getNameInDocument());
+            return QString::fromUtf8(sobj->getNameInDocument());
     }
 
     return QString();
@@ -316,7 +316,7 @@ QVariant TaskSketchBasedParameters::setUpToFace(const QString& text)
         parts.push_back(QString::fromLatin1(""));
 
     // Check whether this is the name of an App::Plane or Part::Datum feature
-    App::DocumentObject* obj = vp->getObject()->getDocument()->getObject(parts[0].toLatin1());
+    App::DocumentObject* obj = vp->getObject()->getDocument()->getObject(parts[0].toUtf8());
     if (obj == NULL)
         return QVariant();
 
@@ -343,7 +343,7 @@ QVariant TaskSketchBasedParameters::setUpToFace(const QString& text)
             upToFace = ss.str();
         }
         else
-            upToFace = parts[1].toLatin1().constData();
+            upToFace = parts[1].toUtf8().constData();
 
         PartDesign::ProfileBased* pcSketchBased = static_cast<PartDesign::ProfileBased*>(vp->getObject());
         pcSketchBased->UpToFace.setValue(obj, {upToFace});
@@ -386,8 +386,8 @@ QString TaskSketchBasedParameters::getFaceReference(const QString& obj, const QS
     if (o.isEmpty())
         return QString();
 
-    return QString::fromLatin1("(App.getDocument(\"%1\").getObject(\"%2\"), [\"%3\"])")
-            .arg(QString::fromLatin1(doc->getName()), o, sub);
+    return QStringLiteral("(App.getDocument(\"%1\").getObject(\"%2\"), [\"%3\"])")
+            .arg(QString::fromUtf8(doc->getName()), o, sub);
 }
 
 TaskSketchBasedParameters::~TaskSketchBasedParameters()
