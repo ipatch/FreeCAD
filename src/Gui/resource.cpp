@@ -88,7 +88,7 @@ WidgetFactorySupplier::WidgetFactorySupplier()
     // ADD YOUR CUSTOMIZE PAGES HERE
     //
     //
-    new CustomPageProducer<DlgCustomCommandsImp>;
+    // new CustomPageProducer<DlgCustomCommandsImp>;
     new CustomPageProducer<DlgCustomKeyboardImp>;
     new CustomPageProducer<DlgWorkbenchesImp>;
     new CustomPageProducer<DlgCustomToolbarsImp>;
