@@ -29,6 +29,8 @@
 # include <QElapsedTimer>
 #endif
 
+#include <boost/regex.hpp>
+
 #include "PyExport.h"
 #include "Interpreter.h"
 #include "Tools.h"
@@ -113,13 +115,10 @@ std::string Base::Tools::getIdentifier(const std::string& name)
     std::string CleanName = name;
     if (!CleanName.empty() && CleanName[0] >= 48 && CleanName[0] <= 57)
         CleanName[0] = '_';
-    // strip illegal chars
-    for (std::string::iterator it = CleanName.begin(); it != CleanName.end(); ++it) {
-        if (!((*it>=48 && *it<=57) ||  // number
-             (*it>=65 && *it<=90)  ||  // uppercase letter
-             (*it>=97 && *it<=122)))   // lowercase letter
-             *it = '_'; // it's neither number nor letter
-    }
+
+    // Replace all spaces and punctuations with underscore
+    static const boost::regex re("[[:space:][:punct:]]");
+    CleanName = boost::regex_replace(CleanName, re, "_");
 
     return CleanName;
 }
