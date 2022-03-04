@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>667</width>
+    <width>645</width>
     <height>404</height>
    </rect>
   </property>
@@ -335,7 +335,14 @@
             </widget>
            </item>
            <item row="0" column="1" colspan="2">
-            <widget class="QComboBox" name="workbenchBox"/>
+            <widget class="QComboBox" name="workbenchBox">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+            </widget>
            </item>
            <item row="6" column="3">
             <widget class="QPushButton" name="resetButton">
@@ -408,6 +415,12 @@
            </item>
            <item row="0" column="0">
             <widget class="QLabel" name="textLabelAssigned">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="toolTip">
               <string>This list shows commands having the same shortcut in the priority from hight
 to low. If more than one command with the same shortcut are active at the

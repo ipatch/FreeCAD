@@ -365,7 +365,7 @@ void DlgCustomKeyboardImp::on_commandTreeWidget_currentItemChanged(QTreeWidgetIt
         QKeySequence ks2 = QString::fromLatin1(cmd->getAccel());
         QKeySequence ks3 = ui->editShortcut->text();
         if (ks.isEmpty())
-            ui->accelLineEditShortcut->setText( tr("none") );
+            ui->accelLineEditShortcut->clear();
         else
             ui->accelLineEditShortcut->setText(ks.toString(QKeySequence::NativeText));
 
@@ -435,7 +435,7 @@ void DlgCustomKeyboardImp::on_buttonReset_clicked()
     ShortcutManager::instance()->reset(name);
 
     QString txt = ShortcutManager::instance()->getShortcut(name);
-    ui->accelLineEditShortcut->setText((txt.isEmpty() ? tr("none") : txt));
+    ui->accelLineEditShortcut->setText(txt);
     ui->buttonReset->setEnabled( false );
 }
 
