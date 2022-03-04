@@ -2181,6 +2181,17 @@ bool CommandCompleter::eventFilter(QObject *o, QEvent *ev)
             }
             break;
         }
+        case Qt::Key_Enter:
+        case Qt::Key_Return:
+            if (o == this->widget()) {
+                auto index = currentIndex();
+                if (index.isValid())
+                    onCommandActivated(index);
+                else
+                    complete();
+                ev->setAccepted(true);
+                return true;
+            }
         default:
             break;
         }
