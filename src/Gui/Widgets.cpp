@@ -378,17 +378,39 @@ void ActionSelector::on_downButton_clicked()
 AccelLineEdit::AccelLineEdit ( QWidget * parent )
   : QLineEdit(parent)
 {
-    noneStr = tr("none");
-    setText(noneStr);
+    setupPlaceHolderText();
     keyPressedCount = 0;
-
     LineEditStyle::setup(this);
 }
 
 bool AccelLineEdit::isNone() const
 {
-    QString t = text();
-    return t.isEmpty() || t == noneStr;
+    return text().isEmpty();
+}
+
+void AccelLineEdit::changeEvent(QEvent *ev)
+{
+    switch(ev->type()) {
+    case QEvent::ReadOnlyChange:
+    case QEvent::LanguageChange:
+    case QEvent::EnabledChange:
+        setupPlaceHolderText();
+        break;
+    default:
+        break;
+    }
+    QLineEdit::changeEvent(ev);
+}
+
+void AccelLineEdit::setupPlaceHolderText()
+{
+    if (isReadOnly() || !isEnabled()) {
+        setPlaceholderText(tr("None"));
+        setClearButtonEnabled(false);
+    } else {
+        setPlaceholderText(tr("Press a keyboard shortcut"));
+        setClearButtonEnabled(true);
+    }
 }
 
 /**
@@ -401,15 +423,9 @@ void AccelLineEdit::keyPressEvent ( QKeyEvent * e)
     int key = e->key();
     Qt::KeyboardModifiers state = e->modifiers();
 
-    // Backspace clears the shortcut
     // If a modifier is pressed without any other key, return.
     // AltGr is not a modifier but doesn't have a QtSring representation.
     switch(key) {
-    case Qt::Key_Backspace:
-        if (state == Qt::NoModifier) {
-            keyPressedCount = 0;
-            setText(noneStr);
-        }
     case Qt::Key_Control:
     case Qt::Key_Shift:
     case Qt::Key_Alt:
@@ -420,19 +436,23 @@ void AccelLineEdit::keyPressEvent ( QKeyEvent * e)
         break;
     }
 
-    // 4 keys are allowed for QShortcut
-    switch(keyPressedCount) {
-    case 4:
+    if (txtLine.isEmpty()) {
+        // Text maybe cleared by QLineEdit's built in clear button
         keyPressedCount = 0;
-        txtLine.clear();
-        break;
-    case 0:
-        txtLine.clear();
-        break;
-    default:
-        if (txtLine.size())
+    } else {
+        // 4 keys are allowed for QShortcut
+        switch(keyPressedCount) {
+        case 4:
+            keyPressedCount = 0;
+            txtLine.clear();
+            break;
+        case 0:
+            txtLine.clear();
+            break;
+        default:
             txtLine += QString::fromLatin1(",");
-        break;
+            break;
+        }
     }
 
     // Handles modifiers applying a mask.

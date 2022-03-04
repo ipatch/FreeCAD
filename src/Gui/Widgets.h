@@ -142,9 +142,10 @@ public:
 
 protected:
     void keyPressEvent(QKeyEvent * e);
+    void changeEvent(QEvent *);
+    void setupPlaceHolderText();
 
 private:
-    QString noneStr;
     int keyPressedCount;
 };
 
