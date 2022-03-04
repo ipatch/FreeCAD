@@ -144,6 +144,7 @@ public:
     void hideCompleter();
 protected:
     void keyPressEvent(QKeyEvent * event);
+    void inputMethodEvent(QInputMethodEvent *event);
     void contextMenuEvent(QContextMenuEvent * event);
 Q_SIGNALS:
     void textChanged2(QString text, int pos);

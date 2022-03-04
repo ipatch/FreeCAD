@@ -2331,6 +2331,11 @@ void ExpressionCompleter::slotUpdate(const QString & prefix, int pos)
     prefixEnd = expression.size();
     pos -= start;
 
+    if ((int)expression.size() != prefix.size()-start) {
+        // account for differences in character size vs byte size
+        pos = prefix.mid(start, pos).toUtf8().size();
+    }
+
     closeString = false;
     insideString = false;
 
@@ -2593,6 +2598,13 @@ bool ExpressionCompleter::eventFilter(QObject *o, QEvent *e) {
             break;
         }
     }
+    else if (e->type() == QEvent::InputMethodQuery
+            || e->type() == QEvent::InputMethod) {
+        if (o == popup()) {
+            QApplication::sendEvent(widget(), e);
+            return true;
+        }
+    }
     return QCompleter::eventFilter(o, e);
 }
 
@@ -2808,6 +2820,11 @@ void ExpressionTextEdit::slotCompleteText(QString completionPrefix)
 void ExpressionTextEdit::keyPressEvent(QKeyEvent *e) {
     Base::FlagToggler<bool> flag(block,true);
     QPlainTextEdit::keyPressEvent(e);
+}
+
+void ExpressionTextEdit::inputMethodEvent(QInputMethodEvent *e) {
+    Base::FlagToggler<bool> flag(block,true);
+    QPlainTextEdit::inputMethodEvent(e);
 }
 
 void ExpressionTextEdit::contextMenuEvent(QContextMenuEvent *event)
