@@ -716,6 +716,13 @@ void PythonConsole::keyPressEvent(QKeyEvent * e)
         { d->history.restart(); }
 }
 
+void PythonConsole::inputMethodEvent(QInputMethodEvent *event)
+{
+    TextEdit::inputMethodEvent(event);
+    if (d->callTipsList->isVisible())
+        { d->callTipsList->validateCursor(); }
+}
+
 /**
  * Insert an output message to the console. This message comes from
  * the Python interpreter and is redirected from sys.stdout.

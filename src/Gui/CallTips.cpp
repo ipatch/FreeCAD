@@ -167,7 +167,7 @@ void CallTipsList::validateCursor()
             // the following text might be an operator, brackets, ...
             const QChar underscore =  QLatin1Char('_');
             const QChar ch = word.at(0);
-            if (!ch.isLetterOrNumber() && ch != underscore)
+            if (ch.isSpace() || (ch != underscore && ch.isPunct()))
                 word.clear();
         }
         if (currentPos > this->cursorPos+word.length()) {
@@ -657,8 +657,21 @@ bool CallTipsList::eventFilter(QObject * watched, QEvent * event)
         return true;
     }
     else if (isVisible() && (watched == textEdit || watched == this)) {
-        if (event->type() == QEvent::KeyPress) {
+        if (event->type() == QEvent::InputMethod
+                || event->type() == QEvent::InputMethodQuery)
+        {
+            if (watched == this) {
+                QApplication::sendEvent(textEdit, event);
+                return true;
+            }
+        }
+        else if (event->type() == QEvent::KeyPress) {
             QKeyEvent* ke = (QKeyEvent*)event;
+            if (ke->modifiers() != Qt::NoModifier &&
+                    (ke->key() == Qt::Key_Space || ke->key() == Qt::Key_Tab))
+            {
+                return false;
+            }
             if (watched == textEdit) {
                 if (ke->key() == Qt::Key_Up || ke->key() == Qt::Key_Down) {
                     keyPressEvent(ke);

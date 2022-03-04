@@ -132,6 +132,7 @@ protected:
     void dragMoveEvent  ( QDragMoveEvent    * e );
     void changeEvent    ( QEvent            * e );
     void mouseReleaseEvent( QMouseEvent     * e );
+    void inputMethodEvent( QInputMethodEvent* e );
 
     void overrideCursor(const QString& txt);
 
