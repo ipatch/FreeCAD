@@ -347,13 +347,19 @@ be treated as shorctcut key sequence 'F, F'.</string>
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>editCommand</tabstop>
   <tabstop>categoryBox</tabstop>
+  <tabstop>commandTreeWidget</tabstop>
   <tabstop>accelLineEditShortcut</tabstop>
-  <tabstop>assignedTreeWidget</tabstop>
+  <tabstop>editShortcut</tabstop>
   <tabstop>buttonAssign</tabstop>
   <tabstop>buttonClear</tabstop>
   <tabstop>buttonReset</tabstop>
   <tabstop>buttonResetAll</tabstop>
+  <tabstop>shortcutTimeout</tabstop>
+  <tabstop>assignedTreeWidget</tabstop>
+  <tabstop>buttonUp</tabstop>
+  <tabstop>buttonDown</tabstop>
  </tabstops>
  <resources/>
  <connections/>

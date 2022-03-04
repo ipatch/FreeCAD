@@ -694,41 +694,12 @@ void DlgCustomToolbars::on_resetButton_clicked()
     ui->assignButton->setEnabled(false);
 }
 
-void DlgCustomToolbars::onAddMacroAction(const QByteArray& macro)
+void DlgCustomToolbars::onAddMacroAction(const QByteArray&)
 {
-    QVariant data = ui->categoryBox->itemData(ui->categoryBox->currentIndex(), Qt::UserRole);
-    QString group = data.toString();
-    if (group == QLatin1String("Macros"))
-    {
-        CommandManager & cCmdMgr = Application::Instance->commandManager();
-        Command* pCmd = cCmdMgr.getCommandByName(macro);
-
-        QTreeWidgetItem* item = new QTreeWidgetItem(ui->commandTreeWidget);
-        item->setText(1, QString::fromUtf8(pCmd->getMenuText()));
-        item->setToolTip(1, QString::fromUtf8(pCmd->getToolTipText()));
-        item->setData(1, Qt::UserRole, macro);
-        item->setSizeHint(0, QSize(32, 32));
-        if (pCmd->getPixmap())
-            item->setIcon(0, BitmapFactory().iconFromTheme(pCmd->getPixmap()));
-    }
 }
 
-void DlgCustomToolbars::onRemoveMacroAction(const QByteArray& macro)
+void DlgCustomToolbars::onRemoveMacroAction(const QByteArray&)
 {
-    QVariant data = ui->categoryBox->itemData(ui->categoryBox->currentIndex(), Qt::UserRole);
-    QString group = data.toString();
-    if (group == QLatin1String("Macros"))
-    {
-        for (int i=0; i<ui->commandTreeWidget->topLevelItemCount(); i++) {
-            QTreeWidgetItem* item = ui->commandTreeWidget->topLevelItem(i);
-            QByteArray command = item->data(1, Qt::UserRole).toByteArray();
-            if (command == macro) {
-                ui->commandTreeWidget->takeTopLevelItem(i);
-                delete item;
-                break;
-            }
-        }
-    }
 }
 
 void DlgCustomToolbars::onModifyMacroAction(const QByteArray& macro)
@@ -739,20 +710,6 @@ void DlgCustomToolbars::onModifyMacroAction(const QByteArray& macro)
     {
         CommandManager & cCmdMgr = Application::Instance->commandManager();
         Command* pCmd = cCmdMgr.getCommandByName(macro);
-        // the left side
-        for (int i=0; i<ui->commandTreeWidget->topLevelItemCount(); i++) {
-            QTreeWidgetItem* item = ui->commandTreeWidget->topLevelItem(i);
-            QByteArray command = item->data(1, Qt::UserRole).toByteArray();
-            if (command == macro) {
-                item->setText(1, QString::fromUtf8(pCmd->getMenuText()));
-                item->setToolTip(1, QString::fromUtf8(pCmd->getToolTipText()));
-                item->setData(1, Qt::UserRole, macro);
-                item->setSizeHint(0, QSize(32, 32));
-                if (pCmd->getPixmap())
-                    item->setIcon(0, BitmapFactory().iconFromTheme(pCmd->getPixmap()));
-                break;
-            }
-        }
         // the right side
         for (int i=0; i<ui->toolbarTreeWidget->topLevelItemCount(); i++) {
             QTreeWidgetItem* toplevel = ui->toolbarTreeWidget->topLevelItem(i);
@@ -766,6 +723,7 @@ void DlgCustomToolbars::onModifyMacroAction(const QByteArray& macro)
                 }
             }
         }
+        ui->categoryBox->activated(ui->categoryBox->currentIndex());
     }
 }
 

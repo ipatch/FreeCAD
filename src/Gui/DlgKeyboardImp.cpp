@@ -466,65 +466,20 @@ void DlgCustomKeyboardImp::on_editShortcut_textChanged(const QString& )
     }
 }
 
-void DlgCustomKeyboardImp::onAddMacroAction(const QByteArray& macro)
+void DlgCustomKeyboardImp::onAddMacroAction(const QByteArray&)
 {
-    QVariant data = ui->categoryBox->itemData(ui->categoryBox->currentIndex(), Qt::UserRole);
-    QString group = data.toString();
-    if (group == QStringLiteral("Macros"))
-    {
-        CommandManager & cCmdMgr = Application::Instance->commandManager();
-        Command* pCmd = cCmdMgr.getCommandByName(macro);
-        QTreeWidgetItem* item = new QTreeWidgetItem(ui->commandTreeWidget);
-        item->setToolTip(1, QString::fromUtf8(pCmd->getToolTipText()));
-        item->setData(1, Qt::UserRole, macro);
-        item->setSizeHint(0, QSize(32, 32));
-        if (pCmd->getPixmap())
-            item->setIcon(0, BitmapFactory().iconFromTheme(pCmd->getPixmap()));
-    }
 }
 
-void DlgCustomKeyboardImp::onRemoveMacroAction(const QByteArray& macro)
+void DlgCustomKeyboardImp::onRemoveMacroAction(const QByteArray&)
 {
-    QVariant data = ui->categoryBox->itemData(ui->categoryBox->currentIndex(), Qt::UserRole);
-    QString group = data.toString();
-    if (group == QStringLiteral("Macros"))
-    {
-        for (int i=0; i<ui->commandTreeWidget->topLevelItemCount(); i++) {
-            QTreeWidgetItem* item = ui->commandTreeWidget->topLevelItem(i);
-            QByteArray command = item->data(1, Qt::UserRole).toByteArray();
-            if (command == macro) {
-                ui->commandTreeWidget->takeTopLevelItem(i);
-                delete item;
-                break;
-            }
-        }
-    }
 }
 
-void DlgCustomKeyboardImp::onModifyMacroAction(const QByteArray& macro)
+void DlgCustomKeyboardImp::onModifyMacroAction(const QByteArray&)
 {
     QVariant data = ui->categoryBox->itemData(ui->categoryBox->currentIndex(), Qt::UserRole);
     QString group = data.toString();
     if (group == QStringLiteral("Macros"))
-    {
-        CommandManager & cCmdMgr = Application::Instance->commandManager();
-        Command* pCmd = cCmdMgr.getCommandByName(macro);
-        for (int i=0; i<ui->commandTreeWidget->topLevelItemCount(); i++) {
-            QTreeWidgetItem* item = ui->commandTreeWidget->topLevelItem(i);
-            QByteArray command = item->data(1, Qt::UserRole).toByteArray();
-            if (command == macro) {
-                item->setText(1, QString::fromUtf8(pCmd->getMenuText()));
-                item->setToolTip(1, QString::fromUtf8(pCmd->getToolTipText()));
-                item->setData(1, Qt::UserRole, macro);
-                item->setSizeHint(0, QSize(32, 32));
-                if (pCmd->getPixmap())
-                    item->setIcon(0, BitmapFactory().iconFromTheme(pCmd->getPixmap()));
-                if (item->isSelected())
-                    ui->textLabelDescription->setText(item->toolTip(1));
-                break;
-            }
-        }
-    }
+        ui->categoryBox->activated(ui->categoryBox->currentIndex());
 }
 
 void DlgCustomKeyboardImp::changeEvent(QEvent *e)
