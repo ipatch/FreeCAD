@@ -244,8 +244,6 @@ void ViewProviderGeoFeatureGroupExtension::buildExport() const {
         if (!vp || vp == getExtendedViewProvider()) { continue; }
 
         auto children = vp->claimChildren();
-        for (auto child : children)
-            FC_MSG(obj->Label.getValue() << ": " << child->Label.getValue());
         filterLinksByScope(obj,children);
         outSet.insert(children.begin(),children.end());
     }
