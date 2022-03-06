@@ -41,6 +41,7 @@
 # include <QSpinBox>
 #endif
 
+#include <QRegularExpression>
 #include <QWidgetAction>
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
@@ -52,7 +53,6 @@
 #include <cctype>
 #include <boost/regex.hpp>
 #include <boost/algorithm/string/replace.hpp>
-
 
 #include <Base/Tools.h>
 #include <Base/Parameter.h>
@@ -241,16 +241,30 @@ void Action::setToolTip(const QString & s, const QString & title)
                 this));
 }
 
+static QString & actionTitle(QString & title)
+{
+    // Deal with QAction title mnemonic
+    static QRegularExpression re(QStringLiteral("&(.)"));
+    title.replace(re, QStringLiteral("\\1"));
+    // Trim line ending punctuation
+    static QRegularExpression rePunct(QStringLiteral("[[:punct:]]+$"));
+    title.replace(rePunct, QString());
+    return title;
+}
+
+static inline QString actionTitle(const QString &title)
+{
+    QString text(title);
+    return actionTitle(text);
+}
+
 QString Action::createToolTip(QString _tooltip,
                               const QString & title,
                               const QFont &font,
                               const QString &sc,
                               Action *act)
 {
-    QString text = title;
-    text.remove(QLatin1Char('&'));;
-    while(text.size() && text[text.size()-1].isPunct())
-        text.resize(text.size()-1);
+    QString text = actionTitle(title);
 
     if (text.isEmpty())
         return _tooltip;
@@ -2072,14 +2086,10 @@ public:
         case Qt::DisplayRole:
         case Qt::EditRole:
             if (info.text.isEmpty()) {
-#if QT_VERSION>=QT_VERSION_CHECK(5,2,0)
-                info.text = QString::fromLatin1("%2 (%1)").arg(
+                info.text = QStringLiteral("%2 (%1)").arg(
                         QString::fromLatin1(info.cmd->getName()),
                         qApp->translate(info.cmd->className(), info.cmd->getMenuText()));
-#else
-                info.text = qApp->translate(info.cmd->className(), info.cmd->getMenuText());
-#endif
-                info.text.replace(QLatin1Char('&'), QString());
+                actionTitle(info.text);
                 if (info.text.isEmpty())
                     info.text = QString::fromLatin1(info.cmd->getName());
             }
