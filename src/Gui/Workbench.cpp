@@ -318,25 +318,6 @@ void Workbench::setupCustomToolbars(ToolBarItem* root, const char *group, const 
 void Workbench::setupCustomShortcuts() const
 {
     // Now managed by ShortcutManager
-#if 0
-    // Assigns user defined accelerators
-    ParameterGrp::handle hGrp = WindowParameter::getDefaultParameter();
-    if (hGrp->HasGroup("Shortcut")) {
-        hGrp = hGrp->GetGroup("Shortcut");
-        // Get all user defined shortcuts
-        const CommandManager& cCmdMgr = Application::Instance->commandManager();
-        std::vector<std::pair<std::string,std::string> > items = hGrp->GetASCIIMap();
-        for (std::vector<std::pair<std::string,std::string> >::iterator it = items.begin(); it != items.end(); ++it) {
-            Command* cmd = cCmdMgr.getCommandByName(it->first.c_str());
-            if (cmd && cmd->getAction()) {
-                // may be UTF-8 encoded
-                QString str = QString::fromUtf8(it->second.c_str());
-                QKeySequence shortcut = str;
-                cmd->getAction()->setShortcut(shortcut.toString(QKeySequence::NativeText));
-            }
-        }
-    }
-#endif
 }
 
 void Workbench::setupContextMenu(const char* recipient,MenuItem* item) const
