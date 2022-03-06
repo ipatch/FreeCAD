@@ -1112,13 +1112,21 @@ App::DocumentObject *SubShapeBinder::_getLinkedObject(
 }
 
 App::SubObjectT
-SubShapeBinder::import(const App::SubObjectT &feature, 
-                       const App::SubObjectT &editObjT,
+SubShapeBinder::import(const App::SubObjectT &_feature, 
+                       const App::SubObjectT &_editObjT,
                        bool importWholeObject,
                        bool noSubElement,
                        bool compatible,
                        bool noSubObject)
 {
+    // Normalize to 1) simplify hierarchy, 2) make sure to use old style index
+    // based element, because e.g. TaskDraftParameter stores neutral plane in
+    // editor like <objname>:<element>, and it split on ':' to get the element
+    // from the second entry, while the new style mapped element actually
+    // contains ':'.
+    auto feature = _feature.normalized();
+    auto editObjT = _editObjT.normalized();
+
     App::DocumentObject *editObj = nullptr;
     App::DocumentObject *container = nullptr;
     App::DocumentObject *topParent = nullptr;
