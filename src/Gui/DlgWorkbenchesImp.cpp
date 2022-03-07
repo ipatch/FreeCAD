@@ -65,6 +65,7 @@ DlgWorkbenchesImp::DlgWorkbenchesImp(QWidget* parent)
         QStringList() << ui->lw_enabled_workbenches->objectName()
                       << ui->lw_disabled_workbenches->objectName());
 
+    populate();
 }
 
 /** Destroys the object and frees any allocated resources */
