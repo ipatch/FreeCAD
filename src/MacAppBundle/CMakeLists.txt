@@ -113,9 +113,7 @@ get_filename_component(APP_PATH ${CMAKE_INSTALL_PREFIX} PATH)
 
 file(GLOB CONFIG_ICU "/usr/local/Cellar/icu4c*/*/lib")
 
-execute_process(
-       COMMAND find /usr/local/Cellar/nglib -name MacOS
-       OUTPUT_VARIABLE CONFIG_NGLIB)
+file(GLOB CONFIG_NGLIB "/usr/local/Cellar/nglib*/*/Contents/MacOS")
 
 install(CODE 
     "message(STATUS \"Making bundle relocatable...\")
