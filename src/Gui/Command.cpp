@@ -1120,10 +1120,12 @@ void GroupCommand::setup(Action *pcAction) {
         auto cmd = cmds[idx].first;
         BitmapCacheContext ctx(cmd->getName());
         pcAction->setText(QCoreApplication::translate(className(), getMenuText()));
+        QIcon icon;
         if (auto childAction = cmd->getAction())
-            pcAction->setIcon(childAction->icon());
-        else
-            pcAction->setIcon(BitmapFactory().iconFromTheme(cmd->getPixmap()));
+            icon = childAction->icon();
+        if (icon.isNull())
+            icon = BitmapFactory().iconFromTheme(cmd->getPixmap());
+        pcAction->setIcon(icon);
         const char *context = dynamic_cast<PythonCommand*>(cmd) ? cmd->getName() : cmd->className();
         const char *tooltip = cmd->getToolTipText();
         const char *statustip = cmd->getStatusTip();
