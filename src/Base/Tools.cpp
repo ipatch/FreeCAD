@@ -29,6 +29,8 @@
 # include <QElapsedTimer>
 #endif
 
+#include <QRegularExpression>
+
 #include <boost/regex.hpp>
 
 #include "PyExport.h"
@@ -114,16 +116,18 @@ std::string Base::Tools::addNumber(const std::string& name, unsigned int num, in
 
 std::string Base::Tools::getIdentifier(const std::string& name)
 {
+    if (name.empty())
+        return name;
+
     // check for first character whether it's a digit
-    std::string CleanName = name;
-    if (!CleanName.empty() && CleanName[0] >= 48 && CleanName[0] <= 57)
-        CleanName[0] = '_';
+    QString CleanName = QString::fromUtf8(name.c_str());
+    if (CleanName[0].isDigit())
+        CleanName[0] = QLatin1Char('_');
 
     // Replace all spaces and punctuations with underscore
-    static const boost::regex re("[[:space:][:punct:]]");
-    CleanName = boost::regex_replace(CleanName, re, "_");
-
-    return CleanName;
+    static const QRegularExpression re(QStringLiteral("[[:space:][:punct:]]"));
+    CleanName.replace(re, QStringLiteral("_"));
+    return CleanName.toUtf8().constData();
 }
 
 std::wstring Base::Tools::widen(const std::string& str)
