@@ -75,9 +75,11 @@ struct string_comp
 std::string Base::Tools::getUniqueName(const std::string& name, const std::vector<std::string>& names, int d)
 {
     // find highest suffix
+    bool matched = false;
     std::string num_suffix;
     for (std::vector<std::string>::const_iterator it = names.begin(); it != names.end(); ++it) {
         if (it->substr(0, name.length()) == name) { // same prefix
+            matched = true;
             std::string suffix(it->substr(name.length()));
             if (suffix.size() > 0) {
                 std::string::size_type pos = suffix.find_first_not_of("0123456789");
@@ -93,7 +95,8 @@ std::string Base::Tools::getUniqueName(const std::string& name, const std::vecto
         str.fill('0');
         str.width(d);
     }
-    str << Base::string_comp::increment(num_suffix);
+    if (matched)
+        str << Base::string_comp::increment(num_suffix);
     return str.str();
 }
 
