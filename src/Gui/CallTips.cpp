@@ -471,15 +471,15 @@ void CallTipsList::extractTipsFromProperties(Py::Object& obj, QMap<QString, Call
     App::PropertyContainer* container = cont->getPropertyContainerPtr();
     // Make sure that the C++ object is alive
     if (!container) return;
-    std::map<std::string,App::Property*> Map;
-    container->getPropertyMap(Map);
 
-    for (std::map<std::string,App::Property*>::const_iterator It=Map.begin();It!=Map.end();++It) {
+    std::vector<std::pair<const char*,App::Property*>> list;
+    container->getPropertyNamedList(list);
+    for (auto It = list.begin(); It != list.end(); ++It) {
         CallTip tip;
-        QString str = QString::fromUtf8(It->first.c_str());
+        QString str = QString::fromUtf8(It->first);
         tip.name = str;
         tip.type = CallTip::Property;
-        QString longdoc = QString::fromUtf8(container->getPropertyDocumentation(It->second));
+        QString longdoc = QString::fromUtf8(It->second->getDocumentation());
         Py::Object data;
         // a point, mesh or shape property
         if (It->second->isDerivedFrom(Base::Type::fromName("App::PropertyComplexGeoData"))) {
