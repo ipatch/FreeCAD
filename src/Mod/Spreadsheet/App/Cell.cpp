@@ -31,7 +31,6 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/regex.hpp>
 
 #include "Cell.h"
 #include "Utils.h"
@@ -1899,15 +1898,7 @@ void Cell::applyAutoAlias()
 
     PropertySheet::AtomicPropertyChange signaller(*owner, false);
 
-    // Remove leading digits, spaces, and punctuations
-    static const boost::regex reLeading("^[[:digit:][:punct:][:space:]]*");
-    alias = boost::regex_replace(alias, reLeading, "");
-    // Remove ending spaces and punctuations
-    static const boost::regex reEnding("[[:space:][:punct:]]*$");
-    alias = boost::regex_replace(alias, reEnding, "");
-    // Replace all inbetween consecutive spaces and punctuations with a single '_'
-    static const boost::regex re("[[:space:][:punct:]]+");
-    alias = boost::regex_replace(alias, re, "_");
+    alias = Base::Tools::getIdentifier(alias);
 
     CellAddress addr(address.row() + (editMode==EditAutoAlias?0:1),
                      address.col() + (editMode==EditAutoAlias?1:0));
