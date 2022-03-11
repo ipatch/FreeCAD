@@ -1033,9 +1033,9 @@ QString SelectionSingleton::format(const char *docname,
     if (sobj) {
         int index = -1;
         std::string element = objT.getOldElementName(&index);
-        ts << sobj->getNameInDocument();
+        ts << QString::fromUtf8(sobj->getNameInDocument());
         if (index > 0)
-            ts << "." << element.c_str() << index;
+            ts << "." << QString::fromUtf8(element.c_str()) << index;
         ts << " | ";
         if (sobj->Label.getStrValue() != sobj->getNameInDocument())
             ts << QString::fromUtf8(sobj->Label.getValue()) << " | ";
@@ -1052,7 +1052,7 @@ QString SelectionSingleton::format(const char *docname,
                 uint opt = static_cast<uint>(format.option);
                 Lc.setNumberOptions(static_cast<QLocale::NumberOptions>(opt));
             }
-            return QString::fromLatin1("%1 %2").arg(
+            return QStringLiteral("%1 %2").arg(
                         Lc.toString(v/factor, format.toFormat(),
                                     fmtDecimal<0 ? format.precision : fmtDecimal),
                         unit);
@@ -1065,9 +1065,9 @@ QString SelectionSingleton::format(const char *docname,
         ts << QStringLiteral(" | ");
     }
 
-    ts << objT.getDocumentName().c_str() << "#" 
-       << objT.getObjectName().c_str() << "."
-       << objT.getSubName().c_str();
+    ts << QString::fromUtf8(objT.getDocumentName().c_str()) << "#" 
+       << QString::fromUtf8(objT.getObjectName().c_str()) << "."
+       << QString::fromUtf8(objT.getSubName().c_str());
 
     PreselectionText.clear();
     if (show && getMainWindow()) {

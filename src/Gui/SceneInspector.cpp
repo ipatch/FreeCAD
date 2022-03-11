@@ -416,7 +416,6 @@ void DlgInspector::populateFieldView(QTreeWidgetItem *parent, SoNode *n)
             else {
                 QString txt;
                 QTextStream stream(&txt);
-                stream.setCodec("UTF-8");
                 stream << nfield->getValue()->getTypeId().getName() << " " <<nfield->getValue();
                 item->setText(1, txt);
                 item->setChildIndicatorPolicy(QTreeWidgetItem::ShowIndicator);
@@ -478,7 +477,6 @@ void DlgInspector::populateFieldView(QTreeWidgetItem *parent, SoNode *n)
             CoinPtr<SoNode> childNode((*children)[i]);
             QString txt;
             QTextStream stream(&txt);
-            stream.setCodec("UTF-8");
             stream << childNode.get() << " " << childNode->getTypeId().getName();
             child->setText(1, txt);
             child->setData(0, Qt::UserRole, QVariant::fromValue(childNode));

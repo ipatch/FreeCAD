@@ -217,8 +217,7 @@ void ShapeBuilderWidget::createEdgeFromVertex()
         for (jt=it->getSubNames().begin();jt!=it->getSubNames().end();++jt) {
             QString line;
             QTextStream str(&line);
-            str.setCodec("UTF-8");
-            str << "App.ActiveDocument." << it->getFeatName() << ".Shape." << jt->c_str() << ".Point";
+            str << "App.ActiveDocument." << QString::fromUtf8(it->getFeatName()) << ".Shape." << jt->c_str() << ".Point";
             elements.push_back(line);
         }
     }
@@ -263,11 +262,10 @@ void ShapeBuilderWidget::createWireFromEdge()
 
     QString list;
     QTextStream str(&list);
-    str.setCodec("UTF-8");
     str << "[";
     for (it=sel.begin();it!=sel.end();++it) {
         for (jt=it->getSubNames().begin();jt!=it->getSubNames().end();++jt) {
-            str << "App.ActiveDocument." << it->getFeatName() << ".Shape." << jt->c_str() << ", ";
+            str << "App.ActiveDocument." << QString::fromUtf8(it->getFeatName()) << ".Shape." << jt->c_str() << ", ";
         }
     }
     str << "]";
@@ -305,11 +303,10 @@ void ShapeBuilderWidget::createFaceFromVertex()
 
     QString list;
     QTextStream str(&list);
-    str.setCodec("UTF-8");
     str << "[";
     for (it=sel.begin();it!=sel.end();++it) {
         for (jt=it->getSubNames().begin();jt!=it->getSubNames().end();++jt) {
-            str << "App.ActiveDocument." << it->getFeatName() << ".Shape." << jt->c_str() << ".Point, ";
+            str << "App.ActiveDocument." << QString::fromUtf8(it->getFeatName()) << ".Shape." << jt->c_str() << ".Point, ";
         }
     }
     str << "]";
@@ -358,11 +355,10 @@ void ShapeBuilderWidget::createFaceFromEdge()
 
     QString list;
     QTextStream str(&list);
-    str.setCodec("UTF-8");
     str << "[";
     for (it=sel.begin();it!=sel.end();++it) {
         for (jt=it->getSubNames().begin();jt!=it->getSubNames().end();++jt) {
-            str << "App.ActiveDocument." << it->getFeatName() << ".Shape." << jt->c_str() << ", ";
+            str << "App.ActiveDocument." << QString::fromUtf8(it->getFeatName()) << ".Shape." << jt->c_str() << ", ";
         }
     }
     str << "]";
@@ -411,21 +407,20 @@ void ShapeBuilderWidget::createShellFromFace()
 
     QString list;
     QTextStream str(&list);
-    str.setCodec("UTF-8");
     if (d->ui.checkFaces->isChecked()) {
         std::set<App::DocumentObject*> obj;
         for (it=sel.begin();it!=sel.end();++it)
             obj.insert(it->getObject());
         str << "[]";
         for (std::set<App::DocumentObject*>::iterator it = obj.begin(); it != obj.end(); ++it) {
-            str << "+ App.ActiveDocument." << (*it)->getNameInDocument() << ".Shape.Faces";
+            str << "+ App.ActiveDocument." << QString::fromUtf8((*it)->getNameInDocument()) << ".Shape.Faces";
         }
     }
     else {
         str << "[";
         for (it=sel.begin();it!=sel.end();++it) {
             for (jt=it->getSubNames().begin();jt!=it->getSubNames().end();++jt) {
-                str << "App.ActiveDocument." << it->getFeatName() << ".Shape." << jt->c_str() << ", ";
+                str << "App.ActiveDocument." << QString::fromUtf8(it->getFeatName()) << ".Shape." << jt->c_str() << ", ";
             }
         }
         str << "]";
@@ -471,12 +466,11 @@ void ShapeBuilderWidget::createSolidFromShell()
 
     QString line;
     QTextStream str(&line);
-    str.setCodec("UTF-8");
 
     std::vector<Gui::SelectionObject> sel = partFilter.Result[0];
     std::vector<Gui::SelectionObject>::iterator it;
     for (it=sel.begin();it!=sel.end();++it) {
-        str << "App.ActiveDocument." << it->getFeatName() << ".Shape";
+        str << "App.ActiveDocument." << QString::fromUtf8(it->getFeatName()) << ".Shape";
         break;
     }
 

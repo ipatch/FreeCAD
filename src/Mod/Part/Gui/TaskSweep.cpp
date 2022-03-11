@@ -317,7 +317,7 @@ bool SweepWidget::accept()
                 .arg(QString::fromUtf8(spineLabel.c_str())));
             return false;
         }
-        str << "App.getDocument('" << d->document.c_str() << "')." << name << ", ";
+        str << "App.getDocument('" << QString::fromUtf8(d->document.c_str()) << "')." << name << ", ";
     }
 
     try {

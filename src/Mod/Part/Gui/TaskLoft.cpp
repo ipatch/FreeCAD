@@ -183,7 +183,7 @@ bool LoftWidget::accept()
     for (int i=0; i<count; i++) {
         QTreeWidgetItem* child = d->ui.selector->selectedTreeWidget()->topLevelItem(i);
         QString name = child->data(0, Qt::UserRole).toString();
-        str << "App.getDocument('" << d->document.c_str() << "')." << name << ", ";
+        str << "App.getDocument('" << QString::fromUtf8(d->document.c_str()) << "')." << name << ", ";
     }
 
     try {
@@ -200,7 +200,7 @@ bool LoftWidget::accept()
         if (!doc)
             throw Base::RuntimeError("Document doesn't exist anymore");
         doc->openCommand(QT_TRANSLATE_NOOP("Command", "Loft"));
-        Gui::Command::runCommand(Gui::Command::App, cmd.toLatin1());
+        Gui::Command::runCommand(Gui::Command::App, cmd.toUtf8());
         doc->getDocument()->recompute();
         App::DocumentObject* obj = doc->getDocument()->getActiveObject();
         if (obj && !obj->isValid()) {

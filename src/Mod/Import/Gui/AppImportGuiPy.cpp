@@ -220,7 +220,7 @@ void OCAFBrowser::load(const TDF_Label& label, QTreeWidgetItem* item, const QStr
                 QString text;
                 QTextStream str(&text);
                 str << attr->DynamicType()->Name();
-                str << " = " << toString(Handle(TDataStd_Name)::DownCast(attr)->Get()).c_str();
+                str << " = " << QString::fromUtf8(toString(Handle(TDataStd_Name)::DownCast(attr)->Get()).c_str());
                 child->setText(0, text);
             }
             else if (it.Value() == TDF_TagSource::GetID()) {
