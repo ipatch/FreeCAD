@@ -371,6 +371,8 @@ public:
     void addTo(QWidget *);
     void addToGroup(ActionGroup *, bool checkable);
     void addToGroup(ActionGroup *);
+    /// Create the action if not exist
+    void initAction();
     //@}
 
 

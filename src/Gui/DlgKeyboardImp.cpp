@@ -83,6 +83,16 @@ DlgCustomKeyboardImp::DlgCustomKeyboardImp( QWidget* parent  )
 
     widgetStates->addSplitter(ui->splitter);
 
+    // Force create actions for all commands with shortcut to register with ShortcutManager
+    for (auto cmd : Application::Instance->commandManager().getAllCommands()) {
+        if (cmd->getShortcut().size())
+            cmd->initAction();
+    }
+    QObject::connect(ShortcutManager::instance(), &ShortcutManager::shortcutChanged, this,
+        [](const char *cmdName) {
+            if (auto cmd = Application::Instance->commandManager().getCommandByName(cmdName))
+                cmd->initAction();
+        });
 
     conn = initCommandWidgets(ui->commandTreeWidget,
                               nullptr,
