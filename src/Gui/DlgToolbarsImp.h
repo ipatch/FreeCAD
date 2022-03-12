@@ -30,6 +30,8 @@
 
 class QTreeWidgetItem;
 
+class QTreeWidgetItem;
+
 namespace Gui {
 
 class PrefWidgetStates;
@@ -56,7 +58,6 @@ protected:
     virtual ~DlgCustomToolbars();
 
 protected Q_SLOTS:
-    void on_categoryBox_activated(int index);
     void on_workbenchBox_currentIndexChanged(int index);
     void on_moveActionRightButton_clicked();
     void on_moveActionLeftButton_clicked();

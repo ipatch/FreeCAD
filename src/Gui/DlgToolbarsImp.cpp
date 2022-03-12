@@ -82,7 +82,13 @@ DlgCustomToolbars::DlgCustomToolbars(DlgCustomToolbars::Type t, QWidget* parent)
     ui->moveActionDownButton->setIcon(BitmapFactory().iconFromTheme("button_down"));
     ui->moveActionUpButton->setIcon(BitmapFactory().iconFromTheme("button_up"));
 
+    auto sepItem = new QTreeWidgetItem;
+    sepItem->setText(1, tr("<Separator>"));
+    sepItem->setData(1, Qt::UserRole, QByteArray("Separator"));
+    sepItem->setSizeHint(0, QSize(32, 32));
+
     conn = DlgCustomKeyboardImp::initCommandWidgets(ui->commandTreeWidget,
+                                                    sepItem,
                                                     ui->categoryBox,
                                                     ui->editCommand,
                                                     ui->assignedTreeWidget,
@@ -174,15 +180,6 @@ void DlgCustomToolbars::hideEvent(QHideEvent * event)
     exportCustomToolbars(workbench.toLatin1());
 
     CustomizeActionPage::hideEvent(event);
-}
-
-void DlgCustomToolbars::on_categoryBox_activated(int)
-{
-    QTreeWidgetItem* sepitem = new QTreeWidgetItem;
-    sepitem->setText(1, tr("<Separator>"));
-    sepitem->setData(1, Qt::UserRole, QByteArray("Separator"));
-    sepitem->setSizeHint(0, QSize(32, 32));
-    ui->commandTreeWidget->insertTopLevelItem(0, sepitem);
 }
 
 void DlgCustomToolbars::on_workbenchBox_currentIndexChanged(int index)
@@ -721,7 +718,8 @@ void DlgCustomToolbars::onModifyMacroAction(const QByteArray& macro)
                 QTreeWidgetItem* item = toplevel->child(j);
                 QByteArray command = item->data(0, Qt::UserRole).toByteArray();
                 if (command == macro) {
-                    item->setText(0, QString::fromUtf8(pCmd->getMenuText()));
+                    item->setText(0, Action::commandMenuText(pCmd));
+                    item->setToolTip(0, Action::commandToolTip(pCmd));
                     if (pCmd->getPixmap())
                         item->setIcon(0, BitmapFactory().iconFromTheme(pCmd->getPixmap()));
                 }
