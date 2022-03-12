@@ -116,7 +116,23 @@ public:
                                  const QString &title,
                                  const QFont &font,
                                  const QString &shortcut,
-                                 Action *action = nullptr);
+                                 const Command *cmd = nullptr);
+
+    /** Obtain tool tip of a given command
+     * @param cmd: input command
+     * @param richFormat: whether to output rich text formatted tooltip
+     */
+    static QString commandToolTip(const Command *cmd, bool richFormat = true);
+
+    /** Obtain the menu text of a given command
+     * @param cmd: input command
+     * @return Return the command menu text that is stripped with its mnemonic
+     * symbol '&' and ending punctuations
+     */
+    static QString commandMenuText(const Command *cmd);
+
+    /// Clean the title by stripping the mnemonic symbol '&' and ending punctuations
+    static QString cleanTitle(const QString &title);
 
     Command *command() const {
         return _pcCmd;
@@ -500,26 +516,6 @@ protected Q_SLOTS:
 private:
     QMenu* _menu;
     QAction *_emptyAction;
-};
-
-/**
- * Command name completer.
- */
-class GuiExport CommandCompleter : public QCompleter
-{
-    Q_OBJECT
-public:
-    CommandCompleter(QLineEdit *edit, QObject *parent = nullptr);
-
-Q_SIGNALS:
-    void commandActivated(const QByteArray &name);
-
-protected Q_SLOTS:
-    void onTextChanged(const QString &);
-    void onCommandActivated(const QModelIndex &);
-
-protected:
-    bool eventFilter(QObject *, QEvent *ev);
 };
 
 /**
