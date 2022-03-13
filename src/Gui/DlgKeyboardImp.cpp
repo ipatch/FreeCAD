@@ -372,8 +372,6 @@ void DlgCustomKeyboardImp::on_commandTreeWidget_currentItemChanged(QTreeWidgetIt
         ui->buttonAssign->setEnabled(!ui->editShortcut->text().isEmpty() && (ks != ks3));
         ui->buttonReset->setEnabled((ks != ks2));
     }
-
-    ui->textLabelDescription->setText(item->toolTip(1));
 }
 
 /** Shows all commands of this category */
