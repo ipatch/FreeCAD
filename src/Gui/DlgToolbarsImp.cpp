@@ -238,6 +238,8 @@ struct GroupComp
 
 void DlgCustomToolbars::importCustomToolbars(const QByteArray& name)
 {
+    Application::Instance->initializeWorkbench(name);
+
     ParameterGrp::handle hGrp = App::GetApplication().GetUserParameter().GetGroup("BaseApp")->GetGroup("Workbench");
     const char* subgroup = (type == Toolbar ? "Toolbar" : "Toolboxbar");
     if (!hGrp->HasGroup(name.constData()))
