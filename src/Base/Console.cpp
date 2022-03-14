@@ -35,6 +35,7 @@
 # include "fcntl.h"
 #endif
 
+#include "Interpreter.h"
 #include "Console.h"
 #include "Exception.h"
 #include "PyObjectBase.h"

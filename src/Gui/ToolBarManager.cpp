@@ -528,6 +528,14 @@ void ToolBarManager::setup(ToolBarItem* toolBarItems)
     if (!toolBarItems)
         return; // empty menu bar
 
+    static QPointer<QWidget> _ActionWidget;
+    if (!_ActionWidget)
+        _ActionWidget = new QWidget(getMainWindow());
+    else {
+        for (auto action : _ActionWidget->actions())
+            _ActionWidget->removeAction(action);
+    }
+
     this->toolbarNames.clear();
 
     std::map<int,int> widths;
@@ -584,6 +592,9 @@ void ToolBarManager::setup(ToolBarItem* toolBarItems)
         toolbar->setWindowTitle(QApplication::translate("Workbench", toolbarName.c_str())); // i18n
         toolbar->toggleViewAction()->setVisible(true);
         setToolBarVisible(toolbar, visible);
+
+        for (auto action : toolbar->actions())
+            _ActionWidget->addAction(action);
 
         // try to add some breaks to avoid to have all toolbars in one line
         if (toolbar_added) {
