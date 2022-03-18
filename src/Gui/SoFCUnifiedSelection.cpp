@@ -3369,6 +3369,15 @@ void SoFCPathAnnotation::setDetail(bool d) {
     det = d;
 }
 
+SoPath *SoFCPathAnnotation::getPath() const
+{
+    if (!path) {
+        static SoTempPath tmpPath(1);
+        return &tmpPath;
+    }
+    return path;
+}
+
 void SoFCPathAnnotation::setPath(SoPath *newPath) {
     if(path) {
         path->unref();
