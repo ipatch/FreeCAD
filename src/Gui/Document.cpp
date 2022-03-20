@@ -1778,7 +1778,7 @@ void Document::SaveDocFile (Base::Writer &writer) const
         << "\" FileVersion=\"" << writer.getFileVersion() << "\" "
         << FC_ATTR_SPLIT_XML "=\"" << (writer.isSplitXML()?1:0) << "\"";
 
-    if (TreeWidget::saveDocumentItem(this, writer, FC_ATTR_TREE_EXPANSION))
+    if (!TreeWidget::saveDocumentItem(this, writer, FC_ATTR_TREE_EXPANSION))
         writer.Stream() << ">\n";
 
     if(writer.isSplitXML()) {
