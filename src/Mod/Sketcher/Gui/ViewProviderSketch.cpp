@@ -7434,7 +7434,7 @@ void ViewProviderSketch::setEditViewer(Gui::View3DInventorViewer* viewer, int Mo
     transform.getTransform(t, r, s, so);
     SbRotation rot((float)r[0],(float)r[1],(float)r[2],(float)r[3]);
     if (viewBottomOnEdit())
-        rot *= SbRotation(SbVec3f(0,1,0), M_PI);
+        rot = SbRotation(SbVec3f(0,1,0), M_PI) * rot;
     viewer->setCameraOrientation(rot);
 
     viewer->setEditing(true);
