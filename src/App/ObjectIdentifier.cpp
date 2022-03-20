@@ -213,7 +213,11 @@ ObjectIdentifier::ObjectIdentifier(const Property &prop, int index)
     , subObjectName("",true)
     , documentNameSet(false)
     , documentObjectNameSet(false)
-    , localProperty(true)
+    // Although this is obviously a case of local property, for backward
+    // compatibility (e.g. PropertyExpressionEngine use local property for
+    // key), We do not explicitly mark it as local property (i.e. print prefix
+    // '.').
+    , localProperty(false)
     , _hash(0)
 {
     DocumentObject * docObj = freecad_dynamic_cast<DocumentObject>(prop.getContainer());

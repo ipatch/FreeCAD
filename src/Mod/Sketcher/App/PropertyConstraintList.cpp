@@ -88,7 +88,7 @@ App::ObjectIdentifier PropertyConstraintList::makeSimplePath(const Constraint * 
     if (boost::regex_match(c->Name.c_str(), cm, RegexIdentifier))
         res << ObjectIdentifier::SimpleComponent(ObjectIdentifier::String(c->Name));
     else
-        res << ObjectIdentifier::LabelComponent(ObjectIdentifier::String(c->Name, true));
+        res << ObjectIdentifier::MapComponent(ObjectIdentifier::String(c->Name, true));
     return res;
 }
 
