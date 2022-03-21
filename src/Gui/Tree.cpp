@@ -673,8 +673,6 @@ public:
 
 //--------------------------------------------------------------------------
 
-static int _TreeIconSize;
-
 /*[[[cog
 import TreeParams
 TreeParams.define()
@@ -3296,22 +3294,31 @@ void TreeWidget::setItemSpacing(int spacing)
     TreeParams::setItemSpacing(spacing);
 }
 
+static int &_TreeIconSize()
+{
+    static int treeIconSize = -1;
+
+    if (treeIconSize < 0)
+        treeIconSize = TreeParams::getIconSize();
+    return treeIconSize;
+}
+
 int TreeWidget::iconHeight() const
 {
-    return _TreeIconSize;
+    return _TreeIconSize();
 }
 
 void TreeWidget::setIconHeight(int height)
 {
-    if (_TreeIconSize == height)
+    if (_TreeIconSize() == height)
         return;
 
-    _TreeIconSize = height;
-    if (_TreeIconSize <= 0)
-        _TreeIconSize = std::max(10, iconSize());
+    _TreeIconSize() = height;
+    if (_TreeIconSize() <= 0)
+        _TreeIconSize() = std::max(10, iconSize());
 
     for(auto tree : Instances)
-        tree->setIconSize(QSize(_TreeIconSize, _TreeIconSize));
+        tree->setIconSize(QSize(_TreeIconSize(), _TreeIconSize()));
 }
 
 int TreeWidget::iconSize() {
@@ -3323,8 +3330,8 @@ int TreeWidget::iconSize() {
         else
             defaultSize = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize);
     }
-    if (_TreeIconSize > 0)
-        return std::max(10, _TreeIconSize);
+    if (_TreeIconSize() > 0)
+        return std::max(10, _TreeIconSize());
     return defaultSize;
 }
 
