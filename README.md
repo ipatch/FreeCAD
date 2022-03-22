@@ -1,3 +1,21 @@
+![Logo](https://github.com/realthunder/FreeCADMakeImage/raw/master/conda/branding/asm3/icons/hicolor/64x64/apps/freecad_link.png)
+
+This is the Link branch FreeCAD, with lots of new features and enhancement.
+This branch is original created to develop the `App::Link` feature for use
+with my [Assembly3](https://github.com/realthunder/FreeCAD_assembly3)
+workbench. The feature has since been merged to official FreeCAD, but the
+branch stayed and become a forefront of what future FreeCAD might become.
+
+You can help test new features by trying one of the pre-built images
+released [here](https://github.com/realthunder/FreeCAD_assembly3/releases).
+There is also more frequent release in
+[snap](https://snapcraft.io/freecad-realthunder) image for Linux folks to try
+out.
+
+
+<details>
+  <summary>Original FreeCAD ReadMe. Click to Expand.</summary>
+
 ![Logo](https://www.freecadweb.org/images/logo.png)
 
 ### Your own 3D parametric modeler
@@ -122,3 +140,12 @@ pages might help you get started:
 The [FreeCAD forum](https://forum.freecadweb.org) is also a great place
 to find help and solve specific problems you might encounter when
 learning to use FreeCAD.
+
+
+<p>This project receives generous infrastructure support from
+  <a href="https://www.digitalocean.com/">
+    <img src="https://opensource.nyc3.cdn.digitaloceanspaces.com/attribution/assets/SVG/DO_Logo_horizontal_blue.svg" width="91px">
+  </a> and <a href="https://www.kipro-pcb.com/">KiCad Services Corp.</a>
+</p>
+
+</details>
