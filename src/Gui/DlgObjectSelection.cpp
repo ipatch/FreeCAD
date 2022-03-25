@@ -248,6 +248,8 @@ void DlgObjectSelection::updateAllItemState()
     }
     if (count && count == (int)itemMap.size())
         allItem->setCheckState(0, Qt::Checked);
+    else if (!count)
+        allItem->setCheckState(0, Qt::Unchecked);
 }
 
 void DlgObjectSelection::setItemState(App::DocumentObject *obj,
@@ -454,7 +456,7 @@ void DlgObjectSelection::checkItemChanged() {
 
     std::set<App::DocumentObject*> unchecked;
 
-    for (auto &v : itemChanged) {
+    for (const auto &v : itemChanged) {
         const auto &objT = v.first;
         Qt::CheckState state = v.second;
         if (auto obj = objT.getObject()) {
@@ -489,8 +491,8 @@ void DlgObjectSelection::checkItemChanged() {
             getOutList(obj, unchecked, outlist);
         std::sort(outlist.begin(), outlist.end());
 
-        for (auto &v : itemMap) {
-            if (v.second[0]->checkState(0) == Qt::Unchecked)
+        for (const auto &v : itemMap) {
+            if (itemChanged.count(v.first) == 0 && v.second[0]->checkState(0) == Qt::Unchecked)
                 continue;
             if (auto obj = v.first.getObject()) {
                 if (!std::binary_search(outlist.begin(), outlist.end(), obj))
