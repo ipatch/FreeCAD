@@ -87,6 +87,7 @@
 # include <QCheckBox>
 # include <QDesktopWidget>
 # include <QFontDialog>
+# include <QFontMetrics>
 #endif
 
 #include <sstream>
@@ -249,6 +250,10 @@ public:
             {"Bottom", "TextBottom", "BOTTOM"},
             {"Right", "TextRight", "RIGHT"},
             {"Left", "TextLeft", "LEFT"},}
+        , m_AxisLabels {
+            {"X", "AxisLabelX", "X"},
+            {"Y", "AxisLabelY", "Y"},
+            {"Z", "AxisLabelZ", "Z"},}
         , m_colors {
             {"Text", "TextColor", Qt::black, m_TextColor},
             {"Highlight", "HiliteColor", QColor(170, 226, 255, 255), m_HiliteColor},
@@ -256,7 +261,8 @@ public:
             {"Edge", "EdgeColor", QColor(226, 233, 239, 192).dark(140), m_EdgeFaceColor},
             {"Corner", "CornerColor", QColor(226, 233, 239, 192).dark(110), m_CornerFaceColor},
             {"Button", "ButtonColor", QColor(226, 233, 239, 128), m_ButtonColor},
-            {"Border", "BorderColor", QColor(50, 50, 50, 255), m_BorderColor}}
+            {"Border", "BorderColor", QColor(50, 50, 50, 255), m_BorderColor},
+            {"Axis label", "AxisLabelColor", Qt::black, m_AxisLabelColor}}
     {
 	    m_hGrp = App::GetApplication().GetParameterGroupByPath(
                 "User parameter:BaseApp/Preferences/NaviCube");
@@ -280,7 +286,7 @@ public:
 	void handleMenu(QWidget *parent);
     void getParams();
 
-	bool drawNaviCube(SoCamera *cam, bool picking, int hiliteId);
+	bool drawNaviCube(SoCamera *cam, bool picking, int hiliteId, bool hit);
 	bool initNaviCube();
 	void addFace(float gap, const Vector3f&, const Vector3f&, int, int, int, bool flag=false);
 
@@ -289,9 +295,15 @@ public:
     QFont getLabelFont();
     void saveLabelFont(const QFont &);
 
+    void setAxisLabels(QWidget *parent);
+    QFont getAxisLabelFont();
+    void saveAxisLabelFont(const QFont &);
+
 	GLuint createCubeFaceTex(float gap, const char* text, int shape);
 	GLuint createButtonTex(int button, bool stroke = true);
 	GLuint createMenuTex(bool);
+
+    void createAxisLabels();
 
     void deinit(QOpenGLContext *ctx = nullptr);
 
@@ -311,7 +323,15 @@ public:
 	QColor m_EdgeFaceColor;
 	QColor m_CornerFaceColor;
     QColor m_BorderColor;
-    bool m_ShowCS;
+	QColor m_AxisLabelColor;
+    static bool m_ShowCS;
+    static bool m_AutoHideCube;
+    static bool m_AutoHideButton;
+    static int m_AutoHideTimeout;
+
+    QImage m_LabelX;
+    QImage m_LabelY;
+    QImage m_LabelZ;
 
 	QtGLFramebufferObject* m_PickingFramebuffer = nullptr;
 
@@ -333,6 +353,7 @@ public:
         const char *def;
     };
 	vector<LabelInfo> m_labels;
+	vector<LabelInfo> m_AxisLabels;
 
     struct ColorInfo {
         const char *title;
@@ -346,11 +367,17 @@ public:
     QPointer<QDialog> m_DlgColors;
     QPointer<QDialog> m_DlgLabels;
     QPointer<QFontDialog> m_DlgFont;
+    QPointer<QDialog> m_DlgAxisLabels;
+    QPointer<QFontDialog> m_DlgAxisFont;
     static double m_BorderWidth;
 };
 
 int NaviCubeShared::m_CubeWidgetSize;
 double NaviCubeShared::m_BorderWidth = 1.5;
+bool NaviCubeShared::m_ShowCS;
+bool NaviCubeShared::m_AutoHideCube;
+bool NaviCubeShared::m_AutoHideButton;
+int NaviCubeShared::m_AutoHideTimeout;
 
 class NaviCubeImplementation : public ParameterGrp::ObserverType {
 public:
@@ -394,10 +421,12 @@ public:
 	bool m_MouseDown = false;
 	bool m_Dragging = false;
 	bool m_MightDrag = false;
+    bool m_Hit = false;
     NaviCube::Corner m_Corner = NaviCube::TopRightCorner;
 
 	int &m_CubeWidgetSize = NaviCubeShared::m_CubeWidgetSize;
     QTimer timer;
+    QTimer autoHideTimer;
 };
 
 int NaviCube::getNaviCubeSize()
@@ -439,6 +468,11 @@ NaviCubeImplementation::NaviCubeImplementation(Gui::View3DInventorViewer* viewer
         m_Shared->getParams();
 	    m_View3DInventorViewer->getSoRenderManager()->scheduleRedraw();
     });
+
+    autoHideTimer.setSingleShot(true);
+    QObject::connect(&autoHideTimer, &QTimer::timeout, [this](){
+	    m_View3DInventorViewer->getSoRenderManager()->scheduleRedraw();
+    });
 }
 
 NaviCubeImplementation::~NaviCubeImplementation() {
@@ -453,6 +487,9 @@ void NaviCubeShared::getParams()
     m_CubeWidgetSize = m_hGrp->GetInt("CubeSize", 132);
     m_ShowCS = m_hGrp->GetBool("ShowCS", true);
     m_BorderWidth = m_hGrp->GetFloat("BorderWidth", 1.5);
+    m_AutoHideCube = m_hGrp->GetBool("AutoHideCube", false);
+    m_AutoHideButton = m_hGrp->GetBool("AutoHideButton", true);
+    m_AutoHideTimeout = m_hGrp->GetInt("AutoHideTimeout", 300);
     deinit();
 }
 
@@ -532,6 +569,29 @@ GLuint NaviCubeShared::createCubeFaceTex(float gap, const char* text, int shape)
     return texture->textureId();
 }
 
+void NaviCubeShared::createAxisLabels()
+{
+    QFont font = getAxisLabelFont();
+    QFontMetrics fm(font);
+
+    auto create = [&](const LabelInfo &info) {
+        auto text = QString::fromUtf8(m_hGrp->GetASCII(info.name, info.def).c_str());
+        QSize size = fm.size(Qt::TextSingleLine, text);
+        QPainter paint;
+        QImage image(size, QImage::Format_Mono);
+        image.fill(0);
+        paint.begin(&image);
+        paint.setPen(Qt::white);
+        paint.setFont(font);
+        paint.drawText(QRect(QPoint(), size), Qt::AlignCenter, text);
+        paint.end();
+        return image.mirrored();
+    };
+
+	m_LabelX = create(m_AxisLabels[0]);
+	m_LabelY = create(m_AxisLabels[1]);
+	m_LabelZ = create(m_AxisLabels[2]);
+}
 
 GLuint NaviCubeShared::createButtonTex(int button, bool stroke) {
 	int texSize = m_CubeWidgetSize * m_OverSample;
@@ -950,6 +1010,8 @@ bool NaviCubeShared::initNaviCube() {
 	m_Buttons.push_back(TEX_ARROW_RIGHT);
 	m_Buttons.push_back(TEX_DOT_BACKSIDE);
 
+    createAxisLabels();
+
 	m_PickingFramebuffer = new QtGLFramebufferObject(2*m_CubeWidgetSize,2* m_CubeWidgetSize, QtGLFramebufferObject::CombinedDepthStencil);
     return true;
 }
@@ -1008,11 +1070,11 @@ void NaviCubeImplementation::drawNaviCube(bool pickMode) {
 		return;
 
 	handleResize();
-    if (m_Shared->drawNaviCube(cam, pickMode, m_HiliteId))
+    if (m_Shared->drawNaviCube(cam, pickMode, m_HiliteId, m_Hit))
 		m_View3DInventorViewer->getSoRenderManager()->scheduleRedraw();
 }
 
-bool NaviCubeShared::drawNaviCube(SoCamera *cam, bool pickMode, int hiliteId) {
+bool NaviCubeShared::drawNaviCube(SoCamera *cam, bool pickMode, int hiliteId, bool hit) {
     bool res = initNaviCube();
 
 	// Store GL state.
@@ -1097,7 +1159,8 @@ bool NaviCubeShared::drawNaviCube(SoCamera *cam, bool pickMode, int hiliteId) {
 		// Draw the axes
 		if (m_ShowCS) {
 			glDisable(GL_TEXTURE_2D);
-			float a=1.1f;
+			const float a=1.1f;
+            const float b=-0.2f;
 
 	        glLineWidth(2.0);
 
@@ -1123,18 +1186,39 @@ bool NaviCubeShared::drawNaviCube(SoCamera *cam, bool pickMode, int hiliteId) {
 			glRasterPos3d( -a, -a, a);
 
 			glEnable(GL_TEXTURE_2D);
+
+            // Render axis notation letters ("X", "Y", "Z").
+            GLint unpack,rowlength;
+            glGetIntegerv(GL_UNPACK_ALIGNMENT, &unpack);
+            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+            glGetIntegerv(GL_UNPACK_ROW_LENGTH, &rowlength);
+            glPixelStorei(GL_UNPACK_ROW_LENGTH, m_LabelX.bytesPerLine()*8);
+
+            glColor3fv(SbVec3f(m_AxisLabelColor.redF(),
+                               m_AxisLabelColor.greenF(),
+                               m_AxisLabelColor.blueF()).getValue());
+
+            glRasterPos3d(a + b, -a + b, -a);
+            glBitmap(m_LabelX.width(), m_LabelX.height(), 0, 0, 0, 0, m_LabelX.constBits());
+            glRasterPos3d(-a + b, a + b, -a);
+            glBitmap(m_LabelY.width(), m_LabelY.height(), 0, 0, 0, 0, m_LabelY.constBits());
+            glRasterPos3d(-a + b, -a + b, a + b);
+            glBitmap(m_LabelZ.width(), m_LabelZ.height(), 0, 0, 0, 0, m_LabelZ.constBits());
+
+            glPixelStorei(GL_UNPACK_ALIGNMENT, unpack);
+            glPixelStorei(GL_UNPACK_ROW_LENGTH, rowlength);
 		}
 	}
 
 	// Draw the cube faces
 	if (pickMode) {
         for (auto &f : m_Faces) {
-			glColor3ub(f.m_PickId, 0, 0);
-			glBindTexture(GL_TEXTURE_2D, f.m_PickTextureId);
-			glDrawElements(GL_TRIANGLE_FAN, f.m_VertexCount, GL_UNSIGNED_BYTE, (void*) &m_IndexArray[f.m_FirstVertex]);
-		}
+            glColor3ub(f.m_PickId, 0, 0);
+            glBindTexture(GL_TEXTURE_2D, f.m_PickTextureId);
+            glDrawElements(GL_TRIANGLE_FAN, f.m_VertexCount, GL_UNSIGNED_BYTE, (void*) &m_IndexArray[f.m_FirstVertex]);
+        }
 	}
-	else {
+	else if (hit || !m_AutoHideCube) {
 		for (int pass = 0; pass < 3 ; pass++) {
             for (auto &f : m_Faces) {
                 if (pass != f.m_RenderPass)
@@ -1215,81 +1299,82 @@ bool NaviCubeShared::drawNaviCube(SoCamera *cam, bool pickMode, int hiliteId) {
 		}
 	}
 
+    if (hit || (!m_AutoHideButton && !m_AutoHideCube)) {
+        // Draw the rotate buttons
+        glEnable(GL_CULL_FACE);
+        glDisableClientState(GL_VERTEX_ARRAY);
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
-	// Draw the rotate buttons
-	glEnable(GL_CULL_FACE);
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        glDisable(GL_DEPTH_TEST);
+        glClear(GL_DEPTH_BUFFER_BIT);
 
-	glDisable(GL_DEPTH_TEST);
-	glClear(GL_DEPTH_BUFFER_BIT);
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(0, 1, 1, 0, 0, 1);
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0, 1, 1, 0, 0, 1);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+        for (vector<int>::iterator b = m_Buttons.begin(); b != m_Buttons.end(); b++) {
+            if (pickMode) {
+                glColor3ub(*b, 0, 0);
+                glBindTexture(GL_TEXTURE_2D, m_Textures[*b+1]);
+            } else {
+                QColor& c = (hiliteId ==(*b)) ? m_HiliteColor : m_ButtonColor;
+                glColor4f(c.redF(), c.greenF(), c.blueF(), c.alphaF());
+                glBindTexture(GL_TEXTURE_2D, m_Textures[*b]);
+            }
 
-	for (vector<int>::iterator b = m_Buttons.begin(); b != m_Buttons.end(); b++) {
-		if (pickMode) {
-			glColor3ub(*b, 0, 0);
-		    glBindTexture(GL_TEXTURE_2D, m_Textures[*b+1]);
-        } else {
-			QColor& c = (hiliteId ==(*b)) ? m_HiliteColor : m_ButtonColor;
-			glColor4f(c.redF(), c.greenF(), c.blueF(), c.alphaF());
-		    glBindTexture(GL_TEXTURE_2D, m_Textures[*b]);
-		}
+            glBegin(GL_QUADS);
+            glTexCoord2f(0, 0);
+            glVertex3f(0.0f, 1.0f, 0.0f);
+            glTexCoord2f(1, 0);
+            glVertex3f(1.0f, 1.0f, 0.0f);
+            glTexCoord2f(1, 1);
+            glVertex3f(1.0f, 0.0f, 0.0f);
+            glTexCoord2f(0, 1);
+            glVertex3f(0.0f, 0.0f, 0.0f);
+            glEnd();
+        }
 
-		glBegin(GL_QUADS);
-		glTexCoord2f(0, 0);
-		glVertex3f(0.0f, 1.0f, 0.0f);
-		glTexCoord2f(1, 0);
-		glVertex3f(1.0f, 1.0f, 0.0f);
-		glTexCoord2f(1, 1);
-		glVertex3f(1.0f, 0.0f, 0.0f);
-		glTexCoord2f(0, 1);
-		glVertex3f(0.0f, 0.0f, 0.0f);
-		glEnd();
-	}
+        // Draw the view menu icon
+        if (pickMode) {
+            glColor3ub(TEX_VIEW_MENU_FACE, 0, 0);
+            glBindTexture(GL_TEXTURE_2D, m_Textures[TEX_VIEW_MENU_FACE]);
+        }
+        else {
+            if (hiliteId == TEX_VIEW_MENU_FACE) {
+                QColor& c = m_HiliteColor;
+                glColor4f(c.redF(), c.greenF(), c.blueF(),c.alphaF());
+                glBindTexture(GL_TEXTURE_2D, m_Textures[TEX_VIEW_MENU_FACE]);
 
-	// Draw the view menu icon
-	if (pickMode) {
-		glColor3ub(TEX_VIEW_MENU_FACE, 0, 0);
-		glBindTexture(GL_TEXTURE_2D, m_Textures[TEX_VIEW_MENU_FACE]);
-	}
-	else {
-		if (hiliteId == TEX_VIEW_MENU_FACE) {
-			QColor& c = m_HiliteColor;
-			glColor4f(c.redF(), c.greenF(), c.blueF(),c.alphaF());
-			glBindTexture(GL_TEXTURE_2D, m_Textures[TEX_VIEW_MENU_FACE]);
+                glBegin(GL_QUADS); // DO THIS WITH VERTEX ARRAYS
+                glTexCoord2f(0, 0);
+                glVertex3f(0.0f, 1.0f, 0.0f);
+                glTexCoord2f(1, 0);
+                glVertex3f(1.0f, 1.0f, 0.0f);
+                glTexCoord2f(1, 1);
+                glVertex3f(1.0f, 0.0f, 0.0f);
+                glTexCoord2f(0, 1);
+                glVertex3f(0.0f, 0.0f, 0.0f);
+                glEnd();
+            }
 
-			glBegin(GL_QUADS); // DO THIS WITH VERTEX ARRAYS
-			glTexCoord2f(0, 0);
-			glVertex3f(0.0f, 1.0f, 0.0f);
-			glTexCoord2f(1, 0);
-			glVertex3f(1.0f, 1.0f, 0.0f);
-			glTexCoord2f(1, 1);
-			glVertex3f(1.0f, 0.0f, 0.0f);
-			glTexCoord2f(0, 1);
-			glVertex3f(0.0f, 0.0f, 0.0f);
-			glEnd();
-		}
+            QColor& c = m_ButtonColor;
+            glColor4f(c.redF(), c.greenF(), c.blueF(), c.alphaF());
+            glBindTexture(GL_TEXTURE_2D, m_Textures[TEX_VIEW_MENU_ICON]);
+        }
 
-		QColor& c = m_ButtonColor;
-		glColor4f(c.redF(), c.greenF(), c.blueF(), c.alphaF());
-		glBindTexture(GL_TEXTURE_2D, m_Textures[TEX_VIEW_MENU_ICON]);
-	}
-
-	glBegin(GL_QUADS); // FIXME do this with vertex arrays
-	glTexCoord2f(0, 0);
-	glVertex3f(0.0f, 1.0f, 0.0f);
-	glTexCoord2f(1, 0);
-	glVertex3f(1.0f, 1.0f, 0.0f);
-	glTexCoord2f(1, 1);
-	glVertex3f(1.0f, 0.0f, 0.0f);
-	glTexCoord2f(0, 1);
-	glVertex3f(0.0f, 0.0f, 0.0f);
-	glEnd();
+        glBegin(GL_QUADS); // FIXME do this with vertex arrays
+        glTexCoord2f(0, 0);
+        glVertex3f(0.0f, 1.0f, 0.0f);
+        glTexCoord2f(1, 0);
+        glVertex3f(1.0f, 1.0f, 0.0f);
+        glTexCoord2f(1, 1);
+        glVertex3f(1.0f, 0.0f, 0.0f);
+        glTexCoord2f(0, 1);
+        glVertex3f(0.0f, 0.0f, 0.0f);
+        glEnd();
+    }
 
 
 	glPopMatrix();
@@ -1750,6 +1835,7 @@ bool NaviCubeImplementation::mouseReleased(short x, short y) {
 			viewRot = rotateView(viewRot, 0, 180);
 			break;
 		case TEX_VIEW_MENU_FACE :
+            m_Hit = false;
 			m_Shared->handleMenu(m_View3DInventorViewer->parentWidget());
 			break;
 		}
@@ -1777,8 +1863,10 @@ bool NaviCubeImplementation::inDragZone(short x, short y) {
 
 
 bool NaviCubeImplementation::mouseMoved(short x, short y) {
+    bool redraw = false;
+    bool res = false;
 	setHilite(pickFace(x, y));
-
+    
 	if (m_MouseDown) {
 		if (m_MightDrag && !m_Dragging && !inDragZone(x, y))
 			m_Dragging = true;
@@ -1786,11 +1874,28 @@ bool NaviCubeImplementation::mouseMoved(short x, short y) {
 			setHilite(0);
 			m_CubeWidgetPosX = x;
 			m_CubeWidgetPosY = y;
-			this->m_View3DInventorViewer->getSoRenderManager()->scheduleRedraw();
-			return true;
+            redraw = true;
+            res = true;
 		}
 	}
-	return false;
+    else
+        m_Dragging = false;
+
+    bool hit = m_HiliteId || m_Dragging;
+    if (!hit) {
+        int dx = x - m_CubeWidgetPosX;
+        int dy = y - m_CubeWidgetPosY;
+	    hit = abs(dx)<m_CubeWidgetSize/2 && abs(dy)<m_CubeWidgetSize/2;
+    }
+    if (m_Hit != hit) {
+        m_Hit = hit;
+        if (!redraw)
+            autoHideTimer.start(NaviCubeShared::m_AutoHideTimeout);
+    }
+
+    if (redraw)
+        this->m_View3DInventorViewer->getSoRenderManager()->scheduleRedraw();
+    return res;
 }
 
 bool NaviCubeImplementation::processSoEvent(const SoEvent* ev) {
@@ -1847,16 +1952,65 @@ void NaviCubeShared::handleMenu(QWidget *parent) {
     }
     m_Menu.addSeparator();
 
-    QCheckBox *checkbox;
+    QCheckBox *checkboxRotate;
     auto action = Gui::Action::addCheckBox(
                                 &m_Menu,
                                 QObject::tr("Rotate to nearest"),
                                 QObject::tr(ViewParams::docNaviRotateToNearest()),
                                 QIcon(),
                                 ViewParams::getNaviRotateToNearest(),
-                                &checkbox);
+                                &checkboxRotate);
     QObject::connect(action, &QAction::toggled, [](bool checked) {
         ViewParams::setNaviRotateToNearest(checked);
+    });
+
+    auto subMenu = m_Menu.addMenu(QObject::tr("Auto hide"));
+
+    QCheckBox *checkboxAutoHideButton;
+    action = Gui::Action::addCheckBox(
+                                subMenu,
+                                QObject::tr("Buttons"),
+                                QObject::tr("Auto hide navigation buttons on mouse leave"),
+                                QIcon(),
+                                m_AutoHideButton,
+                                &checkboxAutoHideButton);
+    QObject::connect(action, &QAction::toggled, [this](bool checked) {
+        m_hGrp->SetBool("AutoHideButton", checked);
+    });
+
+    QCheckBox *checkboxAutoHideCube;
+    action = Gui::Action::addCheckBox(
+                                subMenu,
+                                QObject::tr("Navigation cube"),
+                                QObject::tr("Auto hide navigation cube on mouse leave"),
+                                QIcon(),
+                                m_AutoHideCube,
+                                &checkboxAutoHideCube);
+    QObject::connect(action, &QAction::toggled, [this](bool checked) {
+        m_hGrp->SetBool("AutoHideCube", checked);
+    });
+
+    auto spinBoxAutoHide = new QSpinBox;
+    spinBoxAutoHide->setMinimum(0);
+    spinBoxAutoHide->setMaximum(9999);
+    spinBoxAutoHide->setSingleStep(1);
+    spinBoxAutoHide->setValue(m_AutoHideTimeout);
+    Gui::Action::addWidget(&m_Menu, QObject::tr("Auto hide timeout"),
+                           QString(), spinBoxAutoHide);
+    QObject::connect(spinBoxAutoHide, QOverload<int>::of(&QSpinBox::valueChanged), [this](int value) {
+        m_hGrp->SetInt("AutoHideTimeout", value);
+    });
+
+    QCheckBox *checkboxShowCS;
+    action = Gui::Action::addCheckBox(
+                                &m_Menu,
+                                QObject::tr("Show coordinate system"),
+                                QString(),
+                                QIcon(),
+                                m_ShowCS,
+                                &checkboxShowCS);
+    QObject::connect(action, &QAction::toggled, [this](bool checked) {
+        m_hGrp->SetBool("ShowCS", checked);
     });
 
     auto spinBoxSize = new QSpinBox;
@@ -1888,13 +2042,17 @@ void NaviCubeShared::handleMenu(QWidget *parent) {
     Gui::Action::addWidget(&m_Menu, QObject::tr("Border width"),
             QObject::tr("Cube face border line width"), spinBoxWidth);
     QObject::connect(spinBoxWidth, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
-    [this](int value) {
+    [this](double value) {
         m_hGrp->SetFloat("BorderWidth", value);
     });
 
     QObject::connect(&m_Menu, &QMenu::aboutToShow,
-    [checkbox, spinBoxSize, spinBoxSteps, spinBoxWidth](){
-        { QSignalBlocker blocker(checkbox); checkbox->setChecked(ViewParams::getNaviRotateToNearest()); }
+    [=](){
+        { QSignalBlocker blocker(checkboxRotate); checkboxRotate->setChecked(ViewParams::getNaviRotateToNearest()); }
+        { QSignalBlocker blocker(checkboxAutoHideCube); checkboxAutoHideCube->setChecked(m_AutoHideCube); }
+        { QSignalBlocker blocker(checkboxAutoHideButton); checkboxAutoHideButton->setChecked(m_AutoHideButton); }
+        { QSignalBlocker blocker(spinBoxAutoHide); spinBoxAutoHide->setValue(m_AutoHideTimeout); }
+        { QSignalBlocker blocker(checkboxShowCS); checkboxShowCS->setChecked(m_ShowCS); }
         { QSignalBlocker blocker(spinBoxSize); spinBoxSize->setValue(m_CubeWidgetSize); }
         { QSignalBlocker blocker(spinBoxSteps); spinBoxSteps->setValue(ViewParams::getNaviStepByTurn()); }
         { QSignalBlocker blocker(spinBoxWidth); spinBoxWidth->setValue(m_BorderWidth); }
@@ -1910,6 +2068,12 @@ void NaviCubeShared::handleMenu(QWidget *parent) {
     action->setToolTip(QObject::tr("Change navigation cube labels"));
     QObject::connect(action, &QAction::triggered, [parent]() {
         NaviCube::setLabels(parent);
+    });
+
+    action = m_Menu.addAction(QObject::tr("Axis labels..."));
+    action->setToolTip(QObject::tr("Change coordinate system axis labels"));
+    QObject::connect(action, &QAction::triggered, [parent]() {
+        NaviCubeShared::instance()->setAxisLabels(parent);
     });
 
     m_Menu.popup(QCursor::pos());
@@ -2041,6 +2205,93 @@ void NaviCubeShared::setLabels(QWidget *parent)
     m_DlgLabels->show();
 }
 
+void NaviCubeShared::setAxisLabels(QWidget *parent)
+{
+    if (m_DlgAxisLabels) {
+        m_DlgAxisLabels->setParent(parent);
+        m_DlgAxisLabels->show();
+        return;
+    }
+
+    auto layout = new QVBoxLayout;
+    layout->setSizeConstraint(QLayout::SetFixedSize);
+    m_DlgAxisLabels = new QDialog(parent);
+    QDialog &dlg = *m_DlgAxisLabels;
+    dlg.setAttribute(Qt::WA_DeleteOnClose);
+    dlg.setLayout(layout);
+    dlg.setWindowTitle(QObject::tr("Navigation Cube Axis Labels"));
+    auto grid = new QGridLayout;
+    layout->addLayout(grid);
+    auto buttons = new QDialogButtonBox(
+            QDialogButtonBox::Ok|QDialogButtonBox::Cancel, Qt::Horizontal);
+    QObject::connect(buttons, SIGNAL(accepted()), &dlg, SLOT(accept()));
+    QObject::connect(buttons, SIGNAL(rejected()), &dlg, SLOT(reject()));
+    layout->addWidget(buttons);
+    int row = 0;
+    std::vector<std::string> labels;
+    for (auto &info : m_AxisLabels) {
+        grid->addWidget(new QLabel(QObject::tr(info.title)), row, 0);
+        labels.push_back(m_hGrp->GetASCII(info.name));
+        auto edit = new QLineEdit;
+        if (labels.back().empty())
+            edit->setText(QObject::tr(info.def));
+        else
+            edit->setText(QString::fromUtf8(labels.back().c_str()));
+        QObject::connect(edit, &QLineEdit::editingFinished, [this, edit, info]() {
+            QString t = edit->text();
+            if (t.isEmpty())
+                m_hGrp->RemoveASCII(info.name);
+            else
+                m_hGrp->SetASCII(info.name, t.toUtf8().constData());
+        });
+        grid->addWidget(edit, row++, 1);
+    }
+
+    QFont font = getAxisLabelFont();
+    auto fontButton = new QPushButton(QObject::tr("Label font"));
+    fontButton->setFont(font);
+    grid->addWidget(fontButton, row++, 0, 1, 2);
+    QObject::connect(fontButton, &QPushButton::clicked, [this, &dlg, fontButton]() {
+        if (this->m_DlgAxisFont) {
+            this->m_DlgAxisFont->show();
+            return;
+        }
+        QFont curFont(getAxisLabelFont());
+        auto fontDlg = new QFontDialog(&dlg);
+        fontDlg->setAttribute(Qt::WA_DeleteOnClose);
+        fontDlg->setCurrentFont(curFont);
+        this->m_DlgAxisFont = fontDlg;
+        QObject::connect(fontDlg, &QFontDialog::currentFontChanged, [this, fontButton](const QFont &f) {
+            saveAxisLabelFont(f);
+            fontButton->setFont(getAxisLabelFont());
+        });
+        QObject::connect(fontDlg, &QFontDialog::finished, [this, curFont, fontButton](int result) {
+            if (result == QDialog::Rejected) {
+                saveAxisLabelFont(curFont);
+                fontButton->setFont(getAxisLabelFont());
+            }
+        });
+        fontDlg->show();
+    });
+
+    auto self = this->shared_from_this();
+    QObject::connect(&dlg, &QDialog::finished, [self, labels, font](int result) {
+        if (result == QDialog::Rejected) {
+            int i=0;
+            for (auto &info : self->m_labels) {
+                if (labels[i].empty())
+                    self->m_hGrp->RemoveASCII(info.name);
+                else
+                    self->m_hGrp->SetASCII(info.name, labels[i].c_str());
+                ++i;
+            }
+            self->saveAxisLabelFont(font);
+        }
+    });
+
+    m_DlgAxisLabels->show();
+}
+
 void NaviCube::setColors(QWidget *parent)
 {
     NaviCubeShared::instance()->setColors(parent);
@@ -2124,3 +2375,26 @@ void NaviCubeShared::saveLabelFont(const QFont &font)
     m_hGrp->SetBool("FontItalic", font.italic());
 }
 
+QFont NaviCubeShared::getAxisLabelFont()
+{
+    QString fontString = QString::fromUtf8((m_hGrp->GetASCII("AxisFont", "Monospace")).c_str());
+    int fontSize = m_hGrp->GetInt("AxisFontSize", 8);
+    QFont font(fontString);
+    font.setPointSize(fontSize);
+    font.setItalic(m_hGrp->GetBool("AxisFontItalic", false));
+    int weight = m_hGrp->GetInt("AxisFontWeight", 50);
+    if (weight > 0)
+        font.setWeight(weight);
+    return font;
+}
+
+void NaviCubeShared::saveAxisLabelFont(const QFont &font)
+{
+    if (font.family().isEmpty())
+        m_hGrp->RemoveASCII("AxisFont");
+    else
+        m_hGrp->SetASCII("AxisFont", font.family().toUtf8().constData());
+    m_hGrp->SetInt("AxisFontSize", font.pointSize());
+    m_hGrp->SetInt("AxisFontWeight", font.weight());
+    m_hGrp->SetBool("AxisFontItalic", font.italic());
+}
