@@ -576,6 +576,8 @@ void NaviCubeShared::createAxisLabels()
 
     auto create = [&](const LabelInfo &info) {
         auto text = QString::fromUtf8(m_hGrp->GetASCII(info.name, info.def).c_str());
+        if (text.isEmpty())
+            return QImage();
         QSize size = fm.size(Qt::TextSingleLine, text);
         QPainter paint;
         QImage image(size, QImage::Format_Mono);
@@ -1187,23 +1189,28 @@ bool NaviCubeShared::drawNaviCube(SoCamera *cam, bool pickMode, int hiliteId, bo
 
 			glEnable(GL_TEXTURE_2D);
 
-            // Render axis notation letters ("X", "Y", "Z").
+            // Render axis labels
             GLint unpack,rowlength;
             glGetIntegerv(GL_UNPACK_ALIGNMENT, &unpack);
             glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
             glGetIntegerv(GL_UNPACK_ROW_LENGTH, &rowlength);
-            glPixelStorei(GL_UNPACK_ROW_LENGTH, m_LabelX.bytesPerLine()*8);
 
             glColor3fv(SbVec3f(m_AxisLabelColor.redF(),
                                m_AxisLabelColor.greenF(),
                                m_AxisLabelColor.blueF()).getValue());
 
+            auto drawAxisLabel = [=](const QImage &img) {
+                if (!img.isNull()) {
+                    glPixelStorei(GL_UNPACK_ROW_LENGTH, img.bytesPerLine()*8);
+                    glBitmap(img.width(), img.height(), 0, 0, 0, 0, img.constBits());
+                }
+            };
             glRasterPos3d(a + b, -a + b, -a);
-            glBitmap(m_LabelX.width(), m_LabelX.height(), 0, 0, 0, 0, m_LabelX.constBits());
+            drawAxisLabel(m_LabelX);
             glRasterPos3d(-a + b, a + b, -a);
-            glBitmap(m_LabelY.width(), m_LabelY.height(), 0, 0, 0, 0, m_LabelY.constBits());
+            drawAxisLabel(m_LabelY);
             glRasterPos3d(-a + b, -a + b, a + b);
-            glBitmap(m_LabelZ.width(), m_LabelZ.height(), 0, 0, 0, 0, m_LabelZ.constBits());
+            drawAxisLabel(m_LabelZ);
 
             glPixelStorei(GL_UNPACK_ALIGNMENT, unpack);
             glPixelStorei(GL_UNPACK_ROW_LENGTH, rowlength);
@@ -2116,7 +2123,12 @@ void NaviCubeShared::setLabels(QWidget *parent)
             edit->setText(QObject::tr(info.def));
         else
             edit->setText(QString::fromUtf8(labels.back().c_str()));
-        QObject::connect(edit, &QLineEdit::editingFinished, [this, edit, info]() {
+        auto timer = new QTimer(edit);
+        timer->setSingleShot(true);
+        QObject::connect(edit, &QLineEdit::textEdited, [timer]() {
+            timer->start(500);
+        });
+        QObject::connect(timer, &QTimer::timeout, [this, edit, info]() {
             QString t = edit->text();
             if (t.isEmpty())
                 m_hGrp->RemoveASCII(info.name);
@@ -2231,18 +2243,17 @@ void NaviCubeShared::setAxisLabels(QWidget *parent)
     std::vector<std::string> labels;
     for (auto &info : m_AxisLabels) {
         grid->addWidget(new QLabel(QObject::tr(info.title)), row, 0);
-        labels.push_back(m_hGrp->GetASCII(info.name));
+        labels.push_back(m_hGrp->GetASCII(info.name, info.def));
         auto edit = new QLineEdit;
-        if (labels.back().empty())
-            edit->setText(QObject::tr(info.def));
-        else
-            edit->setText(QString::fromUtf8(labels.back().c_str()));
-        QObject::connect(edit, &QLineEdit::editingFinished, [this, edit, info]() {
+        edit->setText(QString::fromUtf8(labels.back().c_str()));
+        auto timer = new QTimer(edit);
+        timer->setSingleShot(true);
+        QObject::connect(edit, &QLineEdit::textEdited, [timer]() {
+            timer->start(500);
+        });
+        QObject::connect(timer, &QTimer::timeout, [this, edit, info]() {
             QString t = edit->text();
-            if (t.isEmpty())
-                m_hGrp->RemoveASCII(info.name);
-            else
-                m_hGrp->SetASCII(info.name, t.toUtf8().constData());
+            m_hGrp->SetASCII(info.name, t.toUtf8().constData());
         });
         grid->addWidget(edit, row++, 1);
     }
@@ -2278,8 +2289,8 @@ void NaviCubeShared::setAxisLabels(QWidget *parent)
     QObject::connect(&dlg, &QDialog::finished, [self, labels, font](int result) {
         if (result == QDialog::Rejected) {
             int i=0;
-            for (auto &info : self->m_labels) {
-                if (labels[i].empty())
+            for (auto &info : self->m_AxisLabels) {
+                if (labels[i] == info.def)
                     self->m_hGrp->RemoveASCII(info.name);
                 else
                     self->m_hGrp->SetASCII(info.name, labels[i].c_str());
