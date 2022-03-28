@@ -6344,6 +6344,24 @@ int SketchObject::addExternal(App::DocumentObject *Obj, const char* SubName, boo
     if (!isExternalAllowed(Obj->getDocument(), Obj))
        return -1;
 
+    std::vector<const char *> subs;
+    if (boost::starts_with(SubName, "Wire")) {
+        auto shape = Part::Feature::getTopoShape(Obj);
+        auto wire = shape.getSubTopoShape(SubName);
+        int size = ExternalGeometry.getSize();
+        for (const auto &edge : wire.getSubShapes(TopAbs_EDGE)) {
+            int idx = shape.findShape(edge);
+            if (idx >= 0) {
+                std::string element("Edge");
+                element += std::to_string(idx);
+                addExternal(Obj, element.c_str(), defining);
+            }
+        }
+        if (ExternalGeometry.getSize() == size)
+            return -1;
+        return size;
+    }
+
     // get the actual lists of the externals
     std::vector<DocumentObject*> Objects     = ExternalGeometry.getValues();
     std::vector<std::string>     SubElements = ExternalGeometry.getSubValues();
@@ -6355,7 +6373,7 @@ int SketchObject::addExternal(App::DocumentObject *Obj, const char* SubName, boo
     }
 
     for (size_t i = 0  ;  i < Objects.size()  ;  ++i){
-        if (Objects[i] == Obj   &&   std::string(SubName) == SubElements[i]){
+        if (Objects[i] == Obj   &&   SubElements[i] == SubName) {
             Base::Console().Error("Link to %s already exists in this sketch.\n",SubName);
             return -1;
         }
