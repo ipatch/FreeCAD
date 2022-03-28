@@ -5159,6 +5159,8 @@ void Document::setLastObjectId(long id) {
 }
 
 void Document::afterImport(App::DocumentObject *obj) {
+    if (obj->Label.getStrValue() == "Unnamed")
+        obj->Label.setValue(obj->getNameInDocument());
     obj->onDocumentRestored();
 }
 
