@@ -4200,6 +4200,14 @@ bool OverlayManager::eventFilter(QObject *o, QEvent *ev)
         return false;
 
     switch(ev->type()) {
+    case QEvent::Enter:
+        if (Selection().hasPreselection()
+                && !qobject_cast<View3DInventorViewer*>(o)
+                && !isUnderOverlay())
+        {
+            Selection().rmvPreselect();
+        }
+        break;
     case QEvent::ZOrderChange: {
         if(!d->raising && getMainWindow() && o == getMainWindow()->getMdiArea()) {
             auto mdi = getMainWindow()->getMdiArea();

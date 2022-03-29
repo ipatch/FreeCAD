@@ -701,9 +701,12 @@ void SoFCUnifiedSelection::onPreselectTimer() {
     if(infos.size())
         setHighlight(infos[0]);
     else {
+        // Disabled below because it seems worsen user experience
+#if 0
         // Do not remove preslection in case of dock overlay mouse pass through
-        if (!OverlayManager::instance()->isUnderOverlay()) {
-            // setHighlight(PickedInfo());
+        if (!OverlayManager::instance()->isUnderOverlay())
+#endif
+        {
             Selection().rmvPreselect();
         }
     }
