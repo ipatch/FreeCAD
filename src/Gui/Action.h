@@ -519,6 +519,32 @@ private:
 };
 
 /**
+ * Special action for Std_SelBack and Std_SelForward command.
+ */
+class GuiExport SelStackAction : public Action
+{
+    Q_OBJECT
+
+public:
+    enum class Type {
+        Backward,
+        Forward
+    };
+    SelStackAction (Command* pcCmd, Type type, QObject * parent = 0);
+    virtual ~SelStackAction();
+
+    void addTo (QWidget * w);
+
+protected:
+    void populate();
+    void select(int idx, const std::vector<int> &subIndices={});
+
+private:
+    QMenu* _menu;
+    Type _type;
+};
+
+/**
  * Special action for Std_CmdHistory command.
  */
 class GuiExport CmdHistoryAction : public Action

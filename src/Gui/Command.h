@@ -685,6 +685,7 @@ protected:
     virtual void activated(int iMsg);
     virtual bool isActive(void);
     virtual Gui::Action * createAction(void);
+    virtual void refreshIcon();
 
     /// Called to determine if this command/option is checked
     virtual bool getOption() const = 0;

@@ -665,23 +665,40 @@ public:
      */
     std::vector<Gui::SelectionObject> selStackGet(const char* pDocName=0,int resolve=1,int index=0) const;
 
+    /** Obtain selected objects from stack
+     * @param pDocName: optional filtering document, NULL for current active
+     *                  document
+     * @param resolve: sub-object resolving mode.
+     *                 0 no resolve,
+     *                 1 resolve sub-object with old style element name
+     *                 2 resolve sub-object with new style element name
+     * @param index: optional position in the stack
+     */
+    std::vector<App::SubObjectT> selStackGetT(const char* pDocName=0,int resolve=1,int index=0) const;
+
     /** Go back selection history
      *
      * @param count: optional number of steps to go back
+     * @param indices: optional indices of the objects to select in case of
+     *                 multiple selections in the stack entry.
+     * @param skipEmpty: auto skipping entry with missing object
      *
      * This function pops the selection stack, and populate the current
      * selection with the content of the last pop'd entry
      */
-    void selStackGoBack(int count=1);
+    void selStackGoBack(int count=1, const std::vector<int> &indices={}, bool skipEmpty=false);
 
     /** Go forward selection history
      *
      * @param count: optional number of steps to go back
+     * @param indices: optional indices of the objects to select in case of
+     *                 multiple selections in the stack entry.
+     * @param skipEmpty: auto skipping entry with missing object
      *
      * This function pops the selection stack, and populate the current
      * selection with the content of the last pop'd entry
      */
-    void selStackGoForward(int count=1);
+    void selStackGoForward(int count=1, const std::vector<int> &indices={}, bool skipEmpty=false);
 
     /** Save the current selection on to the stack
      *
@@ -782,6 +799,8 @@ protected:
 
     void notify(SelectionChanges &&Chng);
     void notify(const SelectionChanges &Chng) { notify(SelectionChanges(Chng)); }
+
+    void _selStackPush(bool overwrite);
 
     struct _SelObj {
         std::string DocName;

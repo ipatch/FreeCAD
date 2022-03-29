@@ -230,6 +230,7 @@ public:
     unsigned long BacklightColor; // Auto generated code. See class document of ViewParams.
     double BacklightIntensity; // Auto generated code. See class document of ViewParams.
     bool OverrideSelectability; // Auto generated code. See class document of ViewParams.
+    unsigned long SelectionStackSize; // Auto generated code. See class document of ViewParams.
 
     // Auto generated code. See class document of ViewParams.
     ViewParamsP() {
@@ -578,6 +579,8 @@ public:
         funcs["BacklightIntensity"] = &ViewParamsP::updateBacklightIntensity;
         OverrideSelectability = handle->GetBool("OverrideSelectability", false);
         funcs["OverrideSelectability"] = &ViewParamsP::updateOverrideSelectability;
+        SelectionStackSize = handle->GetUnsigned("SelectionStackSize", 30);
+        funcs["SelectionStackSize"] = &ViewParamsP::updateSelectionStackSize;
     }
 
     // Auto generated code. See class document of ViewParams.
@@ -1322,6 +1325,10 @@ public:
     // Auto generated code. See class document of ViewParams.
     static void updateOverrideSelectability(ViewParamsP *self) {
         self->OverrideSelectability = self->handle->GetBool("OverrideSelectability", false);
+    }
+    // Auto generated code. See class document of ViewParams.
+    static void updateSelectionStackSize(ViewParamsP *self) {
+        self->SelectionStackSize = self->handle->GetUnsigned("SelectionStackSize", 30);
     }
 };
 
@@ -6062,6 +6069,34 @@ void ViewParams::setOverrideSelectability(const bool &v) {
 // Auto generated code. See class document of ViewParams.
 void ViewParams::removeOverrideSelectability() {
     instance()->handle->RemoveBool("OverrideSelectability");
+}
+
+// Auto generated code. See class document of ViewParams.
+const char *ViewParams::docSelectionStackSize() {
+    return QT_TRANSLATE_NOOP("ViewParams",
+"Maximum selection history record size");
+}
+
+// Auto generated code. See class document of ViewParams.
+const unsigned long & ViewParams::getSelectionStackSize() {
+    return instance()->SelectionStackSize;
+}
+
+// Auto generated code. See class document of ViewParams.
+const unsigned long & ViewParams::defaultSelectionStackSize() {
+    const static unsigned long def = 30;
+    return def;
+}
+
+// Auto generated code. See class document of ViewParams.
+void ViewParams::setSelectionStackSize(const unsigned long &v) {
+    instance()->handle->SetUnsigned("SelectionStackSize",v);
+    instance()->SelectionStackSize = v;
+}
+
+// Auto generated code. See class document of ViewParams.
+void ViewParams::removeSelectionStackSize() {
+    instance()->handle->RemoveUnsigned("SelectionStackSize");
 }
 //[[[end]]]
 

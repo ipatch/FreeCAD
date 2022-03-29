@@ -1838,6 +1838,17 @@ public:
     static void setOverrideSelectability(const bool &v);
     static const char *docOverrideSelectability();
     //@}
+
+    //@{
+    /// Accessor for parameter SelectionStackSize
+    ///
+    /// Maximum selection history record size
+    static const unsigned long & getSelectionStackSize();
+    static const unsigned long & defaultSelectionStackSize();
+    static void removeSelectionStackSize();
+    static void setSelectionStackSize(const unsigned long &v);
+    static const char *docSelectionStackSize();
+    //@}
 //[[[end]]]
 
     static bool highlightIndicesOnFullSelect() {

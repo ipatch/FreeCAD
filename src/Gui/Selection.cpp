@@ -56,6 +56,7 @@
 #include <Gui/SelectionObjectPy.h>
 #include "MainWindow.h"
 #include "Tree.h"
+#include "TreeParams.h"
 #include "ViewParams.h"
 #include "ViewProviderDocumentObject.h"
 #include "Macro.h"
@@ -570,10 +571,17 @@ std::vector<SelectionObject> SelectionSingleton::getObjectList(const char* pDocN
         if(it!=SortMap.end()) {
             // only add sub-element
             if (subelement && *subelement) {
-                if(resolve && !temp[it->second]._SubNameSet.insert(subelement).second)
+                auto &entry = temp[it->second];
+                if(resolve && !entry._SubNameSet.insert(subelement).second)
                     continue;
-                temp[it->second].SubNames.push_back(subelement);
-                temp[it->second].SelPoses.emplace_back(sel.x,sel.y,sel.z);
+                if (entry.SubNames.empty()) {
+                    // It means there is previous whole object selection. Don't
+                    // loose that information.
+                    entry.SubNames.emplace_back();
+                    entry.SelPoses.emplace_back(0, 0, 0);
+                }
+                entry.SubNames.push_back(subelement);
+                entry.SelPoses.emplace_back(sel.x,sel.y,sel.z);
             }
         }
         else {
@@ -1256,8 +1264,10 @@ void SelectionSingleton::_SelObj::log(bool remove, bool clearPreselect) {
     Application::Instance->macroManager()->addLine(MacroManager::Cmt, ss.str().c_str());
 }
 
-bool SelectionSingleton::addSelection(const char* pDocName, const char* pObjectName, 
-        const char* pSubName, float x, float y, float z, 
+static bool _SelStackLock;
+
+bool SelectionSingleton::addSelection(const char* pDocName, const char* pObjectName,
+        const char* pSubName, float x, float y, float z,
         const std::vector<SelObj> *pickedList, bool clearPreselect)
 {
     if(pickedList) {
@@ -1312,7 +1322,10 @@ bool SelectionSingleton::addSelection(const char* pDocName, const char* pObjectN
         temp.log(false,clearPreselect);
 
     _SelList.push_back(temp);
+
     _SelStackForward.clear();
+    if (TreeParams::getRecordSelection() && !_SelStackLock)
+        _selStackPush(_SelList.size() > 1);
 
     if(clearPreselect)
         rmvPreselect();
@@ -1333,16 +1346,20 @@ bool SelectionSingleton::addSelection(const char* pDocName, const char* pObjectN
 }
 
 void SelectionSingleton::selStackPush(bool clearForward, bool overwrite) {
-    static int stackSize;
-    if(!stackSize) {
-        stackSize = App::GetApplication().GetParameterGroupByPath
-                ("User parameter:BaseApp/Preferences/View")->GetInt("SelectionStackSize",100);
+    // Change of behavior. If tree view record selection option is active, we'll
+    // manage selection recording internally and bypass any external call of
+    // stack push.
+    if (!TreeParams::getRecordSelection()) {
+        if (clearForward)
+            _SelStackForward.clear();
+        _selStackPush(overwrite);
     }
-    if(clearForward)
-        _SelStackForward.clear();
+}
+
+void SelectionSingleton::_selStackPush(bool overwrite) {
     if(_SelList.empty())
         return;
-    if((int)_SelStackBack.size() >= stackSize)
+    if(_SelStackBack.size() >= ViewParams::getSelectionStackSize())
         _SelStackBack.pop_front();
     SelStackItem item;
     for(auto &sel : _SelList)
@@ -1354,13 +1371,15 @@ void SelectionSingleton::selStackPush(bool clearForward, bool overwrite) {
     _SelStackBack.back() = std::move(item);
 }
 
-void SelectionSingleton::selStackGoBack(int count) {
+void SelectionSingleton::selStackGoBack(int count, const std::vector<int> &indices, bool skipEmpty)
+{
+    Base::StateLocker guard(_SelStackLock);
     if((int)_SelStackBack.size()<count)
         count = _SelStackBack.size();
     if(count<=0)
         return;
     if(_SelList.size()) {
-        selStackPush(false,true);
+        _selStackPush(true);
         clearCompleteSelection();
     } else 
         --count;
@@ -1371,12 +1390,16 @@ void SelectionSingleton::selStackGoBack(int count) {
     std::deque<SelStackItem> tmpStack;
     _SelStackForward.swap(tmpStack);
     while(_SelStackBack.size()) {
-        bool found = false;
+        bool found = !skipEmpty || !indices.empty();
+        int idx = -1;
         for(auto &sobjT : _SelStackBack.back()) {
+            ++idx;
+            if (!indices.empty() && std::find(indices.begin(), indices.end(), idx) == indices.end())
+                continue;
             if(sobjT.getSubObject()) {
                 addSelection(sobjT.getDocumentName().c_str(),
-                             sobjT.getObjectName().c_str(),
-                             sobjT.getSubName().c_str());
+                            sobjT.getObjectName().c_str(),
+                            sobjT.getSubName().c_str());
                 found = true;
             }
         }
@@ -1389,13 +1412,15 @@ void SelectionSingleton::selStackGoBack(int count) {
     getMainWindow()->updateActions();
 }
 
-void SelectionSingleton::selStackGoForward(int count) {
+void SelectionSingleton::selStackGoForward(int count, const std::vector<int> &indices, bool skipEmpty)
+{
+    Base::StateLocker guard(_SelStackLock);
     if((int)_SelStackForward.size()<count)
         count = _SelStackForward.size();
     if(count<=0)
         return;
     if(_SelList.size()) {
-        selStackPush(false,true);
+        _selStackPush(true);
         clearCompleteSelection();
     }
     for(int i=0;i<count;++i) {
@@ -1405,12 +1430,16 @@ void SelectionSingleton::selStackGoForward(int count) {
     std::deque<SelStackItem> tmpStack;
     _SelStackForward.swap(tmpStack);
     while(1) {
-        bool found = false;
+        bool found = !skipEmpty || !indices.empty();
+        int idx = -1;
         for(auto &sobjT : _SelStackBack.back()) {
+            ++idx;
+            if (!indices.empty() && std::find(indices.begin(), indices.end(), idx) == indices.end())
+                continue;
             if(sobjT.getSubObject()) {
                 addSelection(sobjT.getDocumentName().c_str(),
-                             sobjT.getObjectName().c_str(),
-                             sobjT.getSubName().c_str());
+                            sobjT.getObjectName().c_str(),
+                            sobjT.getSubName().c_str());
                 found = true;
             }
         }
@@ -1435,7 +1464,7 @@ std::vector<SelectionObject> SelectionSingleton::selStackGet(
         index = -index-1;
         if(index>=(int)_SelStackForward.size())
             return {};
-        item = &_SelStackBack[_SelStackForward.size()-1-index];
+        item = &_SelStackForward[index];
     }
     
     std::list<_SelObj> selList;
@@ -1455,12 +1484,29 @@ std::vector<SelectionObject> SelectionSingleton::selStackGet(
     return getObjectList(pDocName,App::DocumentObject::getClassTypeId(),selList,resolve);
 }
 
+std::vector<App::SubObjectT> SelectionSingleton::selStackGetT(
+        const char* pDocName, int resolve, int index) const
+{
+    std::vector<App::SubObjectT> res;
+    for (const auto &sel : selStackGet(pDocName, resolve, index)) {
+        if (sel.getSubNames().empty())
+            res.emplace_back(sel.getDocName(), sel.getFeatName(), "");
+        else {
+            for (const auto &sub : sel.getSubNames())
+                res.emplace_back(sel.getDocName(), sel.getFeatName(), sub.c_str());
+        }
+    }
+    return res;
+}
+
 bool SelectionSingleton::addSelections(const char* pDocName, const char* pObjectName, const std::vector<std::string>& pSubNames)
 {
     if(_PickedList.size()) {
         _PickedList.clear();
         notify(SelectionChanges(SelectionChanges::PickedListChanged));
     }
+
+    bool overwriteStack = !_SelList.empty();
 
     bool update = false;
     for(std::vector<std::string>::const_iterator it = pSubNames.begin(); it != pSubNames.end(); ++it) {
@@ -1485,8 +1531,12 @@ bool SelectionSingleton::addSelections(const char* pDocName, const char* pObject
         update = true;
     }
 
-    if(update)
+    if(update) {
+        _SelStackForward.clear();
+        if (TreeParams::getRecordSelection() && !_SelStackLock)
+            _selStackPush(overwriteStack);
         getMainWindow()->updateActions();
+    }
     return true;
 }
 
@@ -1607,6 +1657,12 @@ void SelectionSingleton::rmvSelection(const char* pDocName, const char* pObjectN
     // behaviour.
     // So, the notification is done after the loop, see also #0003469
     if(changes.size()) {
+        if (!_SelList.empty()) {
+            _SelStackForward.clear();
+            if (TreeParams::getRecordSelection() && !_SelStackLock)
+                _selStackPush(true);
+        }
+
         for(auto &Chng : changes) {
             FC_LOG("Rmv Selection "<<Chng.pDocName<<'#'<<Chng.pObjectName<<'.'<<Chng.pSubName);
             notify(std::move(Chng));
@@ -1733,6 +1789,8 @@ void SelectionSingleton::setSelection(const char* pDocName, const std::vector<Ap
         notify(SelectionChanges(SelectionChanges::PickedListChanged));
     }
 
+    bool overwriteStack = !_SelList.empty();
+
     bool touched = false;
     for(auto obj : sel) {
         if(!obj || !obj->getNameInDocument())
@@ -1747,6 +1805,9 @@ void SelectionSingleton::setSelection(const char* pDocName, const std::vector<Ap
 
     if(touched) {
         _SelStackForward.clear();
+        if (TreeParams::getRecordSelection() && !_SelStackLock)
+            _selStackPush(overwriteStack);
+
         notify(SelectionChanges(SelectionChanges::SetSelection,pDocName));
         getMainWindow()->updateActions();
     }

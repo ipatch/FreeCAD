@@ -3391,7 +3391,7 @@ Action * StdCmdSelUp::createAction(void)
 // Std_SelBack
 //===========================================================================
 
-DEF_STD_CMD_A(StdCmdSelBack)
+DEF_STD_CMD_AC(StdCmdSelBack)
 
 StdCmdSelBack::StdCmdSelBack()
   :Command("Std_SelBack")
@@ -3418,11 +3418,21 @@ bool StdCmdSelBack::isActive(void)
     return Selection().selStackBackSize()>0;
 }
 
+Action * StdCmdSelBack::createAction(void)
+{
+    Action *pcAction;
+    pcAction = new SelStackAction(this, SelStackAction::Type::Backward, getMainWindow());
+    pcAction->setIcon(BitmapFactory().iconFromTheme(sPixmap));
+    pcAction->setShortcut(QString::fromLatin1(sAccel));
+    applyCommandData(this->className(), pcAction);
+    return pcAction;
+}
+
 //===========================================================================
 // Std_SelForward
 //===========================================================================
 
-DEF_STD_CMD_A(StdCmdSelForward)
+DEF_STD_CMD_AC(StdCmdSelForward)
 
 StdCmdSelForward::StdCmdSelForward()
   :Command("Std_SelForward")
@@ -3447,6 +3457,16 @@ void StdCmdSelForward::activated(int iMsg)
 bool StdCmdSelForward::isActive(void)
 {
   return !!Selection().selStackForwardSize();
+}
+
+Action * StdCmdSelForward::createAction(void)
+{
+    Action *pcAction;
+    pcAction = new SelStackAction(this, SelStackAction::Type::Forward, getMainWindow());
+    pcAction->setIcon(BitmapFactory().iconFromTheme(sPixmap));
+    pcAction->setShortcut(QString::fromLatin1(sAccel));
+    applyCommandData(this->className(), pcAction);
+    return pcAction;
 }
 
 //===========================================================================

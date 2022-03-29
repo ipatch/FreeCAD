@@ -289,6 +289,7 @@ Params = [
     ParamUInt('BacklightColor',  0xffffffff),
     ParamFloat('BacklightIntensity',  1.0),
     ParamBool('OverrideSelectability',  False, "Override object selectability to enable selection"),
+    ParamUInt('SelectionStackSize', 30, "Maximum selection history record size")
 ]
 
 def declare_begin():
