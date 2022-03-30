@@ -24,6 +24,7 @@
 #ifndef GUI_DIALOG_DLGDISPLAYPROPERTIES_IMP_H
 #define GUI_DIALOG_DLGDISPLAYPROPERTIES_IMP_H
 
+#include "Widgets.h"
 #include <memory>
 #include <vector>
 #include <QDialog>
@@ -32,6 +33,11 @@
 #include <Gui/TaskView/TaskDialog.h>
 #include <Gui/TaskView/TaskView.h>
 #include <App/Material.h>
+
+class QCheckBox;
+class QSlider;
+class QSpinBox;
+class QDoubleSpinBox;
 
 namespace App
 {
@@ -70,12 +76,17 @@ private Q_SLOTS:
     void on_changePlot_activated(const QString&);
     void on_buttonColor_changed();
     void on_spinTransparency_valueChanged(int);
-    void on_spinPointSize_valueChanged(int);
+    void on_spinPointSize_valueChanged(double);
     void on_buttonLineColor_changed();
-    void on_spinLineWidth_valueChanged(int);
+    void on_buttonPointColor_changed();
+    void on_spinLineWidth_valueChanged(double);
     void on_spinLineTransparency_valueChanged(int);
     void on_buttonUserDefinedMaterial_clicked();
     void on_buttonColorPlot_clicked();
+    void on_checkBoxMapFaceColor_toggled(bool);
+    void on_checkBoxMapLineColor_toggled(bool);
+    void on_checkBoxMapPointColor_toggled(bool);
+    void on_checkBoxMapTransparency_toggled(bool);
 
 protected:
     void changeEvent(QEvent *e);
@@ -88,11 +99,22 @@ private:
     void fillupMaterials();
     void setShapeColor(const std::vector<ViewProvider*>&);
     void setLineColor(const std::vector<ViewProvider*>&);
+    void setPointColor(const std::vector<ViewProvider*>&);
     void setPointSize(const std::vector<ViewProvider*>&);
     void setLineWidth(const std::vector<ViewProvider*>&);
     void setTransparency(const std::vector<ViewProvider*>&);
     void setLineTransparency(const std::vector<ViewProvider*>&);
+    void setMapFaceColor(const std::vector<ViewProvider*>&);
+    void setMapEdgeColor(const std::vector<ViewProvider*>&);
+    void setMapVertexColor(const std::vector<ViewProvider*>&);
+    void setMapTransparency(const std::vector<ViewProvider*>&);
     std::vector<ViewProvider*> getSelection() const;
+
+    void onPropertyBoolChanged(const char *name, bool checked);
+    void setPropertyColor(const char *name, Gui::ColorButton *button, const std::vector<ViewProvider*>&);
+    void setPropertyBool(const char *name, QCheckBox *checkbox, const std::vector<ViewProvider*>&);
+    void setPropertyInteger(const char *name, QSlider *slider, QSpinBox *spinBox, const std::vector<ViewProvider*>&);
+    void setPropertyFloat(const char *name, QDoubleSpinBox *spinBox, const std::vector<ViewProvider*>&);
 
 private:
     class Private;
