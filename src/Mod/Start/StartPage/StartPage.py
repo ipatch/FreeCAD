@@ -37,6 +37,15 @@ tempfolder = None # store icons inside a subfolder in temp dir
 defaulticon = None # store a default icon for problematic file types
 logger = FreeCAD.Logger('StartPage')
 
+def encode(data):
+    try:
+        return data.encode(sys.getfilesystemencoding())
+    except UnicodeDecodeError:
+        try:
+            return data.encode('utf-8')
+        except UnicodeDecodeError:
+            return data.encode('latin-1')
+
 def gethexcolor(color):
 
     "returns a color hex value #000000"
@@ -162,7 +171,7 @@ def getInfo(filename):
             import gnomevfs
         except Exception:
             # alternative method
-            fhash = hashlib.md5(urllib.parse.quote("file://"+path,safe=":/").encode('utf-8')).hexdigest()
+            fhash = hashlib.md5(encode(urllib.parse.quote("file://"+path,safe=":/"))).hexdigest()
             thumb = os.path.join(os.path.expanduser("~"),".thumbnails","normal",fhash+".png")
         else:
             uri = gnomevfs.get_uri_from_local_path(path)
@@ -308,7 +317,7 @@ def buildCard(filename,method,arg=None):
         cachename = None
         if filename.lower().endswith(".fcstd"):
             sha = hashlib.sha1()
-            sha.update((filename + '_card').encode('utf-8'))
+            sha.update(encode(filename + '_card'))
             sha = sha.hexdigest()
 
             s = os.stat(filename)
