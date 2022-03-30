@@ -100,6 +100,7 @@ void DlgSettings3DViewPart::saveSettings()
     ui->checkBoxMapLineColor->onSave();
     ui->checkBoxMapPointColor->onSave();
     ui->checkBoxMapTransparency->onSave();
+    ui->checkBoxColorRecompute->onSave();
 }
 
 void DlgSettings3DViewPart::loadSettings()
@@ -113,6 +114,7 @@ void DlgSettings3DViewPart::loadSettings()
     ui->checkBoxMapLineColor->onRestore();
     ui->checkBoxMapPointColor->onRestore();
     ui->checkBoxMapTransparency->onRestore();
+    ui->checkBoxColorRecompute->onRestore();
 }
 
 /**

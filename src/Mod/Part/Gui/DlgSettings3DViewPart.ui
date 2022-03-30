@@ -14,75 +14,33 @@
    <string>Shape view</string>
   </property>
   <layout class="QGridLayout">
-   <property name="margin">
+   <property name="leftMargin">
+    <number>9</number>
+   </property>
+   <property name="topMargin">
+    <number>9</number>
+   </property>
+   <property name="rightMargin">
+    <number>9</number>
+   </property>
+   <property name="bottomMargin">
     <number>9</number>
    </property>
    <property name="spacing">
     <number>6</number>
    </property>
-   <item row="1" column="0">
-    <widget class="QGroupBox" name="groupBox">
-     <property name="toolTip">
-      <string>Specifies how to map color from child objects to parent</string>
+   <item row="3" column="0">
+    <spacer>
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
      </property>
-     <property name="title">
-      <string>Color Mapping</string>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>61</height>
+      </size>
      </property>
-     <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="0">
-       <widget class="Gui::PrefCheckBox" name="checkBoxMapFaceColor">
-        <property name="text">
-         <string>Map face colors</string>
-        </property>
-        <property name="prefEntry" stdset="0">
-         <cstring>MapFaceColor</cstring>
-        </property>
-        <property name="prefPath" stdset="0">
-         <cstring>Mod/Part</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="Gui::PrefCheckBox" name="checkBoxMapLineColor">
-        <property name="text">
-         <string>Map edge colors</string>
-        </property>
-        <property name="prefEntry" stdset="0">
-         <cstring>MapLineColor</cstring>
-        </property>
-        <property name="prefPath" stdset="0">
-         <cstring>Mod/Part</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="Gui::PrefCheckBox" name="checkBoxMapPointColor">
-        <property name="text">
-         <string>Map vertex colors</string>
-        </property>
-        <property name="prefEntry" stdset="0">
-         <cstring>MapPointColor</cstring>
-        </property>
-        <property name="prefPath" stdset="0">
-         <cstring>Mod/Part</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="Gui::PrefCheckBox" name="checkBoxMapTransparency">
-        <property name="text">
-         <string>Map transparencies</string>
-        </property>
-        <property name="prefEntry" stdset="0">
-         <cstring>MapTransparency</cstring>
-        </property>
-        <property name="prefPath" stdset="0">
-         <cstring>Mod/Part</cstring>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
+    </spacer>
    </item>
    <item row="0" column="0">
     <widget class="QGroupBox" name="GroupBox12">
@@ -90,7 +48,16 @@
       <string>Tessellation</string>
      </property>
      <layout class="QGridLayout">
-      <property name="margin">
+      <property name="leftMargin">
+       <number>9</number>
+      </property>
+      <property name="topMargin">
+       <number>9</number>
+      </property>
+      <property name="rightMargin">
+       <number>9</number>
+      </property>
+      <property name="bottomMargin">
        <number>9</number>
       </property>
       <property name="spacing">
@@ -98,7 +65,16 @@
       </property>
       <item row="0" column="0">
        <layout class="QGridLayout">
-        <property name="margin">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
          <number>0</number>
         </property>
         <property name="spacing">
@@ -262,31 +238,115 @@
      </layout>
     </widget>
    </item>
+   <item row="1" column="0">
+    <widget class="QGroupBox" name="groupBox">
+     <property name="toolTip">
+      <string>Specifies how to map color from child objects to parent</string>
+     </property>
+     <property name="title">
+      <string>Color Mapping</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <widget class="Gui::PrefCheckBox" name="checkBoxMapFaceColor">
+        <property name="toolTip">
+         <string>Mapping face color from derived shape if possible.
+You may want to disable this if you want to set a
+uniform color for all faces.</string>
+        </property>
+        <property name="text">
+         <string>Map face colors</string>
+        </property>
+        <property name="prefEntry" stdset="0">
+         <cstring>MapFaceColor</cstring>
+        </property>
+        <property name="prefPath" stdset="0">
+         <cstring>Mod/Part</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="Gui::PrefCheckBox" name="checkBoxMapPointColor">
+        <property name="toolTip">
+         <string>Mapping vertex color from derived shape if possible.
+You may want to disable this if you want to set a
+uniform color for all vertices.</string>
+        </property>
+        <property name="text">
+         <string>Map vertex colors</string>
+        </property>
+        <property name="prefEntry" stdset="0">
+         <cstring>MapPointColor</cstring>
+        </property>
+        <property name="prefPath" stdset="0">
+         <cstring>Mod/Part</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="Gui::PrefCheckBox" name="checkBoxMapLineColor">
+        <property name="toolTip">
+         <string>Mapping edge color from base shape if possible.
+You may want to disable this if you want to set a
+uniform color for all edges.</string>
+        </property>
+        <property name="text">
+         <string>Map edge colors</string>
+        </property>
+        <property name="prefEntry" stdset="0">
+         <cstring>MapLineColor</cstring>
+        </property>
+        <property name="prefPath" stdset="0">
+         <cstring>Mod/Part</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="Gui::PrefCheckBox" name="checkBoxMapTransparency">
+        <property name="toolTip">
+         <string>Mapping face transparency from derived shape if possible.
+You may want to disable this if you want to set a uniform
+transparency for all faces.</string>
+        </property>
+        <property name="text">
+         <string>Map transparencies</string>
+        </property>
+        <property name="prefEntry" stdset="0">
+         <cstring>MapTransparency</cstring>
+        </property>
+        <property name="prefPath" stdset="0">
+         <cstring>Mod/Part</cstring>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
    <item row="2" column="0">
-    <spacer>
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
+    <widget class="Gui::PrefCheckBox" name="checkBoxColorRecompute">
+     <property name="text">
+      <string>Touch object for recompute on color change</string>
      </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>61</height>
-      </size>
+     <property name="prefPath" stdset="0">
+      <cstring>View</cstring>
      </property>
-    </spacer>
+     <property name="prefEntry" stdset="0">
+      <cstring>ColorRecompute</cstring>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>Gui::PrefDoubleSpinBox</class>
-   <extends>QDoubleSpinBox</extends>
+   <class>Gui::PrefCheckBox</class>
+   <extends>QCheckBox</extends>
    <header>Gui/PrefWidgets.h</header>
   </customwidget>
   <customwidget>
-   <class>Gui::PrefCheckBox</class>
-   <extends>QCheckBox</extends>
+   <class>Gui::PrefDoubleSpinBox</class>
+   <extends>QDoubleSpinBox</extends>
    <header>Gui/PrefWidgets.h</header>
   </customwidget>
  </customwidgets>
