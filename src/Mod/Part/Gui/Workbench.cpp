@@ -159,7 +159,7 @@ Gui::MenuItem* Workbench::setupMenuBar() const
 
     Gui::MenuItem* view = root->findItem("&View");
     if (view) {
-        Gui::MenuItem* appr = view->findItem("Std_RandomColor");
+        Gui::MenuItem* appr = view->findItem("Std_GroupRandomColor");
         appr = view->afterItem(appr);
         Gui::MenuItem* face = new Gui::MenuItem();
         face->setCommand("Part_ColorPerFace");

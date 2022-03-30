@@ -32,6 +32,7 @@
 #include "ViewProvider.h"
 #include "ViewProviderDocumentObject.h"
 #include "ViewProviderLink.h"
+#include "ViewParams.h"
 
 using namespace Gui;
 
@@ -72,38 +73,53 @@ StdCmdRandomColor::StdCmdRandomColor()
 {
     sGroup        = QT_TR_NOOP("File");
     sMenuText     = QT_TR_NOOP("Random color");
-    sToolTipText  = QT_TR_NOOP("Random color");
+    sToolTipText  = QT_TR_NOOP("Pick a random color for the selected object.\n"
+                               "Note, depending on the object and its 'MapFaceColor'\n"
+                               "setting, not all faces may be assigned the color");
     sWhatsThis    = "Std_RandomColor";
-    sStatusTip    = QT_TR_NOOP("Random color");
+    sStatusTip    = sMenuText;
     sPixmap       = "Std_RandomColor";
+}
+
+static void inline setRandomColor(const char *name, bool force)
+{
+    try {
+        App::AutoTransaction guard(name, false, true); 
+        // get the complete selection
+        for (const auto &sel : Selection().getCompleteSelection()) {
+            float fMax = (float)RAND_MAX;
+            float fRed = (float)rand()/fMax;
+            float fGrn = (float)rand()/fMax;
+            float fBlu = (float)rand()/fMax;
+
+            ViewProvider* view = Application::Instance->getViewProvider(sel.pObject);
+            if (auto vpLink = Base::freecad_dynamic_cast<ViewProviderLink>(view)) {
+                if(!vpLink->OverrideMaterial.getValue())
+                    cmdGuiObjectArgs(sel.pObject, "OverrideMaterial = True");
+                cmdGuiObjectArgs(sel.pObject, "ShapeMaterial.DiffuseColor=(%.2f,%.2f,%.2f)", fRed, fGrn, fBlu);
+                continue;
+            }
+            if (Base::freecad_dynamic_cast<App::PropertyColor>(view->getPropertyByName("ShapeColor"))) {
+                // get the view provider of the selected object and set the shape color
+                cmdGuiObjectArgs(sel.pObject, "ShapeColor=(%.2f,%.2f,%.2f)", fRed, fGrn, fBlu);
+            }
+            if (force && Base::freecad_dynamic_cast<App::PropertyBool>(view->getPropertyByName("MapFaceColor"))) {
+                cmdGuiObjectArgs(sel.pObject, "MapFaceColor = False");
+            }
+        }
+
+        if (ViewParams::getColorRecompute())
+            Command::updateActive();
+    }
+    catch (Base::Exception &e) {
+        e.ReportException();
+    }
 }
 
 void StdCmdRandomColor::activated(int iMsg)
 {
     Q_UNUSED(iMsg);
-
-    // get the complete selection
-    std::vector<SelectionSingleton::SelObj> sel = Selection().getCompleteSelection();
-    for (std::vector<SelectionSingleton::SelObj>::iterator it = sel.begin(); it != sel.end(); ++it) {
-        float fMax = (float)RAND_MAX;
-        float fRed = (float)rand()/fMax;
-        float fGrn = (float)rand()/fMax;
-        float fBlu = (float)rand()/fMax;
-
-        ViewProvider* view = Application::Instance->getDocument(it->pDoc)->getViewProvider(it->pObject);
-        auto vpLink = dynamic_cast<ViewProviderLink*>(view);
-        if(vpLink) {
-            if(!vpLink->OverrideMaterial.getValue())
-                cmdGuiObjectArgs(it->pObject, "OverrideMaterial = True");
-            cmdGuiObjectArgs(it->pObject, "ShapeMaterial.DiffuseColor=(%.2f,%.2f,%.2f)", fRed, fGrn, fBlu);
-            continue;
-        }
-        auto color = dynamic_cast<App::PropertyColor*>(view->getPropertyByName("ShapeColor"));
-        if (color) {
-            // get the view provider of the selected object and set the shape color
-            cmdGuiObjectArgs(it->pObject, "ShapeColor=(%.2f,%.2f,%.2f)", fRed, fGrn, fBlu);
-        }
-    }
+    setRandomColor(getName(), false);
 }
 
 bool StdCmdRandomColor::isActive(void)
@@ -111,6 +127,90 @@ bool StdCmdRandomColor::isActive(void)
     return (Gui::Selection().size() != 0);
 }
 
+//===========================================================================
+// Std_ObjectRandomColor
+//===========================================================================
+
+DEF_STD_CMD_A(StdCmdObjectRandomColor)
+
+StdCmdObjectRandomColor::StdCmdObjectRandomColor()
+  :Command("Std_ObjectRandomColor")
+{
+    sGroup        = "File";
+    sMenuText     = QT_TR_NOOP("Object random color");
+    sToolTipText  = QT_TR_NOOP("Force the whole object to use a uniform randomly picked color");
+    sWhatsThis    = "Std_ObjectRandomColor";
+    sStatusTip    = sMenuText;
+    sPixmap       = "Std_ObjectRandomColor";
+}
+
+void StdCmdObjectRandomColor::activated(int iMsg)
+{
+    Q_UNUSED(iMsg);
+    setRandomColor(getName(), true);
+}
+
+bool StdCmdObjectRandomColor::isActive(void)
+{
+    return (Gui::Selection().size() != 0);
+}
+
+
+//===========================================================================
+// Std_RecomputeOnColorChange
+//===========================================================================
+
+class StdCmdColorRecompute : public  Gui::CheckableCommand
+{
+public:
+    StdCmdColorRecompute();
+    virtual const char* className() const
+    { return "StdCmdColorRecompute"; }
+protected: 
+    virtual void setOption(bool checked) {
+        ViewParams::setColorRecompute(checked);
+    }
+    virtual bool getOption(void) const {
+        return ViewParams::getColorRecompute();
+    }
+};
+
+StdCmdColorRecompute::StdCmdColorRecompute()
+  : CheckableCommand("Std_ColorRecompute")
+{
+    sGroup        = "Standard-View";
+    sMenuText     = QT_TR_NOOP("Recompute on color change");
+    sToolTipText  = QT_TR_NOOP("Touch object for recompute on color change");
+    sWhatsThis    = "Std_ColorRecomputer";
+    sStatusTip    = sMenuText;
+    eType         = 0;
+}
+
+//===========================================================================
+// Std_GroupRandomColor
+//===========================================================================
+
+class StdCmdGroupRandomColor : public GroupCommand
+{
+public:
+    StdCmdGroupRandomColor()
+        :GroupCommand("Std_GroupRandomColor")
+    {
+        sGroup        = "Standard-View";
+        sMenuText     = QT_TR_NOOP("Random color");
+        sToolTipText  = QT_TR_NOOP("Actions for setting random color");
+        sWhatsThis    = "Std_GroupRandomColor";
+        sStatusTip    = sToolTipText;
+        eType         = 0;
+        bCanLog       = false;
+
+        addCommand(new StdCmdRandomColor());
+        addCommand(new StdCmdObjectRandomColor());
+        addCommand();
+        addCommand(new StdCmdColorRecompute());
+    };
+    virtual const char* className() const {return "StdCmdGroupRandomColor";}
+};
 
 //===========================================================================
 // Std_SendToPythonConsole
@@ -218,8 +318,8 @@ void CreateFeatCommands(void)
 {
     CommandManager &rcCmdMgr = Application::Instance->commandManager();
 
-    rcCmdMgr.addCommand(new StdCmdFeatRecompute());
-    rcCmdMgr.addCommand(new StdCmdRandomColor());
+    // rcCmdMgr.addCommand(new StdCmdFeatRecompute());
+    rcCmdMgr.addCommand(new StdCmdGroupRandomColor());
     rcCmdMgr.addCommand(new StdCmdSendToPythonConsole());
     rcCmdMgr.addCommand(new StdCmdRenameActiveObject());
 }

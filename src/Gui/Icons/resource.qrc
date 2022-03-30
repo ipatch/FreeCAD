@@ -193,6 +193,7 @@
         <file>Std_MergeProjects.svg</file>
         <file>Std_PrintPdf.svg</file>
         <file>Std_RandomColor.svg</file>
+        <file>Std_ObjectRandomColor.svg</file>
         <file>Std_RecentFiles.svg</file>
         <file>Std_Revert.svg</file>
         <file>Std_SaveAll.svg</file>

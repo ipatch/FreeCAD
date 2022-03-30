@@ -537,7 +537,7 @@ void StdWorkbench::setupContextMenu(const char* recipient, MenuItem* item) const
         if (Gui::Selection().hasSelection()) {
             *item << "Separator" << "Std_SetAppearance" << "Std_ToggleVisibility" << "Std_ToggleShowOnTop"
                   << "Std_ToggleSelectability" << "Std_TreeSelection"
-                  << "Std_RandomColor" << "Separator" << "Std_Delete"
+                  << "Std_GroupRandomColor" << "Separator" << "Std_Delete"
                   << "Std_SendToPythonConsole";
         }
     }
@@ -550,7 +550,7 @@ void StdWorkbench::setupContextMenu(const char* recipient, MenuItem* item) const
                   << "Std_ShowSelection" << "Std_HideSelection";
             *item << visu
                   << "Std_ToggleSelectability" << "Std_TreeSelectAllInstances" << "Separator"
-                  << "Std_SetAppearance" << "Std_RandomColor" << "Separator"
+                  << "Std_SetAppearance" << "Std_GroupRandomColor" << "Separator"
                   << "Std_Cut" << "Std_Copy" << "Std_Paste" << "Std_Delete"
                   << "Std_SendToPythonConsole" << "Separator";
         }
@@ -636,7 +636,7 @@ MenuItem* StdWorkbench::setupMenuBar() const
 #endif
           << "Separator" << visu
           << "Std_ToggleNavigation"
-          << "Std_SetAppearance" << "Std_RandomColor" << "Separator"
+          << "Std_SetAppearance" << "Std_GroupRandomColor" << "Separator"
           << "Std_Workbench" << "Std_ToolBarMenu" << "Std_DockViewMenu";
     if(Application::Instance->commandManager().getCommandByName("Std_DockOverlay"))
         *view << "Std_DockOverlay";

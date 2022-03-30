@@ -407,6 +407,9 @@ void ViewProviderPartExt::onChanged(const App::Property* prop)
         prop == &MapTransparency || 
         prop == &ForceMapColors) 
     {
+        if (Gui::ViewParams::getColorRecompute() && getObject())
+            getObject()->touch(true);
+
         if(!prop->testStatus(App::Property::User3)) {
             if(prop == &MapFaceColor) {
                 if(!MapFaceColor.getValue()) {
@@ -427,6 +430,11 @@ void ViewProviderPartExt::onChanged(const App::Property* prop)
             updateColors();
         }
         return;
+    } else if (Gui::ViewParams::getColorRecompute() && getObject()) {
+        if (prop == &DiffuseColor
+                || prop == &LineColorArray
+                || prop == &PointColorArray)
+            getObject()->touch();
     }
     
     if (isRestoring()) {
