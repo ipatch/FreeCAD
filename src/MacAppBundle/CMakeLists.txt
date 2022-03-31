@@ -129,9 +129,12 @@ install(CODE
     "message(STATUS \"Making bundle relocatable...\")
     # The top-level CMakeLists.txt should prevent multiple package manager
     # prefixes from being set, so the lib path will resolve correctly...
+
+    # NOTE: `/usr/lib` required to find, libiodbc.2.dylib
+
     execute_process(
         COMMAND python2.7
         ${CMAKE_SOURCE_DIR}/src/Tools/MakeMacBundleRelocatable.py
-        ${APP_PATH} ${HOMEBREW_PREFIX}${MACPORTS_PREFIX}/lib ${ICU_PREFIX}/lib/ /usr/local/opt ${CONFIG_NGLIB} ${Qt5Core_DIR}/../../.. ${XCTEST_PATH} ${WEBKIT_FRAMEWORK_DIR}
+        ${APP_PATH} ${HOMEBREW_PREFIX}${MACPORTS_PREFIX}/lib ${HOMEBREW_PREFIX}/Cellar/nglib@6.2.2105/6.2.2105_1/Contents/MacOS ${HOMEBREW_PREFIX}/opt ${HOMEBREW_PREFIX}/opt/gcc/lib/gcc/11 ${HOMEBREW_PREFIX}/opt/icu4c/lib ${HOMEBREW_PREFIX}/opt/llvm/lib ${Qt5Core_DIR}/../../.. ${XCTEST_PATH} ${WEBKIT_FRAMEWORK_DIR} /usr/lib
     )"
 )
