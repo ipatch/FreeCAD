@@ -1059,11 +1059,34 @@ Action * GroupCommand::createAction(void) {
     return pcAction;
 }
 
+static inline QIcon commandIcon(Command *cmd)
+{
+    if (!cmd)
+        return QIcon();
+    BitmapCacheContext ctx(cmd->getName());
+    QIcon icon;
+    if (auto action = cmd->getAction())
+        icon = action->icon();
+    if (icon.isNull())
+        icon = BitmapFactory().iconFromTheme(cmd->getPixmap());
+    if (!icon.isNull() && !cmd->isActive()) {
+        auto sizes = icon.availableSizes(QIcon::Disabled);
+        QSize size(64, 64);
+        if (sizes.size())
+            size = sizes[0];
+        icon = icon.pixmap(size, QIcon::Disabled);
+    }
+    return icon;
+}
+
 bool GroupCommand::isActive() {
     if(_pcAction && triggerSource() == TriggerNone) {
         int idx = _pcAction->property("defaultAction").toInt();
-        if(idx >= 0) 
-            _pcAction->setChecked(cmds[idx].first->getAction()->isChecked(),true);
+        if(idx >= 0) {
+            auto cmd = cmds[idx].first;
+            _pcAction->setChecked(cmd->getAction()->isChecked(),true);
+            _pcAction->setIcon(commandIcon(cmd));
+        }
     }
     return true;
 }
@@ -1112,14 +1135,8 @@ void GroupCommand::setup(Action *pcAction) {
     int idx = pcAction->property("defaultAction").toInt();
     if(idx>=0 && idx<(int)cmds.size() && cmds[idx].first) {
         auto cmd = cmds[idx].first;
-        BitmapCacheContext ctx(cmd->getName());
         pcAction->setText(QCoreApplication::translate(className(), getMenuText()));
-        QIcon icon;
-        if (auto childAction = cmd->getAction())
-            icon = childAction->icon();
-        if (icon.isNull())
-            icon = BitmapFactory().iconFromTheme(cmd->getPixmap());
-        pcAction->setIcon(icon);
+        pcAction->setIcon(commandIcon(cmd));
         const char *context = dynamic_cast<PythonCommand*>(cmd) ? cmd->getName() : cmd->className();
         const char *tooltip = cmd->getToolTipText();
         const char *statustip = cmd->getStatusTip();
