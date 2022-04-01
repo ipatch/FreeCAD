@@ -78,7 +78,7 @@ TaskDressUpParameters::TaskDressUpParameters(ViewProviderDressUp *DressUpView, b
 
     selectionMode = none;
 
-    onTopEnabled = Gui::ViewParams::ShowSelectionOnTop();
+    onTopEnabled = Gui::ViewParams::getShowSelectionOnTop();
     if(!onTopEnabled)
         Gui::ViewParams::setShowSelectionOnTop(true);
 

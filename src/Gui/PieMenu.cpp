@@ -94,11 +94,11 @@ public:
     Private(PieMenu &master, QMenu *menu, const char *_param)
         :master(master), menu(menu), param(_param?_param:"")
     {
-        fontSize = ViewParams::PieMenuFontSize();
-        iconSize = ViewParams::PieMenuIconSize();
-        radius = ViewParams::PieMenuRadius();
-        duration = ViewParams::PieMenuAnimationDuration();
-        triggerRadius = radius - ViewParams::PieMenuTriggerRadius();
+        fontSize = ViewParams::getPieMenuFontSize();
+        iconSize = ViewParams::getPieMenuIconSize();
+        radius = ViewParams::getPieMenuRadius();
+        duration = ViewParams::getPieMenuAnimationDuration();
+        triggerRadius = radius - ViewParams::getPieMenuTriggerRadius();
         if (triggerRadius < 0)
             triggerRadius = 0;
         else
@@ -193,7 +193,7 @@ public:
             if (activeMenu)
                 activeMenu->removeEventFilter(&master);
             activeMenu = nullptr;
-        } else if (ViewParams::PieMenuTriggerAction())
+        } else if (ViewParams::getPieMenuTriggerAction())
             buttons[hoverIndex]->animateClick();
     }
 
@@ -378,7 +378,7 @@ public:
             offset = endOffset;
             updateVisuals();
         }
-        animator->setEasingCurve((QEasingCurve::Type)ViewParams::PieMenuAnimationCurve());
+        animator->setEasingCurve((QEasingCurve::Type)ViewParams::getPieMenuAnimationCurve());
         animator->setStartValue(offset);
         animator->setEndValue(endOffset);
         animator->start();
@@ -397,11 +397,11 @@ public:
         hoverIndex = index;
         master.update(master.width()/2-radius, master.height()/2-radius, radius*2, radius*2);
 
-        if (ViewParams::PieMenuTriggerDelay() > 0) {
+        if (ViewParams::getPieMenuTriggerDelay() > 0) {
             if (hoverIndex < 0)
                 timer.stop();
             else
-                timer.start(ViewParams::PieMenuTriggerDelay());
+                timer.start(ViewParams::getPieMenuTriggerDelay());
         }
     }
 
@@ -623,9 +623,9 @@ public:
         painter.setOpacity(0.6);
         painter.setRenderHint(QPainter::Antialiasing, true);
 
-        if (ViewParams::PieMenuCenterRadius()) {
+        if (ViewParams::getPieMenuCenterRadius()) {
             painter.setPen(QPen(Qt::black, 4));
-            qreal r = ViewParams::PieMenuCenterRadius();
+            qreal r = ViewParams::getPieMenuCenterRadius();
             painter.drawEllipse(QPointF(master.width()*0.5, master.height()*0.5), r, r);
         }
 
@@ -652,7 +652,7 @@ PieMenu::PieMenu(QMenu *menu, const char *param, QWidget *parent)
     this->setAttribute(Qt::WA_TranslucentBackground, true);
 
 #if QT_VERSION  >= 0x050000
-    if (ViewParams::PieMenuPopup())
+    if (ViewParams::getPieMenuPopup())
         this->setWindowFlags(Qt::Popup | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
     else {
         this->setFocusPolicy(Qt::StrongFocus);
@@ -834,7 +834,7 @@ QAction *PieMenu::exec(QMenu *menu,
 
     pmenu.createWinId();
     QPoint point;
-    if (ViewParams::PieMenuPopup())
+    if (ViewParams::getPieMenuPopup())
         point = pt;
     else
         point = getMainWindow()->mapFromGlobal(pt);
@@ -914,7 +914,7 @@ void PieMenu::setOffset(qreal offset)
 void PieMenu::keyPressEvent(QKeyEvent *ev)
 {
     if (ev->key() == Qt::Key_Escape) {
-        if (ViewParams::PieMenuPopup())
+        if (ViewParams::getPieMenuPopup())
             QWidget::keyPressEvent(ev);
         else
             hide();

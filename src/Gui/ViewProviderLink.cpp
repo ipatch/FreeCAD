@@ -410,7 +410,7 @@ public:
         if(pcSnapshot) {
             if(!update) return pcSnapshot;
         }else{
-            if(ViewParams::UseSelectionRoot())
+            if(ViewParams::getUseSelectionRoot())
                 pcSnapshot = new SoFCSelectionRoot(true);
             else {
                 pcSnapshot = new SoSeparator;
@@ -529,7 +529,7 @@ public:
                         return;
                     }
                 }
-            } else if (!ViewParams::LinkChildrenDirect()) {
+            } else if (!ViewParams::getLinkChildrenDirect()) {
                 if(childSensor.getAttachedNode() != pcLinked->getChildRoot()) {
                     childSensor.detach();
                     childSensor.attach(pcLinked->getChildRoot());
@@ -685,7 +685,7 @@ public:
             subname = nextsub;
             sobj = ssobj;
 
-            if(ViewParams::MapChildrenPlacement()
+            if(ViewParams::getMapChildrenPlacement()
                     || sobj->hasExtension(App::LinkBaseExtension::getExtensionClassTypeId())) {
                 // Link will contain all its children
                 break;
@@ -1699,7 +1699,7 @@ bool LinkView::linkGetDetailPath(const char *subname, SoFullPath *path, SoDetail
                 subname = dot+1;
                 if(!subname[0] || nodeArray[idx]->isGroup==0)
                     break;
-                if(ViewParams::MapChildrenPlacement()
+                if(ViewParams::getMapChildrenPlacement()
                         && nodeArray[idx]->isGroup<0)
                     break;
                 idx = -1;
@@ -1832,7 +1832,7 @@ ViewProviderLink::ViewProviderLink()
     ADD_PROPERTY_TYPE(OverrideMaterial, (false), " Link", App::Prop_None, "Override linked object's material");
 
     App::Material mat(App::Material::DEFAULT);
-    mat.diffuseColor.setPackedValue(ViewParams::DefaultLinkColor());
+    mat.diffuseColor.setPackedValue(ViewParams::getDefaultLinkColor());
     ADD_PROPERTY_TYPE(ShapeMaterial, (mat), " Link", App::Prop_None, 0);
     ShapeMaterial.setStatus(App::Property::MaterialEdit, true);
 
@@ -1840,7 +1840,7 @@ ViewProviderLink::ViewProviderLink()
     static const char* DrawStyleEnums[]= {"None","Solid","Dashed","Dotted","Dashdot",NULL};
     DrawStyle.setEnums(DrawStyleEnums);
 
-    int lwidth = ViewParams::DefaultShapeLineWidth();
+    int lwidth = ViewParams::getDefaultShapeLineWidth();
     ADD_PROPERTY_TYPE(LineWidth,(lwidth), " Link", App::Prop_None, "");
 
     static App::PropertyFloatConstraint::Constraints sizeRange = {1.0,64.0,1.0};
@@ -2772,7 +2772,7 @@ void ViewProviderLink::setupContextMenu(QMenu* menu, QObject* receiver, const ch
                 QCheckBox *box = new QCheckBox(QObject::tr("Apply to all"), &dlg);
                 box->setToolTip(QObject::tr("Apply the setting to all links. Or, uncheck this\n"
                                             "option to apply only to this link."));
-                box->setChecked(App::LinkParams::CopyOnChangeApplyToAll());
+                box->setChecked(App::LinkParams::getCopyOnChangeApplyToAll());
                 dlg.addCheckBox(box);
                 if(dlg.exec()!=QDialog::Accepted)
                     return;

@@ -83,14 +83,14 @@ ViewProviderGeometryObject::ViewProviderGeometryObject()
 {
     float r,g,b;
 
-    if (ViewParams::RandomColor()){
+    if (ViewParams::getRandomColor()){
         float fMax = (float)RAND_MAX;
         r = (float)rand()/fMax;
         g = (float)rand()/fMax;
         b = (float)rand()/fMax;
     }
     else {
-        unsigned long shcol = ViewParams::DefaultShapeColor();
+        unsigned long shcol = ViewParams::getDefaultShapeColor();
         r = ((shcol >> 24) & 0xff) / 255.0;
         g = ((shcol >> 16) & 0xff) / 255.0;
         b = ((shcol >> 8) & 0xff) / 255.0;
@@ -234,7 +234,7 @@ SoPickedPoint* ViewProviderGeometryObject::getPickedPoint(const SbVec2s& pos, co
 
 unsigned long ViewProviderGeometryObject::getBoundColor() const
 {
-    return ViewParams::BoundingBoxColor();
+    return ViewParams::getBoundingBoxColor();
 }
 
 void ViewProviderGeometryObject::addBoundSwitch() {

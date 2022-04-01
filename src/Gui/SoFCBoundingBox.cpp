@@ -157,7 +157,7 @@ void SoFCBoundingBox::GLRender (SoGLRenderAction *action)
     // get the latest values from the fields
     SbXfBox3f xbbox(minBounds.getValue(),maxBounds.getValue());
 
-    if(ViewParams::RenderProjectedBBox())
+    if(ViewParams::getRenderProjectedBBox())
         xbbox.transform(SoModelMatrixElement::get(state));
 
     SbBox3f bbox = xbbox.project();
@@ -220,7 +220,7 @@ void SoFCBoundingBox::GLRender (SoGLRenderAction *action)
     // Avoid shading
     state->push();
 
-    if(ViewParams::RenderProjectedBBox())
+    if(ViewParams::getRenderProjectedBBox())
         SoModelMatrixElement::makeIdentity(state,this);
 
     SoLazyElement::setLightModel(state, SoLazyElement::BASE_COLOR);

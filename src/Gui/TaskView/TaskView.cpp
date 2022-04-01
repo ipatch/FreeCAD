@@ -656,7 +656,7 @@ void TaskView::showDialog(TaskDialog *dlg)
 
     this->contents = dlg->getDialogContent();
 
-    if (ViewParams::TaskNoWheelFocus()) {
+    if (ViewParams::getTaskNoWheelFocus()) {
         // Since task dialog contains mlutiple panels which often require
         // scrolling up and down to access. Using wheel focus in any input
         // field may cause accidental change of value while scrolling.
@@ -680,7 +680,7 @@ void TaskView::showDialog(TaskDialog *dlg)
     // give to task dialog to customize the button box
     dlg->modifyStandardButtons(ActiveCtrl->buttonBox);
 
-    if (ViewParams::StickyTaskControl() && parentWidget()) {
+    if (ViewParams::getStickyTaskControl() && parentWidget()) {
         if (dlg->buttonPosition() == TaskDialog::North)
             this->layout->insertWidget(0, ActiveCtrl);
         else

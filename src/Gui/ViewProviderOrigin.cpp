@@ -167,7 +167,7 @@ void ViewProviderOrigin::resetTemporaryVisibility() {
 
 double ViewProviderOrigin::defaultSize()
 {
-    return 0.25 * ViewParams::NewDocumentCameraScale();
+    return 0.25 * ViewParams::getNewDocumentCameraScale();
 }
 
 double ViewProviderOrigin::baseSize()

@@ -41,10 +41,7 @@
 # include <qmessagebox.h>
 #endif
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-# include <QWindow>
-#endif
-
+#include <QWindow>
 #include <QStack>
 
 #include <boost/algorithm/string/predicate.hpp>
@@ -437,10 +434,8 @@ public:
 #endif
 
         qreal dpr = 1.0;
-#if QT_VERSION >= 0x050000
         auto window = master->window()->windowHandle();
         dpr = window ? window->devicePixelRatio() : qApp->devicePixelRatio();
-#endif
 #if defined(Q_OS_WIN32) || defined(Q_OS_MAC)
 #else
         hotX = static_cast<int>(hotX * dpr);
@@ -595,7 +590,7 @@ public:
         if (disableSyncView || !item || !item->getOwnerDocument())
             return;
         auto docitem = item->getOwnerDocument();
-        if(TreeParams::SyncView()) {
+        if(TreeParams::getSyncView()) {
             bool focus = master->hasFocus();
             auto view = docitem->document()->setActiveView(item->object());
             if(focus)
@@ -680,42 +675,1338 @@ public:
 
 static int _TreeIconSize;
 
-TreeParams::TreeParams() {
-    handle = App::GetApplication().GetParameterGroupByPath("User parameter:BaseApp/Preferences/TreeView");
-    handle->Attach(this);
-#undef FC_TREE_PARAM
-#define FC_TREE_PARAM(_name,_ctype,_type,_def,_doc) \
-    _##_name = handle->Get##_type(#_name,_def);\
-    funcs[#_name] = &TreeParams::update##_name;
+/*[[[cog
+import TreeParams
+TreeParams.define()
+]]]*/
 
-#undef FC_TREE_PARAM2
-#define FC_TREE_PARAM2 FC_TREE_PARAM
-    FC_TREE_PARAMS
+// Auto generated code. See class document of TreeParams.
+#include <unordered_map>
+#include <App/Application.h>
+#include <App/DynamicProperty.h>
+#include "TreeParams.h"
+using namespace Gui;
 
-    _TreeIconSize = _IconSize;
+namespace {
+
+// Auto generated code. See class document of TreeParams.
+class TreeParamsP: public ParameterGrp::ObserverType {
+public:
+    // Auto generated code. See class document of TreeParams.
+    ParameterGrp::handle handle;
+
+    // Auto generated code. See class document of TreeParams.
+    std::unordered_map<const char *,void(*)(TreeParamsP*),App::CStringHasher,App::CStringHasher> funcs;
+
+    bool SyncSelection; // Auto generated code. See class document of TreeParams.
+    bool CheckBoxesSelection; // Auto generated code. See class document of TreeParams.
+    bool SyncView; // Auto generated code. See class document of TreeParams.
+    bool PreSelection; // Auto generated code. See class document of TreeParams.
+    bool SyncPlacement; // Auto generated code. See class document of TreeParams.
+    bool RecordSelection; // Auto generated code. See class document of TreeParams.
+    long DocumentMode; // Auto generated code. See class document of TreeParams.
+    long StatusTimeout; // Auto generated code. See class document of TreeParams.
+    long SelectionTimeout; // Auto generated code. See class document of TreeParams.
+    long PreSelectionTimeout; // Auto generated code. See class document of TreeParams.
+    long PreSelectionDelay; // Auto generated code. See class document of TreeParams.
+    long PreSelectionMinDelay; // Auto generated code. See class document of TreeParams.
+    bool RecomputeOnDrop; // Auto generated code. See class document of TreeParams.
+    bool KeepRootOrder; // Auto generated code. See class document of TreeParams.
+    bool TreeActiveAutoExpand; // Auto generated code. See class document of TreeParams.
+    unsigned long TreeActiveColor; // Auto generated code. See class document of TreeParams.
+    unsigned long TreeEditColor; // Auto generated code. See class document of TreeParams.
+    unsigned long SelectingGroupColor; // Auto generated code. See class document of TreeParams.
+    bool TreeActiveBold; // Auto generated code. See class document of TreeParams.
+    bool TreeActiveItalic; // Auto generated code. See class document of TreeParams.
+    bool TreeActiveUnderlined; // Auto generated code. See class document of TreeParams.
+    bool TreeActiveOverlined; // Auto generated code. See class document of TreeParams.
+    long Indentation; // Auto generated code. See class document of TreeParams.
+    bool LabelExpression; // Auto generated code. See class document of TreeParams.
+    long IconSize; // Auto generated code. See class document of TreeParams.
+    long FontSize; // Auto generated code. See class document of TreeParams.
+    long ItemSpacing; // Auto generated code. See class document of TreeParams.
+    unsigned long ItemBackground; // Auto generated code. See class document of TreeParams.
+    long ItemBackgroundPadding; // Auto generated code. See class document of TreeParams.
+    bool HideColumn; // Auto generated code. See class document of TreeParams.
+    bool HideScrollBar; // Auto generated code. See class document of TreeParams.
+    bool HideHeaderView; // Auto generated code. See class document of TreeParams.
+    bool ResizableColumn; // Auto generated code. See class document of TreeParams.
+    long ColumnSize1; // Auto generated code. See class document of TreeParams.
+    long ColumnSize2; // Auto generated code. See class document of TreeParams.
+
+    // Auto generated code. See class document of TreeParams.
+    TreeParamsP() {
+        handle = App::GetApplication().GetParameterGroupByPath("User parameter:BaseApp/Preferences/TreeView");
+        handle->Attach(this);
+
+        SyncSelection = handle->GetBool("SyncSelection", true);
+        funcs["SyncSelection"] = &TreeParamsP::updateSyncSelection;
+        CheckBoxesSelection = handle->GetBool("CheckBoxesSelection", false);
+        funcs["CheckBoxesSelection"] = &TreeParamsP::updateCheckBoxesSelection;
+        SyncView = handle->GetBool("SyncView", true);
+        funcs["SyncView"] = &TreeParamsP::updateSyncView;
+        PreSelection = handle->GetBool("PreSelection", true);
+        funcs["PreSelection"] = &TreeParamsP::updatePreSelection;
+        SyncPlacement = handle->GetBool("SyncPlacement", false);
+        funcs["SyncPlacement"] = &TreeParamsP::updateSyncPlacement;
+        RecordSelection = handle->GetBool("RecordSelection", true);
+        funcs["RecordSelection"] = &TreeParamsP::updateRecordSelection;
+        DocumentMode = handle->GetInt("DocumentMode", 2);
+        funcs["DocumentMode"] = &TreeParamsP::updateDocumentMode;
+        StatusTimeout = handle->GetInt("StatusTimeout", 100);
+        funcs["StatusTimeout"] = &TreeParamsP::updateStatusTimeout;
+        SelectionTimeout = handle->GetInt("SelectionTimeout", 100);
+        funcs["SelectionTimeout"] = &TreeParamsP::updateSelectionTimeout;
+        PreSelectionTimeout = handle->GetInt("PreSelectionTimeout", 500);
+        funcs["PreSelectionTimeout"] = &TreeParamsP::updatePreSelectionTimeout;
+        PreSelectionDelay = handle->GetInt("PreSelectionDelay", 700);
+        funcs["PreSelectionDelay"] = &TreeParamsP::updatePreSelectionDelay;
+        PreSelectionMinDelay = handle->GetInt("PreSelectionMinDelay", 200);
+        funcs["PreSelectionMinDelay"] = &TreeParamsP::updatePreSelectionMinDelay;
+        RecomputeOnDrop = handle->GetBool("RecomputeOnDrop", true);
+        funcs["RecomputeOnDrop"] = &TreeParamsP::updateRecomputeOnDrop;
+        KeepRootOrder = handle->GetBool("KeepRootOrder", true);
+        funcs["KeepRootOrder"] = &TreeParamsP::updateKeepRootOrder;
+        TreeActiveAutoExpand = handle->GetBool("TreeActiveAutoExpand", true);
+        funcs["TreeActiveAutoExpand"] = &TreeParamsP::updateTreeActiveAutoExpand;
+        TreeActiveColor = handle->GetUnsigned("TreeActiveColor", 3873898495);
+        funcs["TreeActiveColor"] = &TreeParamsP::updateTreeActiveColor;
+        TreeEditColor = handle->GetUnsigned("TreeEditColor", 2459042047);
+        funcs["TreeEditColor"] = &TreeParamsP::updateTreeEditColor;
+        SelectingGroupColor = handle->GetUnsigned("SelectingGroupColor", 1082163711);
+        funcs["SelectingGroupColor"] = &TreeParamsP::updateSelectingGroupColor;
+        TreeActiveBold = handle->GetBool("TreeActiveBold", true);
+        funcs["TreeActiveBold"] = &TreeParamsP::updateTreeActiveBold;
+        TreeActiveItalic = handle->GetBool("TreeActiveItalic", false);
+        funcs["TreeActiveItalic"] = &TreeParamsP::updateTreeActiveItalic;
+        TreeActiveUnderlined = handle->GetBool("TreeActiveUnderlined", false);
+        funcs["TreeActiveUnderlined"] = &TreeParamsP::updateTreeActiveUnderlined;
+        TreeActiveOverlined = handle->GetBool("TreeActiveOverlined", false);
+        funcs["TreeActiveOverlined"] = &TreeParamsP::updateTreeActiveOverlined;
+        Indentation = handle->GetInt("Indentation", 0);
+        funcs["Indentation"] = &TreeParamsP::updateIndentation;
+        LabelExpression = handle->GetBool("LabelExpression", false);
+        funcs["LabelExpression"] = &TreeParamsP::updateLabelExpression;
+        IconSize = handle->GetInt("IconSize", 0);
+        funcs["IconSize"] = &TreeParamsP::updateIconSize;
+        FontSize = handle->GetInt("FontSize", 0);
+        funcs["FontSize"] = &TreeParamsP::updateFontSize;
+        ItemSpacing = handle->GetInt("ItemSpacing", 0);
+        funcs["ItemSpacing"] = &TreeParamsP::updateItemSpacing;
+        ItemBackground = handle->GetUnsigned("ItemBackground", 0);
+        funcs["ItemBackground"] = &TreeParamsP::updateItemBackground;
+        ItemBackgroundPadding = handle->GetInt("ItemBackgroundPadding", 10);
+        funcs["ItemBackgroundPadding"] = &TreeParamsP::updateItemBackgroundPadding;
+        HideColumn = handle->GetBool("HideColumn", false);
+        funcs["HideColumn"] = &TreeParamsP::updateHideColumn;
+        HideScrollBar = handle->GetBool("HideScrollBar", true);
+        funcs["HideScrollBar"] = &TreeParamsP::updateHideScrollBar;
+        HideHeaderView = handle->GetBool("HideHeaderView", true);
+        funcs["HideHeaderView"] = &TreeParamsP::updateHideHeaderView;
+        ResizableColumn = handle->GetBool("ResizableColumn", false);
+        funcs["ResizableColumn"] = &TreeParamsP::updateResizableColumn;
+        ColumnSize1 = handle->GetInt("ColumnSize1", 0);
+        funcs["ColumnSize1"] = &TreeParamsP::updateColumnSize1;
+        ColumnSize2 = handle->GetInt("ColumnSize2", 0);
+        funcs["ColumnSize2"] = &TreeParamsP::updateColumnSize2;
+    }
+
+    // Auto generated code. See class document of TreeParams.
+    ~TreeParamsP() {
+    }
+
+    // Auto generated code. See class document of TreeParams.
+    void OnChange(Base::Subject<const char*> &, const char* sReason) {
+        if(!sReason)
+            return;
+        auto it = funcs.find(sReason);
+        if(it == funcs.end())
+            return;
+        it->second(this);
+    }
+
+
+    // Auto generated code. See class document of TreeParams.
+    static void updateSyncSelection(TreeParamsP *self) {
+        auto v = self->handle->GetBool("SyncSelection", true);
+        if (self->SyncSelection != v) {
+            self->SyncSelection = v;
+            TreeParams::onSyncSelectionChanged();
+        }
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updateCheckBoxesSelection(TreeParamsP *self) {
+        auto v = self->handle->GetBool("CheckBoxesSelection", false);
+        if (self->CheckBoxesSelection != v) {
+            self->CheckBoxesSelection = v;
+            TreeParams::onCheckBoxesSelectionChanged();
+        }
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updateSyncView(TreeParamsP *self) {
+        self->SyncView = self->handle->GetBool("SyncView", true);
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updatePreSelection(TreeParamsP *self) {
+        self->PreSelection = self->handle->GetBool("PreSelection", true);
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updateSyncPlacement(TreeParamsP *self) {
+        self->SyncPlacement = self->handle->GetBool("SyncPlacement", false);
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updateRecordSelection(TreeParamsP *self) {
+        self->RecordSelection = self->handle->GetBool("RecordSelection", true);
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updateDocumentMode(TreeParamsP *self) {
+        auto v = self->handle->GetInt("DocumentMode", 2);
+        if (self->DocumentMode != v) {
+            self->DocumentMode = v;
+            TreeParams::onDocumentModeChanged();
+        }
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updateStatusTimeout(TreeParamsP *self) {
+        self->StatusTimeout = self->handle->GetInt("StatusTimeout", 100);
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updateSelectionTimeout(TreeParamsP *self) {
+        self->SelectionTimeout = self->handle->GetInt("SelectionTimeout", 100);
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updatePreSelectionTimeout(TreeParamsP *self) {
+        self->PreSelectionTimeout = self->handle->GetInt("PreSelectionTimeout", 500);
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updatePreSelectionDelay(TreeParamsP *self) {
+        self->PreSelectionDelay = self->handle->GetInt("PreSelectionDelay", 700);
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updatePreSelectionMinDelay(TreeParamsP *self) {
+        self->PreSelectionMinDelay = self->handle->GetInt("PreSelectionMinDelay", 200);
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updateRecomputeOnDrop(TreeParamsP *self) {
+        self->RecomputeOnDrop = self->handle->GetBool("RecomputeOnDrop", true);
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updateKeepRootOrder(TreeParamsP *self) {
+        self->KeepRootOrder = self->handle->GetBool("KeepRootOrder", true);
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updateTreeActiveAutoExpand(TreeParamsP *self) {
+        self->TreeActiveAutoExpand = self->handle->GetBool("TreeActiveAutoExpand", true);
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updateTreeActiveColor(TreeParamsP *self) {
+        auto v = self->handle->GetUnsigned("TreeActiveColor", 3873898495);
+        if (self->TreeActiveColor != v) {
+            self->TreeActiveColor = v;
+            TreeParams::onTreeActiveColorChanged();
+        }
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updateTreeEditColor(TreeParamsP *self) {
+        auto v = self->handle->GetUnsigned("TreeEditColor", 2459042047);
+        if (self->TreeEditColor != v) {
+            self->TreeEditColor = v;
+            TreeParams::onTreeEditColorChanged();
+        }
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updateSelectingGroupColor(TreeParamsP *self) {
+        auto v = self->handle->GetUnsigned("SelectingGroupColor", 1082163711);
+        if (self->SelectingGroupColor != v) {
+            self->SelectingGroupColor = v;
+            TreeParams::onSelectingGroupColorChanged();
+        }
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updateTreeActiveBold(TreeParamsP *self) {
+        auto v = self->handle->GetBool("TreeActiveBold", true);
+        if (self->TreeActiveBold != v) {
+            self->TreeActiveBold = v;
+            TreeParams::onTreeActiveBoldChanged();
+        }
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updateTreeActiveItalic(TreeParamsP *self) {
+        auto v = self->handle->GetBool("TreeActiveItalic", false);
+        if (self->TreeActiveItalic != v) {
+            self->TreeActiveItalic = v;
+            TreeParams::onTreeActiveItalicChanged();
+        }
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updateTreeActiveUnderlined(TreeParamsP *self) {
+        auto v = self->handle->GetBool("TreeActiveUnderlined", false);
+        if (self->TreeActiveUnderlined != v) {
+            self->TreeActiveUnderlined = v;
+            TreeParams::onTreeActiveUnderlinedChanged();
+        }
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updateTreeActiveOverlined(TreeParamsP *self) {
+        auto v = self->handle->GetBool("TreeActiveOverlined", false);
+        if (self->TreeActiveOverlined != v) {
+            self->TreeActiveOverlined = v;
+            TreeParams::onTreeActiveOverlinedChanged();
+        }
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updateIndentation(TreeParamsP *self) {
+        auto v = self->handle->GetInt("Indentation", 0);
+        if (self->Indentation != v) {
+            self->Indentation = v;
+            TreeParams::onIndentationChanged();
+        }
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updateLabelExpression(TreeParamsP *self) {
+        self->LabelExpression = self->handle->GetBool("LabelExpression", false);
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updateIconSize(TreeParamsP *self) {
+        auto v = self->handle->GetInt("IconSize", 0);
+        if (self->IconSize != v) {
+            self->IconSize = v;
+            TreeParams::onIconSizeChanged();
+        }
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updateFontSize(TreeParamsP *self) {
+        auto v = self->handle->GetInt("FontSize", 0);
+        if (self->FontSize != v) {
+            self->FontSize = v;
+            TreeParams::onFontSizeChanged();
+        }
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updateItemSpacing(TreeParamsP *self) {
+        auto v = self->handle->GetInt("ItemSpacing", 0);
+        if (self->ItemSpacing != v) {
+            self->ItemSpacing = v;
+            TreeParams::onItemSpacingChanged();
+        }
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updateItemBackground(TreeParamsP *self) {
+        auto v = self->handle->GetUnsigned("ItemBackground", 0);
+        if (self->ItemBackground != v) {
+            self->ItemBackground = v;
+            TreeParams::onItemBackgroundChanged();
+        }
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updateItemBackgroundPadding(TreeParamsP *self) {
+        auto v = self->handle->GetInt("ItemBackgroundPadding", 10);
+        if (self->ItemBackgroundPadding != v) {
+            self->ItemBackgroundPadding = v;
+            TreeParams::onItemBackgroundPaddingChanged();
+        }
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updateHideColumn(TreeParamsP *self) {
+        auto v = self->handle->GetBool("HideColumn", false);
+        if (self->HideColumn != v) {
+            self->HideColumn = v;
+            TreeParams::onHideColumnChanged();
+        }
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updateHideScrollBar(TreeParamsP *self) {
+        self->HideScrollBar = self->handle->GetBool("HideScrollBar", true);
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updateHideHeaderView(TreeParamsP *self) {
+        self->HideHeaderView = self->handle->GetBool("HideHeaderView", true);
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updateResizableColumn(TreeParamsP *self) {
+        auto v = self->handle->GetBool("ResizableColumn", false);
+        if (self->ResizableColumn != v) {
+            self->ResizableColumn = v;
+            TreeParams::onResizableColumnChanged();
+        }
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updateColumnSize1(TreeParamsP *self) {
+        self->ColumnSize1 = self->handle->GetInt("ColumnSize1", 0);
+    }
+    // Auto generated code. See class document of TreeParams.
+    static void updateColumnSize2(TreeParamsP *self) {
+        self->ColumnSize2 = self->handle->GetInt("ColumnSize2", 0);
+    }
+};
+
+// Auto generated code. See class document of TreeParams.
+TreeParamsP *instance() {
+    static TreeParamsP *inst = new TreeParamsP;
+    return inst;
 }
 
-TreeParams::~TreeParams()
-{
+} // Anonymous namespace
+
+// Auto generated code. See class document of TreeParams.
+ParameterGrp::handle TreeParams::getHandle() {
+    return instance()->handle;
 }
 
-#undef FC_TREE_PARAM
-#define FC_TREE_PARAM(_name,_ctype,_type,_def,_doc) \
-const char *TreeParams::doc##_name() { return _doc; }
-
-FC_TREE_PARAMS
-
-void TreeParams::OnChange(Base::Subject<const char*> &, const char* sReason) {
-    if(!sReason)
-        return;
-    auto it = funcs.find(sReason);
-    if(it == funcs.end())
-        return;
-    it->second(this);
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docSyncSelection() {
+    return "";
 }
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::getSyncSelection() {
+    return instance()->SyncSelection;
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::defaultSyncSelection() {
+    const static bool def = true;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setSyncSelection(const bool &v) {
+    instance()->handle->SetBool("SyncSelection",v);
+    instance()->SyncSelection = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeSyncSelection() {
+    instance()->handle->RemoveBool("SyncSelection");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docCheckBoxesSelection() {
+    return "";
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::getCheckBoxesSelection() {
+    return instance()->CheckBoxesSelection;
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::defaultCheckBoxesSelection() {
+    const static bool def = false;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setCheckBoxesSelection(const bool &v) {
+    instance()->handle->SetBool("CheckBoxesSelection",v);
+    instance()->CheckBoxesSelection = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeCheckBoxesSelection() {
+    instance()->handle->RemoveBool("CheckBoxesSelection");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docSyncView() {
+    return "";
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::getSyncView() {
+    return instance()->SyncView;
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::defaultSyncView() {
+    const static bool def = true;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setSyncView(const bool &v) {
+    instance()->handle->SetBool("SyncView",v);
+    instance()->SyncView = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeSyncView() {
+    instance()->handle->RemoveBool("SyncView");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docPreSelection() {
+    return "";
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::getPreSelection() {
+    return instance()->PreSelection;
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::defaultPreSelection() {
+    const static bool def = true;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setPreSelection(const bool &v) {
+    instance()->handle->SetBool("PreSelection",v);
+    instance()->PreSelection = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removePreSelection() {
+    instance()->handle->RemoveBool("PreSelection");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docSyncPlacement() {
+    return "";
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::getSyncPlacement() {
+    return instance()->SyncPlacement;
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::defaultSyncPlacement() {
+    const static bool def = false;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setSyncPlacement(const bool &v) {
+    instance()->handle->SetBool("SyncPlacement",v);
+    instance()->SyncPlacement = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeSyncPlacement() {
+    instance()->handle->RemoveBool("SyncPlacement");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docRecordSelection() {
+    return "";
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::getRecordSelection() {
+    return instance()->RecordSelection;
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::defaultRecordSelection() {
+    const static bool def = true;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setRecordSelection(const bool &v) {
+    instance()->handle->SetBool("RecordSelection",v);
+    instance()->RecordSelection = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeRecordSelection() {
+    instance()->handle->RemoveBool("RecordSelection");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docDocumentMode() {
+    return "";
+}
+
+// Auto generated code. See class document of TreeParams.
+const long & TreeParams::getDocumentMode() {
+    return instance()->DocumentMode;
+}
+
+// Auto generated code. See class document of TreeParams.
+const long & TreeParams::defaultDocumentMode() {
+    const static long def = 2;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setDocumentMode(const long &v) {
+    instance()->handle->SetInt("DocumentMode",v);
+    instance()->DocumentMode = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeDocumentMode() {
+    instance()->handle->RemoveInt("DocumentMode");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docStatusTimeout() {
+    return "";
+}
+
+// Auto generated code. See class document of TreeParams.
+const long & TreeParams::getStatusTimeout() {
+    return instance()->StatusTimeout;
+}
+
+// Auto generated code. See class document of TreeParams.
+const long & TreeParams::defaultStatusTimeout() {
+    const static long def = 100;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setStatusTimeout(const long &v) {
+    instance()->handle->SetInt("StatusTimeout",v);
+    instance()->StatusTimeout = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeStatusTimeout() {
+    instance()->handle->RemoveInt("StatusTimeout");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docSelectionTimeout() {
+    return "";
+}
+
+// Auto generated code. See class document of TreeParams.
+const long & TreeParams::getSelectionTimeout() {
+    return instance()->SelectionTimeout;
+}
+
+// Auto generated code. See class document of TreeParams.
+const long & TreeParams::defaultSelectionTimeout() {
+    const static long def = 100;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setSelectionTimeout(const long &v) {
+    instance()->handle->SetInt("SelectionTimeout",v);
+    instance()->SelectionTimeout = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeSelectionTimeout() {
+    instance()->handle->RemoveInt("SelectionTimeout");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docPreSelectionTimeout() {
+    return "";
+}
+
+// Auto generated code. See class document of TreeParams.
+const long & TreeParams::getPreSelectionTimeout() {
+    return instance()->PreSelectionTimeout;
+}
+
+// Auto generated code. See class document of TreeParams.
+const long & TreeParams::defaultPreSelectionTimeout() {
+    const static long def = 500;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setPreSelectionTimeout(const long &v) {
+    instance()->handle->SetInt("PreSelectionTimeout",v);
+    instance()->PreSelectionTimeout = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removePreSelectionTimeout() {
+    instance()->handle->RemoveInt("PreSelectionTimeout");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docPreSelectionDelay() {
+    return "";
+}
+
+// Auto generated code. See class document of TreeParams.
+const long & TreeParams::getPreSelectionDelay() {
+    return instance()->PreSelectionDelay;
+}
+
+// Auto generated code. See class document of TreeParams.
+const long & TreeParams::defaultPreSelectionDelay() {
+    const static long def = 700;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setPreSelectionDelay(const long &v) {
+    instance()->handle->SetInt("PreSelectionDelay",v);
+    instance()->PreSelectionDelay = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removePreSelectionDelay() {
+    instance()->handle->RemoveInt("PreSelectionDelay");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docPreSelectionMinDelay() {
+    return "";
+}
+
+// Auto generated code. See class document of TreeParams.
+const long & TreeParams::getPreSelectionMinDelay() {
+    return instance()->PreSelectionMinDelay;
+}
+
+// Auto generated code. See class document of TreeParams.
+const long & TreeParams::defaultPreSelectionMinDelay() {
+    const static long def = 200;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setPreSelectionMinDelay(const long &v) {
+    instance()->handle->SetInt("PreSelectionMinDelay",v);
+    instance()->PreSelectionMinDelay = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removePreSelectionMinDelay() {
+    instance()->handle->RemoveInt("PreSelectionMinDelay");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docRecomputeOnDrop() {
+    return "";
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::getRecomputeOnDrop() {
+    return instance()->RecomputeOnDrop;
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::defaultRecomputeOnDrop() {
+    const static bool def = true;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setRecomputeOnDrop(const bool &v) {
+    instance()->handle->SetBool("RecomputeOnDrop",v);
+    instance()->RecomputeOnDrop = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeRecomputeOnDrop() {
+    instance()->handle->RemoveBool("RecomputeOnDrop");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docKeepRootOrder() {
+    return "";
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::getKeepRootOrder() {
+    return instance()->KeepRootOrder;
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::defaultKeepRootOrder() {
+    const static bool def = true;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setKeepRootOrder(const bool &v) {
+    instance()->handle->SetBool("KeepRootOrder",v);
+    instance()->KeepRootOrder = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeKeepRootOrder() {
+    instance()->handle->RemoveBool("KeepRootOrder");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docTreeActiveAutoExpand() {
+    return "";
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::getTreeActiveAutoExpand() {
+    return instance()->TreeActiveAutoExpand;
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::defaultTreeActiveAutoExpand() {
+    const static bool def = true;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setTreeActiveAutoExpand(const bool &v) {
+    instance()->handle->SetBool("TreeActiveAutoExpand",v);
+    instance()->TreeActiveAutoExpand = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeTreeActiveAutoExpand() {
+    instance()->handle->RemoveBool("TreeActiveAutoExpand");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docTreeActiveColor() {
+    return "";
+}
+
+// Auto generated code. See class document of TreeParams.
+const unsigned long & TreeParams::getTreeActiveColor() {
+    return instance()->TreeActiveColor;
+}
+
+// Auto generated code. See class document of TreeParams.
+const unsigned long & TreeParams::defaultTreeActiveColor() {
+    const static unsigned long def = 3873898495;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setTreeActiveColor(const unsigned long &v) {
+    instance()->handle->SetUnsigned("TreeActiveColor",v);
+    instance()->TreeActiveColor = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeTreeActiveColor() {
+    instance()->handle->RemoveUnsigned("TreeActiveColor");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docTreeEditColor() {
+    return "";
+}
+
+// Auto generated code. See class document of TreeParams.
+const unsigned long & TreeParams::getTreeEditColor() {
+    return instance()->TreeEditColor;
+}
+
+// Auto generated code. See class document of TreeParams.
+const unsigned long & TreeParams::defaultTreeEditColor() {
+    const static unsigned long def = 2459042047;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setTreeEditColor(const unsigned long &v) {
+    instance()->handle->SetUnsigned("TreeEditColor",v);
+    instance()->TreeEditColor = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeTreeEditColor() {
+    instance()->handle->RemoveUnsigned("TreeEditColor");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docSelectingGroupColor() {
+    return "";
+}
+
+// Auto generated code. See class document of TreeParams.
+const unsigned long & TreeParams::getSelectingGroupColor() {
+    return instance()->SelectingGroupColor;
+}
+
+// Auto generated code. See class document of TreeParams.
+const unsigned long & TreeParams::defaultSelectingGroupColor() {
+    const static unsigned long def = 1082163711;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setSelectingGroupColor(const unsigned long &v) {
+    instance()->handle->SetUnsigned("SelectingGroupColor",v);
+    instance()->SelectingGroupColor = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeSelectingGroupColor() {
+    instance()->handle->RemoveUnsigned("SelectingGroupColor");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docTreeActiveBold() {
+    return "";
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::getTreeActiveBold() {
+    return instance()->TreeActiveBold;
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::defaultTreeActiveBold() {
+    const static bool def = true;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setTreeActiveBold(const bool &v) {
+    instance()->handle->SetBool("TreeActiveBold",v);
+    instance()->TreeActiveBold = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeTreeActiveBold() {
+    instance()->handle->RemoveBool("TreeActiveBold");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docTreeActiveItalic() {
+    return "";
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::getTreeActiveItalic() {
+    return instance()->TreeActiveItalic;
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::defaultTreeActiveItalic() {
+    const static bool def = false;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setTreeActiveItalic(const bool &v) {
+    instance()->handle->SetBool("TreeActiveItalic",v);
+    instance()->TreeActiveItalic = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeTreeActiveItalic() {
+    instance()->handle->RemoveBool("TreeActiveItalic");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docTreeActiveUnderlined() {
+    return "";
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::getTreeActiveUnderlined() {
+    return instance()->TreeActiveUnderlined;
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::defaultTreeActiveUnderlined() {
+    const static bool def = false;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setTreeActiveUnderlined(const bool &v) {
+    instance()->handle->SetBool("TreeActiveUnderlined",v);
+    instance()->TreeActiveUnderlined = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeTreeActiveUnderlined() {
+    instance()->handle->RemoveBool("TreeActiveUnderlined");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docTreeActiveOverlined() {
+    return "";
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::getTreeActiveOverlined() {
+    return instance()->TreeActiveOverlined;
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::defaultTreeActiveOverlined() {
+    const static bool def = false;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setTreeActiveOverlined(const bool &v) {
+    instance()->handle->SetBool("TreeActiveOverlined",v);
+    instance()->TreeActiveOverlined = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeTreeActiveOverlined() {
+    instance()->handle->RemoveBool("TreeActiveOverlined");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docIndentation() {
+    return "";
+}
+
+// Auto generated code. See class document of TreeParams.
+const long & TreeParams::getIndentation() {
+    return instance()->Indentation;
+}
+
+// Auto generated code. See class document of TreeParams.
+const long & TreeParams::defaultIndentation() {
+    const static long def = 0;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setIndentation(const long &v) {
+    instance()->handle->SetInt("Indentation",v);
+    instance()->Indentation = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeIndentation() {
+    instance()->handle->RemoveInt("Indentation");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docLabelExpression() {
+    return "";
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::getLabelExpression() {
+    return instance()->LabelExpression;
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::defaultLabelExpression() {
+    const static bool def = false;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setLabelExpression(const bool &v) {
+    instance()->handle->SetBool("LabelExpression",v);
+    instance()->LabelExpression = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeLabelExpression() {
+    instance()->handle->RemoveBool("LabelExpression");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docIconSize() {
+    return "";
+}
+
+// Auto generated code. See class document of TreeParams.
+const long & TreeParams::getIconSize() {
+    return instance()->IconSize;
+}
+
+// Auto generated code. See class document of TreeParams.
+const long & TreeParams::defaultIconSize() {
+    const static long def = 0;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setIconSize(const long &v) {
+    instance()->handle->SetInt("IconSize",v);
+    instance()->IconSize = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeIconSize() {
+    instance()->handle->RemoveInt("IconSize");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docFontSize() {
+    return "";
+}
+
+// Auto generated code. See class document of TreeParams.
+const long & TreeParams::getFontSize() {
+    return instance()->FontSize;
+}
+
+// Auto generated code. See class document of TreeParams.
+const long & TreeParams::defaultFontSize() {
+    const static long def = 0;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setFontSize(const long &v) {
+    instance()->handle->SetInt("FontSize",v);
+    instance()->FontSize = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeFontSize() {
+    instance()->handle->RemoveInt("FontSize");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docItemSpacing() {
+    return "";
+}
+
+// Auto generated code. See class document of TreeParams.
+const long & TreeParams::getItemSpacing() {
+    return instance()->ItemSpacing;
+}
+
+// Auto generated code. See class document of TreeParams.
+const long & TreeParams::defaultItemSpacing() {
+    const static long def = 0;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setItemSpacing(const long &v) {
+    instance()->handle->SetInt("ItemSpacing",v);
+    instance()->ItemSpacing = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeItemSpacing() {
+    instance()->handle->RemoveInt("ItemSpacing");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docItemBackground() {
+    return QT_TRANSLATE_NOOP("TreeParams",
+"Tree view item background. Only effecitve in overlay.");
+}
+
+// Auto generated code. See class document of TreeParams.
+const unsigned long & TreeParams::getItemBackground() {
+    return instance()->ItemBackground;
+}
+
+// Auto generated code. See class document of TreeParams.
+const unsigned long & TreeParams::defaultItemBackground() {
+    const static unsigned long def = 0;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setItemBackground(const unsigned long &v) {
+    instance()->handle->SetUnsigned("ItemBackground",v);
+    instance()->ItemBackground = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeItemBackground() {
+    instance()->handle->RemoveUnsigned("ItemBackground");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docItemBackgroundPadding() {
+    return QT_TRANSLATE_NOOP("TreeParams",
+"Tree view item background padding.");
+}
+
+// Auto generated code. See class document of TreeParams.
+const long & TreeParams::getItemBackgroundPadding() {
+    return instance()->ItemBackgroundPadding;
+}
+
+// Auto generated code. See class document of TreeParams.
+const long & TreeParams::defaultItemBackgroundPadding() {
+    const static long def = 10;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setItemBackgroundPadding(const long &v) {
+    instance()->handle->SetInt("ItemBackgroundPadding",v);
+    instance()->ItemBackgroundPadding = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeItemBackgroundPadding() {
+    instance()->handle->RemoveInt("ItemBackgroundPadding");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docHideColumn() {
+    return QT_TRANSLATE_NOOP("TreeParams",
+"Hide extra tree view column for item description.");
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::getHideColumn() {
+    return instance()->HideColumn;
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::defaultHideColumn() {
+    const static bool def = false;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setHideColumn(const bool &v) {
+    instance()->handle->SetBool("HideColumn",v);
+    instance()->HideColumn = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeHideColumn() {
+    instance()->handle->RemoveBool("HideColumn");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docHideScrollBar() {
+    return QT_TRANSLATE_NOOP("TreeParams",
+"Hide tree view scroll bar in dock overlay");
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::getHideScrollBar() {
+    return instance()->HideScrollBar;
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::defaultHideScrollBar() {
+    const static bool def = true;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setHideScrollBar(const bool &v) {
+    instance()->handle->SetBool("HideScrollBar",v);
+    instance()->HideScrollBar = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeHideScrollBar() {
+    instance()->handle->RemoveBool("HideScrollBar");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docHideHeaderView() {
+    return QT_TRANSLATE_NOOP("TreeParams",
+"Hide tree view header view in dock overlay");
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::getHideHeaderView() {
+    return instance()->HideHeaderView;
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::defaultHideHeaderView() {
+    const static bool def = true;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setHideHeaderView(const bool &v) {
+    instance()->handle->SetBool("HideHeaderView",v);
+    instance()->HideHeaderView = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeHideHeaderView() {
+    instance()->handle->RemoveBool("HideHeaderView");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docResizableColumn() {
+    return QT_TRANSLATE_NOOP("TreeParams",
+"Allow tree view columns to be manually resized");
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::getResizableColumn() {
+    return instance()->ResizableColumn;
+}
+
+// Auto generated code. See class document of TreeParams.
+const bool & TreeParams::defaultResizableColumn() {
+    const static bool def = false;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setResizableColumn(const bool &v) {
+    instance()->handle->SetBool("ResizableColumn",v);
+    instance()->ResizableColumn = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeResizableColumn() {
+    instance()->handle->RemoveBool("ResizableColumn");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docColumnSize1() {
+    return "";
+}
+
+// Auto generated code. See class document of TreeParams.
+const long & TreeParams::getColumnSize1() {
+    return instance()->ColumnSize1;
+}
+
+// Auto generated code. See class document of TreeParams.
+const long & TreeParams::defaultColumnSize1() {
+    const static long def = 0;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setColumnSize1(const long &v) {
+    instance()->handle->SetInt("ColumnSize1",v);
+    instance()->ColumnSize1 = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeColumnSize1() {
+    instance()->handle->RemoveInt("ColumnSize1");
+}
+
+// Auto generated code. See class document of TreeParams.
+const char *TreeParams::docColumnSize2() {
+    return "";
+}
+
+// Auto generated code. See class document of TreeParams.
+const long & TreeParams::getColumnSize2() {
+    return instance()->ColumnSize2;
+}
+
+// Auto generated code. See class document of TreeParams.
+const long & TreeParams::defaultColumnSize2() {
+    const static long def = 0;
+    return def;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::setColumnSize2(const long &v) {
+    instance()->handle->SetInt("ColumnSize2",v);
+    instance()->ColumnSize2 = v;
+}
+
+// Auto generated code. See class document of TreeParams.
+void TreeParams::removeColumnSize2() {
+    instance()->handle->RemoveInt("ColumnSize2");
+}
+//[[[end]]]
 
 void TreeParams::onSyncSelectionChanged() {
-    if(!TreeParams::SyncSelection() || !Gui::Selection().hasSelection())
+    if(!TreeParams::getSyncSelection() || !Gui::Selection().hasSelection())
         return;
     TreeWidget::scrollItemToTop();
 }
@@ -736,13 +2027,13 @@ void TreeParams::onResizableColumnChanged() {
 void TreeParams::onIconSizeChanged() {
     auto tree = TreeWidget::instance();
     if (tree)
-        tree->setIconHeight(TreeParams::IconSize());
+        tree->setIconHeight(TreeParams::getIconSize());
 }
 
 void TreeParams::onFontSizeChanged() {
-    int fontSize = TreeParams::FontSize();
+    int fontSize = TreeParams::getFontSize();
     if (fontSize <= 0) {
-        fontSize = ViewParams::DefaultFontSize();
+        fontSize = ViewParams::getDefaultFontSize();
         if (fontSize <= 0)
             fontSize = ViewParams::appDefaultFontSize();
     }
@@ -767,9 +2058,9 @@ void TreeParams::refreshTreeViews()
 
 void TreeParams::onItemBackgroundChanged()
 {
-    if (ItemBackground()) {
+    if (getItemBackground()) {
         App::Color color;
-        color.setPackedValue(ItemBackground());
+        color.setPackedValue(getItemBackground());
         QColor col;
         col.setRedF(color.r);
         col.setGreenF(color.g);
@@ -823,24 +2114,18 @@ void TreeParams::onIndentationChanged()
 
 void TreeParams::onItemBackgroundPaddingChanged()
 {
-    if (ItemBackground())
+    if (getItemBackground())
         refreshTreeViews();
 }
 
 void TreeParams::onHideColumnChanged()
 {
     for(auto tree : TreeWidget::Instances)
-        tree->setColumnHidden(1, TreeParams::HideColumn());
-}
-
-TreeParams *TreeParams::instance() {
-    static TreeParams *instance;
-    if(!instance)
-        instance = new TreeParams;
-    return instance;
+        tree->setColumnHidden(1, TreeParams::getHideColumn());
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
+
 struct Stats {
 #define DEFINE_STATS \
     DEFINE_STAT(testStatus1) \
@@ -1023,9 +2308,6 @@ TreeWidgetItemDelegate::TreeWidgetItemDelegate(QObject* parent)
 void TreeWidgetItemDelegate::paint(QPainter *painter,
                 const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-#if QT_VERSION < 0x050000
-    return QStyledItemDelegate::paint(painter, option, index);
-#else
     QStyleOptionViewItem opt = option;
     initStyleOption(&opt, index);
 
@@ -1038,8 +2320,8 @@ void TreeWidgetItemDelegate::paint(QPainter *painter,
     {
         QRect rect = opt.rect;
         int width = opt.fontMetrics.boundingRect(opt.text).width()
-            + opt.decorationSize.width() + TreeParams::ItemBackgroundPadding();
-        if (TreeParams::CheckBoxesSelection()) {
+            + opt.decorationSize.width() + TreeParams::getItemBackgroundPadding();
+        if (TreeParams::getCheckBoxesSelection()) {
             width += style->pixelMetric(QStyle::PM_IndicatorWidth)
                 + style->pixelMetric(QStyle::PM_LayoutHorizontalSpacing);
         }
@@ -1056,7 +2338,7 @@ void TreeWidgetItemDelegate::paint(QPainter *painter,
         selGroup = static_cast<DocumentItem*>(titem)->isSelGroup();
     if (selGroup) {
         QBrush brush;
-        auto color = App::Color((uint32_t)TreeParams::SelectingGroupColor()).asValue<QColor>();
+        auto color = App::Color((uint32_t)TreeParams::getSelectingGroupColor()).asValue<QColor>();
         brush = QBrush(color);
         auto rect = opt.rect;
         if (opt.backgroundBrush.style() != Qt::NoBrush) {
@@ -1068,7 +2350,6 @@ void TreeWidgetItemDelegate::paint(QPainter *painter,
         painter->fillRect(rect, brush);
     }
     style->drawControl(QStyle::CE_ItemViewItem, &opt, painter, tree);
-#endif
 
     if (tree->pimpl->reorderingIndex == index) {
         painter->save();
@@ -1095,11 +2376,7 @@ void TreeWidgetItemDelegate::initStyleOption(QStyleOptionViewItem *option,
         return;
 
     QSize size;
-#if QT_VERSION >= 0x050000
     size = option->icon.actualSize(QSize(0xffff, 0xffff));
-#else
-    size = item->icon(0).actualSize(QSize(0xffff, 0xffff));
-#endif
     if (size.height())
         option->decorationSize = QSize(size.width()*TreeWidget::iconSize()/size.height(),
                                        TreeWidget::iconSize());
@@ -1121,7 +2398,7 @@ QWidget* TreeWidgetItemDelegate::createEditor(
     FC_LOG("create editor transaction " << App::GetApplication().getActiveTransaction());
 
     QLineEdit *editor;
-    if(TreeParams::LabelExpression()) {
+    if(TreeParams::getLabelExpression()) {
         ExpLineEdit *le = new ExpLineEdit(parent);
         le->setAutoApply(true);
         le->setFrame(false);
@@ -1137,7 +2414,7 @@ QWidget* TreeWidgetItemDelegate::createEditor(
 QSize TreeWidgetItemDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     QSize size = QStyledItemDelegate::sizeHint(option, index);
-    int spacing = std::max(0,TreeParams::ItemSpacing());
+    int spacing = std::max(0, (int)TreeParams::getItemSpacing());
     size.setHeight(size.height() + spacing);
     return size;
 }
@@ -1152,9 +2429,9 @@ TreeWidget::TreeWidget(const char *name, QWidget* parent)
     , editingItem(0), hiddenItem(0)
     , myName(name)
 {
-    if (TreeParams::ItemBackground() && _TreeItemBackground.style() == Qt::NoBrush) {
+    if (TreeParams::getItemBackground() && _TreeItemBackground.style() == Qt::NoBrush) {
         App::Color color;
-        color.setPackedValue(TreeParams::ItemBackground());
+        color.setPackedValue(TreeParams::getItemBackground());
         QColor col;
         col.setRedF(color.r);
         col.setGreenF(color.g);
@@ -1169,9 +2446,9 @@ TreeWidget::TreeWidget(const char *name, QWidget* parent)
 
     this->setIconSize(QSize(iconSize(), iconSize()));
 
-    if (TreeParams::FontSize() > 0) {
+    if (TreeParams::getFontSize() > 0) {
         QFont font = this->font();
-        font.setPointSize(TreeParams::FontSize());
+        font.setPointSize(TreeParams::getFontSize());
         this->setFont(font);
     }
 
@@ -1205,10 +2482,6 @@ TreeWidget::TreeWidget(const char *name, QWidget* parent)
     this->hideInTreeAction->setCheckable(true);
     connect(this->hideInTreeAction, SIGNAL(toggled(bool)),
             this, SLOT(onHideInTree()));
-
-    this->createGroupAction = new QAction(this);
-    connect(this->createGroupAction, SIGNAL(triggered()),
-            this, SLOT(onCreateGroup()));
 
     this->relabelObjectAction = new QAction(this);
 #ifndef Q_OS_MAC
@@ -1287,10 +2560,9 @@ TreeWidget::TreeWidget(const char *name, QWidget* parent)
     this->rootItem->setFlags(Qt::ItemIsEnabled);
     this->expandItem(this->rootItem);
     this->setSelectionMode(QAbstractItemView::ExtendedSelection);
-#if QT_VERSION >= 0x040200
     // causes unexpected drop events (possibly only with Qt4.1.x)
     this->setMouseTracking(true); // needed for itemEntered() to work
-#endif
+
 
     this->preselectTimer = new QTimer(this);
     this->preselectTimer->setSingleShot(true);
@@ -1343,7 +2615,7 @@ TreeWidget::TreeWidget(const char *name, QWidget* parent)
         }
     }
 
-    setColumnHidden(1, TreeParams::HideColumn());
+    setColumnHidden(1, TreeParams::getHideColumn());
 }
 
 TreeWidget::~TreeWidget()
@@ -1464,7 +2736,7 @@ void TreeWidget::selectAll() {
     auto itDoc = DocumentMap.find(gdoc);
     if(itDoc == DocumentMap.end())
         return;
-    if(TreeParams::RecordSelection())
+    if(TreeParams::getRecordSelection())
         Gui::Selection().selStackPush();
     Gui::Selection().clearSelection();
     Gui::Selection().setSelection(gdoc->getDocument()->getName(),gdoc->getDocument()->getObjects());
@@ -1504,7 +2776,7 @@ void TreeWidget::resetItemSearch() {
 
 void TreeWidget::startItemSearch(QLineEdit *edit) {
 
-    if(TreeParams::RecordSelection())
+    if(TreeParams::getRecordSelection())
         Selection().selStackPush();
 
     resetItemSearch();
@@ -1612,7 +2884,7 @@ void TreeWidget::itemSearch(const QString &text, bool select) {
         Selection().setPreselect(obj->getDocument()->getName(),
                 obj->getNameInDocument(), subname.c_str(),0,0,0,2);
 
-        if(select || TreeParams::SyncView()) {
+        if(select || TreeParams::getSyncView()) {
             Gui::Selection().clearSelection();
             Gui::Selection().addSelection(obj->getDocument()->getName(),
                     obj->getNameInDocument(),subname.c_str());
@@ -1653,7 +2925,7 @@ void TreeWidget::_updateStatus(bool delay) {
             onUpdateStatus();
         return;
     }
-    int timeout = TreeParams::StatusTimeout();
+    int timeout = TreeParams::getStatusTimeout();
     if (timeout<0)
         timeout = 1;
     TREE_TRACE("delay update status");
@@ -1685,7 +2957,6 @@ void TreeWidget::_setupDocumentMenu(DocumentItem *docitem, QMenu &menu)
         if(doc->testStatus(App::Document::SkipRecompute))
             menu.addAction(this->allowPartialRecomputeAction);
         menu.addAction(this->markRecomputeAction);
-        menu.addAction(this->createGroupAction);
     }
 
     pimpl->setupSelectingGroupAction(menu, doc, "*");
@@ -1731,9 +3002,7 @@ void TreeWidget::contextMenuEvent (QContextMenuEvent * e)
     QMenu subMenu;
     QMenu editMenu;
 
-#if QT_VERSION >= 0x050100
     contextMenu.setToolTipsVisible(true);
-#endif
     QActionGroup subMenuGroup(&subMenu);
     subMenuGroup.setExclusive(true);
     connect(&subMenuGroup, SIGNAL(triggered(QAction*)),
@@ -1762,24 +3031,26 @@ void TreeWidget::contextMenuEvent (QContextMenuEvent * e)
         hideInTreeAction->setChecked(!objitem->object()->showInTree());
         contextMenu.addAction(this->hideInTreeAction);
 
-        if (objitem->object()->getObject()->isDerivedFrom(App::DocumentObjectGroup::getClassTypeId()))
-            contextMenu.addAction(this->createGroupAction);
-
+        contextMenu.addSeparator();
         contextMenu.addAction(this->markRecomputeAction);
         contextMenu.addAction(this->recomputeObjectAction);
-        contextMenu.addAction(this->relabelObjectAction);
 
-        if(this->selectedItems().size()==1 && _setupObjectMenu(objitem, editMenu)) {
-            auto topact = contextMenu.actions().front();
-            bool first = true;
-            for(auto action : editMenu.actions()) {
-                contextMenu.insertAction(topact,action);
-                if(first) {
-                    first = false;
-                    contextMenu.setDefaultAction(action);
+        if(this->selectedItems().size()==1) {
+            // relabeling is only possible for a single selected document
+            contextMenu.addAction(this->relabelObjectAction);
+
+            if (_setupObjectMenu(objitem, editMenu)) {
+                auto topact = contextMenu.actions().front();
+                bool first = true;
+                for(auto action : editMenu.actions()) {
+                    contextMenu.insertAction(topact,action);
+                    if(first) {
+                        first = false;
+                        contextMenu.setDefaultAction(action);
+                    }
                 }
+                contextMenu.insertSeparator(topact);
             }
-            contextMenu.insertSeparator(topact);
         }
     }
 
@@ -1852,7 +3123,7 @@ void TreeWidget::showEvent(QShowEvent *ev) {
 #if 0
     TREE_TRACE("attaching selection observer");
     this->attachSelection();
-    int timeout = TreeParams::SelectionTimeout();
+    int timeout = TreeParams::getSelectionTimeout();
     if(timeout<=0)
         timeout = 1;
     selectTimer->start(timeout);
@@ -1861,34 +3132,6 @@ void TreeWidget::showEvent(QShowEvent *ev) {
     QTreeWidget::showEvent(ev);
 }
 
-void TreeWidget::onCreateGroup()
-{
-    if (!this->contextItem)
-        return;
-
-    QString name = tr("Group");
-    App::AutoTransaction trans("Create group");
-    if (this->contextItem->type() == DocumentType) {
-        DocumentItem* docitem = static_cast<DocumentItem*>(this->contextItem);
-        App::Document* doc = docitem->document()->getDocument();
-        QString cmd = QString::fromLatin1("App.getDocument(\"%1\").addObject"
-                              "(\"App::DocumentObjectGroup\",\"Group\").Label = '%2'")
-                              .arg(QString::fromLatin1(doc->getName()), name);
-        Gui::Command::runCommand(Gui::Command::App, cmd.toUtf8());
-    }
-    else if (this->contextItem->type() == ObjectType) {
-        DocumentObjectItem* objitem = static_cast<DocumentObjectItem*>
-            (this->contextItem);
-        App::DocumentObject* obj = objitem->object()->getObject();
-        App::Document* doc = obj->getDocument();
-        QString cmd = QString::fromLatin1("App.getDocument(\"%1\").getObject(\"%2\")"
-                              ".newObject(\"App::DocumentObjectGroup\",\"Group\").Label = '%3'")
-                              .arg(QString::fromLatin1(doc->getName()),
-                                   QString::fromLatin1(obj->getNameInDocument()),
-                                   name);
-        Gui::Command::runCommand(Gui::Command::App, cmd.toUtf8());
-    }
-}
 
 void TreeWidget::onRelabelObject()
 {
@@ -2045,7 +3288,7 @@ void TreeWidget::onItemPressed() {
 
 int TreeWidget::itemSpacing() const
 {
-    return TreeParams::ItemSpacing();
+    return TreeParams::getItemSpacing();
 }
 
 void TreeWidget::setItemSpacing(int spacing)
@@ -2098,23 +3341,18 @@ TreeWidget *TreeWidget::instance() {
 }
 
 void TreeWidget::setupResizableColumn(TreeWidget *tree) {
-    auto mode = TreeParams::ResizableColumn()?
+    auto mode = TreeParams::getResizableColumn()?
         QHeaderView::Interactive : QHeaderView::ResizeToContents;
     for(auto inst : Instances) {
         if(!tree || tree==inst) {
-#if QT_VERSION >= 0x050000
             inst->header()->setSectionResizeMode(0, mode);
             inst->header()->setSectionResizeMode(1, mode);
-#else
-            inst->header()->setResizeMode(0, mode);
-            inst->header()->setResizeMode(1, mode);
-#endif
-            if (TreeParams::ResizableColumn()) {
+            if (TreeParams::getResizableColumn()) {
                 QSignalBlocker blocker(inst);
-                if (TreeParams::ColumnSize1() > 0)
-                    inst->header()->resizeSection(0, TreeParams::ColumnSize1());
-                if (TreeParams::ColumnSize2() > 0)
-                    inst->header()->resizeSection(1, TreeParams::ColumnSize2());
+                if (TreeParams::getColumnSize1() > 0)
+                    inst->header()->resizeSection(0, TreeParams::getColumnSize1());
+                if (TreeParams::getColumnSize2() > 0)
+                    inst->header()->resizeSection(1, TreeParams::getColumnSize2());
             }
         }
     }
@@ -2786,7 +4024,7 @@ DocumentObjectItem *TreeWidget::Private::itemHitTest(
     int treeX = master->header()->sectionViewportPosition(0);
 
     // Get the x coordinate of the root item. It is required in order to calculate
-    // the identation of the item
+    // the indentation of the item
     int rootX = master->visualRect(master->rootIndex()).x();
 
     // Get the rectangle of the viewport occupied by the pressed item
@@ -2797,7 +4035,7 @@ DocumentObjectItem *TreeWidget::Private::itemHitTest(
 
     // Get the checkbox width if its enabled
     int checkboxWidth = 0;
-    if (TreeParams::CheckBoxesSelection()) {
+    if (TreeParams::getCheckBoxesSelection()) {
         auto style = master->style();
         checkboxWidth = style->pixelMetric(QStyle::PM_IndicatorWidth)
             + style->pixelMetric(QStyle::PM_LayoutHorizontalSpacing);
@@ -2990,9 +4228,7 @@ void TreeWidget::mouseReleaseEvent(QMouseEvent *ev)
                         && !pimpl->skipMouseRelease
                         && ev->button() == Qt::RightButton) {
                     QMenu menu;
-#if QT_VERSION >= 0x050100
                     menu.setToolTipsVisible(true);
-#endif
                     if (_setupObjectMenu(oitem, menu)) {
                         handled = true;
                         menu.exec(QCursor::pos());
@@ -3453,7 +4689,7 @@ void TreeWidget::dropEvent(QDropEvent *event)
                     targetParent->getNameInDocument());
         }
 
-        bool syncPlacement = TreeParams::SyncPlacement();
+        bool syncPlacement = TreeParams::getSyncPlacement();
 
         bool setSelection = true;
         std::vector<App::SubObjectT> droppedObjects;
@@ -3827,7 +5063,7 @@ void TreeWidget::dropEvent(QDropEvent *event)
                 Selection().selStackPush();
             }
 
-            if(touched && TreeParams::RecomputeOnDrop())
+            if(touched && TreeParams::getRecomputeOnDrop())
                 thisDoc->recompute();
 
         } catch (const Base::Exception& e) {
@@ -3855,7 +5091,7 @@ void TreeWidget::dropEvent(QDropEvent *event)
 
         std::vector<ItemInfo2> infos;
         infos.reserve(itemInfo.size());
-        bool syncPlacement = TreeParams::SyncPlacement();
+        bool syncPlacement = TreeParams::getSyncPlacement();
 
         // check if items can be dragged
         for(auto &v : itemInfo) {
@@ -4015,7 +5251,7 @@ void TreeWidget::dropEvent(QDropEvent *event)
             SelectionNoTopParentCheck guard;
             Selection().setSelection(thisDoc->getName(),droppedObjs);
 
-            if(touched && TreeParams::RecomputeOnDrop())
+            if(touched && TreeParams::getRecomputeOnDrop())
                 thisDoc->recompute();
 
         } catch (const Base::Exception& e) {
@@ -4038,7 +5274,7 @@ void TreeWidget::dropEvent(QDropEvent *event)
         }
     }
 
-    if(touched && TreeParams::SyncView()) {
+    if(touched && TreeParams::getSyncView()) {
         auto gdoc = Application::Instance->getDocument(thisDoc);
         if(gdoc)
             gdoc->setActiveView();
@@ -4179,7 +5415,7 @@ void TreeWidget::slotActiveDocument(const Gui::Document& Doc)
     if (jt == DocumentMap.end())
         return; // signal is emitted before the item gets created
 
-    int displayMode = TreeParams::DocumentMode();
+    int displayMode = TreeParams::getDocumentMode();
     for (auto it = DocumentMap.begin(); it != DocumentMap.end(); ++it) {
         QFont f = it->second->font(0);
         f.setBold(it == jt);
@@ -4483,33 +5719,33 @@ void TreeWidget::Private::checkItemEntered(QTreeWidgetItem *item, const QByteArr
         master->hiddenItem = nullptr;
 
     if (item && item->type() == TreeWidget::ObjectType) {
-        if(TreeParams::PreSelection()) {
-            int timeout = TreeParams::PreSelectionMinDelay();
+        if(TreeParams::getPreSelection()) {
+            int timeout = TreeParams::getPreSelectionMinDelay();
             if(timeout > 0 && master->preselectTime.elapsed() < timeout ) {
                 master->preselectTime.restart();
                 master->preselectTimer->start(timeout);
                 return;
             }
-            timeout = TreeParams::PreSelectionDelay();
+            timeout = TreeParams::getPreSelectionDelay();
             if(timeout < 0)
                 timeout = 1;
             if(master->preselectTime.elapsed() < timeout)
                 master->onPreSelectTimer();
             else{
-                timeout = TreeParams::PreSelectionTimeout();
+                timeout = TreeParams::getPreSelectionTimeout();
                 if(timeout < 0)
                     timeout = 1;
                 master->preselectTimer->start(timeout);
                 Selection().rmvPreselect();
             }
         }
-    } else if(TreeParams::PreSelection())
+    } else if(TreeParams::getPreSelection())
         Selection().rmvPreselect();
 }
 
 void TreeWidget::leaveEvent(QEvent *) {
     pimpl->restoreCursor();
-    if(!updateBlocked && TreeParams::PreSelection()) {
+    if(!updateBlocked && TreeParams::getPreSelection()) {
         preselectTimer->stop();
         Selection().rmvPreselect();
         hiddenItem = nullptr;
@@ -4517,7 +5753,7 @@ void TreeWidget::leaveEvent(QEvent *) {
 }
 
 void TreeWidget::onPreSelectTimer() {
-    if(!TreeParams::PreSelection())
+    if(!TreeParams::getPreSelection())
         return;
     QByteArray tag;
     auto item = pimpl->itemHitTest(
@@ -4679,15 +5915,12 @@ void TreeWidget::setupText()
     this->hideInTreeAction->setText(tr("Hide item"));
     this->hideInTreeAction->setStatusTip(tr("Hide the item in tree"));
 
-    this->createGroupAction->setText(tr("Create group..."));
-    this->createGroupAction->setStatusTip(tr("Create a group"));
-
     this->relabelObjectAction->setText(tr("Rename"));
     this->relabelObjectAction->setStatusTip(tr("Rename object"));
 
     this->finishEditingAction->setText(tr("Finish editing"));
     this->finishEditingAction->setStatusTip(tr("Finish editing object"));
-
+    
     this->closeDocAction->setText(tr("Close document"));
     this->closeDocAction->setStatusTip(tr("Close the document"));
 
@@ -4820,7 +6053,7 @@ void TreeWidget::onItemSelectionChanged ()
     }
 
     if(selItems.size()<=1) {
-        if(TreeParams::RecordSelection())
+        if(TreeParams::getRecordSelection())
             Gui::Selection().selStackPush();
 
         // This special handling to deal with possible discrepancy of
@@ -4833,7 +6066,7 @@ void TreeWidget::onItemSelectionChanged ()
         if(selItems.size()) {
             if(selItems.front()->type() == ObjectType) {
                 item = static_cast<DocumentObjectItem*>(selItems.front());
-                if(!ViewParams::ShowSelectionOnTop()) {
+                if(!ViewParams::getShowSelectionOnTop()) {
                     std::ostringstream ss;
                     App::DocumentObject *topParent = 0;
                     App::DocumentObject *obj = item->object()->getObject();
@@ -4854,7 +6087,7 @@ void TreeWidget::onItemSelectionChanged ()
                 }
             } else if(selItems.front()->type() == DocumentType) {
                 auto ditem = static_cast<DocumentItem*>(selItems.front());
-                if(TreeParams::SyncView()) {
+                if(TreeParams::getSyncView()) {
                     bool focus = hasFocus();
                     ditem->document()->setActiveView();
                     if(focus)
@@ -4866,7 +6099,7 @@ void TreeWidget::onItemSelectionChanged ()
         }
         for(auto &v : DocumentMap)
             v.second->clearSelection(item);
-        if(TreeParams::RecordSelection())
+        if(TreeParams::getRecordSelection())
             Gui::Selection().selStackPush();
 
         if(preselObj) {
@@ -4877,7 +6110,7 @@ void TreeWidget::onItemSelectionChanged ()
     }else{
         for (auto pos = DocumentMap.begin();pos!=DocumentMap.end();++pos)
             pos->second->updateSelection(pos->second);
-        if(TreeParams::RecordSelection())
+        if(TreeParams::getRecordSelection())
             Gui::Selection().selStackPush(true,true);
     }
 
@@ -4885,7 +6118,7 @@ void TreeWidget::onItemSelectionChanged ()
 }
 
 static bool isSelectionCheckBoxesEnabled() {
-    return TreeParams::CheckBoxesSelection();
+    return TreeParams::getCheckBoxesSelection();
 }
 
 void TreeWidget::synchronizeSelectionCheckBoxes() {
@@ -4920,7 +6153,7 @@ void TreeWidget::onItemChanged(QTreeWidgetItem *item, int column) {
 
 void TreeWidget::onSelectTimer() {
 
-    bool syncSelect = instance()==this && TreeParams::SyncSelection();
+    bool syncSelect = instance()==this && TreeParams::getSyncSelection();
     bool locked = this->blockConnection(true);
 
     _updateStatus(false);
@@ -4970,7 +6203,7 @@ void TreeWidget::onSelectionChanged(const SelectionChanges& msg)
     case SelectionChanges::AddSelection:
     case SelectionChanges::RmvSelection:
     case SelectionChanges::SetSelection: {
-        int timeout = TreeParams::SelectionTimeout();
+        int timeout = TreeParams::getSelectionTimeout();
         if(timeout<=0)
             timeout = 1;
         selectTimer->start(timeout);
@@ -4989,7 +6222,7 @@ TreePanel::TreePanel(const char *name, QWidget* parent)
   : QWidget(parent)
 {
     this->treeWidget = new TreeWidget(name, this);
-    int indent = TreeParams::Indentation();
+    int indent = TreeParams::getIndentation();
     if(indent)
         this->treeWidget->setIndentation(indent);
 
@@ -5004,9 +6237,7 @@ TreePanel::TreePanel(const char *name, QWidget* parent)
     pLayout->addWidget(this->searchBox);
     this->searchBox->hide();
     this->searchBox->installEventFilter(this);
-#if QT_VERSION >= 0x040700
     this->searchBox->setPlaceholderText(tr("Search"));
-#endif
     connect(this->searchBox, SIGNAL(returnPressed()),
             this, SLOT(accept()));
     connect(this->searchBox, SIGNAL(textChanged(QString)),
@@ -5658,9 +6889,7 @@ void DocumentItem::slotInEdit(const Gui::ViewProviderDocumentObject& v)
 {
     (void)v;
 
-    ParameterGrp::handle hGrp = App::GetApplication().GetParameterGroupByPath(
-            "User parameter:BaseApp/Preferences/TreeView");
-    unsigned long col = hGrp->GetUnsigned("TreeEditColor",4294902015);
+    unsigned long col = TreeParams::getTreeEditColor();
     QColor color((col >> 24) & 0xff,(col >> 16) & 0xff,(col >> 8) & 0xff);
 
     auto doc = Application::Instance->editDocument();
@@ -6141,7 +7370,7 @@ void DocumentItem::populateItem(DocumentObjectItem *item, bool refresh, bool del
 }
 
 int DocumentItem::findRootIndex(App::DocumentObject *childObj) {
-    if(!TreeParams::KeepRootOrder() || !childObj || !childObj->getNameInDocument())
+    if(!TreeParams::getKeepRootOrder() || !childObj || !childObj->getNameInDocument())
         return -1;
 
     // object id is monotonically increasing, so use this as a hint to insert
@@ -6283,7 +7512,7 @@ void DocumentItem::slotHighlightObject (const Gui::ViewProviderDocumentObject& o
         if (!sobj)
             sobj = obj.getObject();
         _FOREACH_ITEM(item, sobj)
-            if (TreeParams::TreeActiveAutoExpand()
+            if (TreeParams::getTreeActiveAutoExpand()
                     && item->highlightMode != HighlightMode::None)
                 item->setExpanded(false);
             item->setHighlight(set, high);
@@ -6300,7 +7529,7 @@ void DocumentItem::slotHighlightObject (const Gui::ViewProviderDocumentObject& o
     }
     if (item) {
         item->setHighlight(set,high);
-        if (TreeParams::TreeActiveAutoExpand())
+        if (TreeParams::getTreeActiveAutoExpand())
             item->setExpanded(true);
         getTree()->scrollToItem(item);
     }
@@ -7026,7 +8255,7 @@ void DocumentItem::selectItems(SelectionReason reason) {
     const auto &sels = Selection().getSelection(pDocument->getDocument()->getName(),0);
 
     bool sync;
-    if (ViewParams::MaxOnTopSelections()<(int)sels.size() || reason==SR_SELECT)
+    if (ViewParams::getMaxOnTopSelections()<(int)sels.size() || reason==SR_SELECT)
         sync = false;
     else
         sync = true;
@@ -7312,11 +8541,11 @@ void DocumentObjectItem::setHighlight(bool set, Gui::HighlightMode high) {
         break;
     case HighlightMode::UserDefined:
     {
-        f.setBold(TreeParams::TreeActiveBold());
-        f.setItalic(TreeParams::TreeActiveItalic());
-        f.setUnderline(TreeParams::TreeActiveUnderlined());
-        f.setOverline(TreeParams::TreeActiveOverlined());
-        unsigned long col = TreeParams::TreeActiveColor();
+        f.setBold(TreeParams::getTreeActiveBold());
+        f.setItalic(TreeParams::getTreeActiveItalic());
+        f.setUnderline(TreeParams::getTreeActiveUnderlined());
+        f.setOverline(TreeParams::getTreeActiveOverlined());
+        unsigned long col = TreeParams::getTreeActiveColor();
         QColor color = QColor((col >> 24) & 0xff,(col >> 16) & 0xff,(col >> 8) & 0xff);
         highlight(color);
     }   break;
@@ -7632,7 +8861,7 @@ enum GroupType {
 };
 
 int DocumentObjectItem::isGroup() const {
-    if(ViewParams::MapChildrenPlacement())
+    if(ViewParams::getMapChildrenPlacement())
         return SuperGroup;
 
     auto obj = object()->getObject();

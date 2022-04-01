@@ -2071,7 +2071,7 @@ std::set<int> ViewProviderSketch::detectPreselectionConstr(const SoPickedPoint *
 
     SoPath *path = Point->getPath();
     SoNode *tail = path->getTail();
-    int r = static_cast<int>(Gui::ViewParams::PickRadius());
+    int r = static_cast<int>(Gui::ViewParams::getPickRadius());
 
     for (int i=1; i<path->getLength(); ++i) {
         SoNode * tailFather = path->getNodeFromTail(i);
@@ -4375,9 +4375,9 @@ void ViewProviderSketch::initParams()
     CurveMissingColor.setPackedValue((uint32_t)color, transparency);
 
     // set the highlight color
-    PreselectColor.setPackedValue((uint32_t)Gui::ViewParams::HighlightColor(), transparency);
+    PreselectColor.setPackedValue((uint32_t)Gui::ViewParams::getHighlightColor(), transparency);
     // set the selection color
-    SelectColor.setPackedValue((uint32_t)Gui::ViewParams::SelectionColor(), transparency);
+    SelectColor.setPackedValue((uint32_t)Gui::ViewParams::getSelectionColor(), transparency);
     PreselectSelectedColor = PreselectColor*0.6f + SelectColor*0.4f;
 }
 

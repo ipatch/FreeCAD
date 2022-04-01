@@ -323,17 +323,17 @@ void View3DInventor::OnChange(ParameterGrp::SubjectType &rCaller,ParameterGrp::M
         _viewer->getBacklight()->intensity.setValue((float)value/100.0f);
     }
     else if (strcmp(Reason,"EnablePreselection") == 0) {
-        SoFCEnableHighlightAction cAct(ViewParams::EnablePreselection());
+        SoFCEnableHighlightAction cAct(ViewParams::getEnablePreselection());
         cAct.apply(_viewer->getSceneGraph());
     }
     else if (strcmp(Reason,"EnableSelection") == 0) {
-        SoFCEnableSelectionAction cAct(ViewParams::EnableSelection());
+        SoFCEnableSelectionAction cAct(ViewParams::getEnableSelection());
         cAct.apply(_viewer->getSceneGraph());
     }
     else if (strcmp(Reason,"HighlightColor") == 0) {
         SbColor color;
         float trans;
-        color.setPackedValue(ViewParams::HighlightColor(),trans);
+        color.setPackedValue(ViewParams::getHighlightColor(),trans);
         SoSFColor col; col.setValue(color);
         SoFCHighlightColorAction cAct(col);
         cAct.apply(_viewer->getSceneGraph());
@@ -341,7 +341,7 @@ void View3DInventor::OnChange(ParameterGrp::SubjectType &rCaller,ParameterGrp::M
     else if (strcmp(Reason,"SelectionColor") == 0) {
         SbColor color;
         float trans;
-        color.setPackedValue(ViewParams::SelectionColor(),trans);
+        color.setPackedValue(ViewParams::getSelectionColor(),trans);
         SoSFColor col; col.setValue(color);
         SoFCSelectionColorAction cAct(col);
         cAct.apply(_viewer->getSceneGraph());
@@ -453,7 +453,7 @@ void View3DInventor::OnChange(ParameterGrp::SubjectType &rCaller,ParameterGrp::M
         }
     }
     else if (strcmp(Reason, "TransparencyOnTop") == 0) {
-        _viewer->setTransparencyOnTop(ViewParams::TransparencyOnTop());
+        _viewer->setTransparencyOnTop(ViewParams::getTransparencyOnTop());
     }
     else {
         unsigned long col1 = rGrp.GetUnsigned("BackgroundColor",3940932863UL);

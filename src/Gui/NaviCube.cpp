@@ -1417,9 +1417,9 @@ bool NaviCubeImplementation::mouseReleased(short x, short y) {
 		float tilt = 90 - Base::toDegrees(atan(sqrt(2.0)));
 		int pick = pickFace(x, y);
 
-		long step = Base::clamp(ViewParams::NaviStepByTurn(), (long)4, (long)36);
+		long step = Base::clamp(ViewParams::getNaviStepByTurn(), (long)4, (long)36);
 		float rotStepAngle = 360.0f / step;
-		bool toNearest = ViewParams::NaviRotateToNearest();
+		bool toNearest = ViewParams::getNaviRotateToNearest();
 
 		SbRotation viewRot = CurrentViewRot;
 
@@ -1853,7 +1853,7 @@ void NaviCubeShared::handleMenu(QWidget *parent) {
                                 QObject::tr("Rotate to nearest"),
                                 QObject::tr(ViewParams::docNaviRotateToNearest()),
                                 QIcon(),
-                                ViewParams::NaviRotateToNearest(),
+                                ViewParams::getNaviRotateToNearest(),
                                 &checkbox);
     QObject::connect(action, &QAction::toggled, [](bool checked) {
         ViewParams::setNaviRotateToNearest(checked);
@@ -1873,7 +1873,7 @@ void NaviCubeShared::handleMenu(QWidget *parent) {
     auto spinBoxSteps = new QSpinBox;
     spinBoxSteps->setMinimum(4);
     spinBoxSteps->setMaximum(36);
-    spinBoxSteps->setValue(ViewParams::NaviStepByTurn());
+    spinBoxSteps->setValue(ViewParams::getNaviStepByTurn());
     Gui::Action::addWidget(&m_Menu, QObject::tr("Steps by turn"),
             QObject::tr(ViewParams::docNaviStepByTurn()), spinBoxSteps);
     QObject::connect(spinBoxSteps, QOverload<int>::of(&QSpinBox::valueChanged), [this](int value) {
@@ -1894,9 +1894,9 @@ void NaviCubeShared::handleMenu(QWidget *parent) {
 
     QObject::connect(&m_Menu, &QMenu::aboutToShow,
     [checkbox, spinBoxSize, spinBoxSteps, spinBoxWidth](){
-        { QSignalBlocker blocker(checkbox); checkbox->setChecked(ViewParams::NaviRotateToNearest()); }
+        { QSignalBlocker blocker(checkbox); checkbox->setChecked(ViewParams::getNaviRotateToNearest()); }
         { QSignalBlocker blocker(spinBoxSize); spinBoxSize->setValue(m_CubeWidgetSize); }
-        { QSignalBlocker blocker(spinBoxSteps); spinBoxSteps->setValue(ViewParams::NaviStepByTurn()); }
+        { QSignalBlocker blocker(spinBoxSteps); spinBoxSteps->setValue(ViewParams::getNaviStepByTurn()); }
         { QSignalBlocker blocker(spinBoxWidth); spinBoxWidth->setValue(m_BorderWidth); }
     });
 

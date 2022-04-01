@@ -80,7 +80,7 @@ DlgPropertyLink::DlgPropertyLink(QWidget* parent, int flags)
 
     selContext = Gui::Selection().getExtendedContext(nullptr);
 
-    unsigned long col = TreeParams::TreeActiveColor();
+    unsigned long col = TreeParams::getTreeActiveColor();
     selBrush = QColor((col >> 24) & 0xff,(col >> 16) & 0xff,(col >> 8) & 0xff);
     bgBrush = QColor(255, 255, 0, 100);
     selFont = ui->treeWidget->font();
@@ -687,7 +687,7 @@ void DlgPropertyLink::onCurrentItemChanged(QTreeWidgetItem *item, QTreeWidgetIte
 
     bool focus = false;
     // Do auto view switch if tree view does not do it
-    if(!TreeParams::SyncView() && selContext.getObjectName().empty()) {
+    if(!TreeParams::getSyncView() && selContext.getObjectName().empty()) {
         focus = ui->treeWidget->hasFocus();
         auto doc = Gui::Application::Instance->getDocument(sobjs.front().getDocumentName().c_str());
         if(doc) {
@@ -1062,10 +1062,10 @@ bool DlgPropertyLink::eventFilter(QObject *obj, QEvent *e) {
         }
     } else if (obj == ui->treeWidget->viewport()) {
         if (e->type() == QEvent::MouseMove) {
-            if(!timer->isActive() && enterTime.elapsed() < Gui::TreeParams::PreSelectionDelay()) {
+            if(!timer->isActive() && enterTime.elapsed() < Gui::TreeParams::getPreSelectionDelay()) {
                 onTimer();
             } else {
-                int timeout = Gui::TreeParams::PreSelectionDelay()/2;
+                int timeout = Gui::TreeParams::getPreSelectionDelay()/2;
                 if(timeout < 0)
                     timeout = 1;
                 timer->start(timeout);

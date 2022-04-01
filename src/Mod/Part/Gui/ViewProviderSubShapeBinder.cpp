@@ -102,11 +102,11 @@ void ViewProviderSubShapeBinder::onChanged(const App::Property *prop) {
             mapLine = mapPoint = mapTrans = false;
             mapFace = true;
         } else {
-            shapeColor.setPackedValue(Gui::ViewParams::DefaultShapeColor());
-            lineColor.setPackedValue(Gui::ViewParams::DefaultShapeLineColor());
+            shapeColor.setPackedValue(Gui::ViewParams::getDefaultShapeColor());
+            lineColor.setPackedValue(Gui::ViewParams::getDefaultShapeLineColor());
             pointColor = lineColor;
             transparency = 0;
-            linewidth = Gui::ViewParams::DefaultShapeLineWidth();
+            linewidth = Gui::ViewParams::getDefaultShapeLineWidth();
 #if 0
             static ParameterGrp::handle hPart = App::GetApplication().GetParameterGroupByPath
                 ("User parameter:BaseApp/Preferences/Mod/Part");

@@ -566,7 +566,7 @@ void PrefWidgetStates::restoreSettings()
     std::istringstream iss(geometry);
     int x,y,w,h;
     if (iss >> x >> y >> w >> h) {
-      if (ViewParams::CheckWidgetPlacementOnRestore()) {
+      if (ViewParams::getCheckWidgetPlacementOnRestore()) {
         auto parent = widget->parentWidget();
         if (!parent)
           parent = getMainWindow();

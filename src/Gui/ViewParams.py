@@ -69,6 +69,7 @@ Params = [
        "Show pre-selection highlight edge only"),
     ParamFloat('PreSelectionDelay', 0.1),
     ParamBool('UseNewRayPick', True),
+    ParamInt('SelectionPickThreshold',50),
     ParamFloat('ViewSelectionExtendFactor', 0.5),
     ParamBool('UseTightBoundingBox', True,
         "Show more accurate bounds when using bounding box selection style"),
@@ -257,10 +258,6 @@ Params = [
     ParamBool('SectionFillInvert',  True, "Invert cross section plane fill color."),
     ParamBool('SectionConcave',  False, "Cross section in concave."),
     ParamBool('NoSectionOnTop',  True, "Ignore section clip planes when rendering on top."),
-    ParamFloat('SectionHatchTextureScale',  1.0, "Section filling texture image scale."),
-    ParamString('SectionHatchTexture',  ":icons/section-hatch.png", on_change=True,
-        doc="Section filling texture image path."),
-    ParamBool('SectionHatchTextureEnable',  True, "Enable section fill texture."),
     ParamBool('SectionFillGroup',  True,
         "Render cross section filling of objects with similar materials together.\\n"
         "Intersecting objects will act as boolean cut operation"),

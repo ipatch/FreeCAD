@@ -62,7 +62,7 @@ static void setLinkPlacement(std::ostringstream &ss,
                              const App::SubObjectT *sobj,
                              const App::SubObjectT *parentT = nullptr)
 {
-    if (!link || !App::LinkParams::CreateInPlace())
+    if (!link || !App::LinkParams::getCreateInPlace())
         return;
     ss.str("");
     ss << "_t,_r,_s,_ = (";
@@ -88,11 +88,11 @@ static void setLinkPlacement(std::ostringstream &ss,
 static App::DocumentObject *getActiveContainer(
         App::DocumentObject **topParent=nullptr, std::string *subname=nullptr)
 {
-    if (!App::LinkParams::CreateInContainer())
+    if (!App::LinkParams::getCreateInContainer())
         return nullptr;
     Gui::MDIView *activeView = Gui::Application::Instance->activeView();
     if ( activeView ) {
-        const auto &key = App::LinkParams::ActiveContainerKey();
+        const auto &key = App::LinkParams::getActiveContainerKey();
         return activeView->getActiveObject<App::DocumentObject*> (
                 key.size() ? key.c_str() : PARTKEY, topParent, subname);
     } else {
@@ -399,7 +399,7 @@ protected: \
         App::LinkParams::set##_name(checked);\
     }\
     virtual bool getOption(void) const {\
-        return App::LinkParams::_name();\
+        return App::LinkParams::get##_name();\
     }\
 };\
 StdCmdLink##_name::StdCmdLink##_name():CheckableCommand("Std_Link" #_name)

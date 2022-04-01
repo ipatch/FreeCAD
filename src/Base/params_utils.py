@@ -110,6 +110,8 @@ using namespace {namespace};
 ''')
 
     cog.out(f'''
+namespace {{
+
 {warning_comment}
 class {class_name}P: public ParameterGrp::ObserverType {{
 public:
@@ -182,6 +184,8 @@ public:
     static {class_name}P *inst = new {class_name}P;
     return inst;
 }}
+
+}} // Anonymous namespace
 
 {warning_comment}
 ParameterGrp::handle {class_name}::getHandle() {{

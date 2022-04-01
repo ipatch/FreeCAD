@@ -70,22 +70,22 @@ void DlgSettingsSelection::saveSettings()
 
 void DlgSettingsSelection::loadSettings()
 {
-    ui->checkBoxAutoSwitch->setChecked(TreeParams::SyncView());
-    ui->checkBoxAutoExpand->setChecked(TreeParams::SyncSelection());
-    ui->checkBoxPreselect->setChecked(TreeParams::PreSelection());
-    ui->checkBoxRecord->setChecked(TreeParams::RecordSelection());
-    ui->checkBoxSelectionCheckBoxes->setChecked(TreeParams::CheckBoxesSelection());
+    ui->checkBoxAutoSwitch->setChecked(TreeParams::getSyncView());
+    ui->checkBoxAutoExpand->setChecked(TreeParams::getSyncSelection());
+    ui->checkBoxPreselect->setChecked(TreeParams::getPreSelection());
+    ui->checkBoxRecord->setChecked(TreeParams::getRecordSelection());
+    ui->checkBoxSelectionCheckBoxes->setChecked(TreeParams::getCheckBoxesSelection());
 
-    ui->checkBoxSelectionOnTop->setChecked(ViewParams::ShowSelectionOnTop());
-    ui->checkBoxPreSelectionOnTop->setChecked(ViewParams::ShowPreSelectedFaceOnTop());
-    ui->checkBoxShowBoundBox->setChecked(ViewParams::ShowSelectionBoundingBox());
-    ui->checkBoxHiddenLineSelect->setChecked(ViewParams::HiddenLineSelectionOnTop());
-    ui->checkBoxSelectElementOnTop->setChecked(ViewParams::SelectElementOnTop());
+    ui->checkBoxSelectionOnTop->setChecked(ViewParams::getShowSelectionOnTop());
+    ui->checkBoxPreSelectionOnTop->setChecked(ViewParams::getShowPreSelectedFaceOnTop());
+    ui->checkBoxShowBoundBox->setChecked(ViewParams::getShowSelectionBoundingBox());
+    ui->checkBoxHiddenLineSelect->setChecked(ViewParams::getHiddenLineSelectionOnTop());
+    ui->checkBoxSelectElementOnTop->setChecked(ViewParams::getSelectElementOnTop());
 
-    ui->comboBoxToolTipCorner->setCurrentIndex(ViewParams::PreselectionToolTipCorner());
-    ui->spinBoxToolTipOffsetX->setValue(ViewParams::PreselectionToolTipOffsetX());
-    ui->spinBoxToolTipOffsetY->setValue(ViewParams::PreselectionToolTipOffsetY());
-    ui->spinBoxToolTipFontSize->setValue(ViewParams::PreselectionToolTipFontSize());
+    ui->comboBoxToolTipCorner->setCurrentIndex(ViewParams::getPreselectionToolTipCorner());
+    ui->spinBoxToolTipOffsetX->setValue(ViewParams::getPreselectionToolTipOffsetX());
+    ui->spinBoxToolTipOffsetY->setValue(ViewParams::getPreselectionToolTipOffsetY());
+    ui->spinBoxToolTipFontSize->setValue(ViewParams::getPreselectionToolTipFontSize());
 }
 
 void DlgSettingsSelection::changeEvent(QEvent *e)

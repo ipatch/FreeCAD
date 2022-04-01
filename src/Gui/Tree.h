@@ -221,7 +221,6 @@ protected:
     bool onDoubleClickItem(QTreeWidgetItem *);
 
 protected Q_SLOTS:
-    void onCreateGroup();
     void onRelabelObject();
     void onActivateDocument(QAction*);
     void onStartEditing();
@@ -277,7 +276,6 @@ private:
     friend class Private;
     std::unique_ptr<Private> pimpl;
 
-    QAction* createGroupAction;
     QAction* relabelObjectAction;
     QAction* finishEditingAction;
     QAction* skipRecomputeAction;

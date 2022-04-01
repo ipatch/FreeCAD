@@ -40,6 +40,7 @@
 #include "View3DInventorViewer.h"
 
 using namespace Gui::Dialog;
+using namespace Gui;
 
 class Clipping::Private {
 public:

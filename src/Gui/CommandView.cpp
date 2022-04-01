@@ -572,7 +572,6 @@ void StdCmdFreezeViews::languageChange()
     }
 }
 
-
 //===========================================================================
 // Std_ToggleClipPlane
 //===========================================================================
@@ -2850,8 +2849,8 @@ static void selectionCallback(void * ud, SoEventCallback * cb)
                 Gui::Selection().clearSelection(doc->getName());
         }
 
-        bool currentSelection = (ViewParams::ShowSelectionOnTop() 
-                                 && ViewParams::SelectElementOnTop()
+        bool currentSelection = (ViewParams::getShowSelectionOnTop() 
+                                 && ViewParams::getSelectElementOnTop()
                                  && selectElement);
 
         auto picked = view->getPickedList(points, center, selectElement, backFaceCull,
@@ -3549,7 +3548,7 @@ Action * StdTree##_name::createAction(void) {\
     return pcAction;\
 }\
 bool StdTree##_name::isActive() {\
-    bool checked = TreeParams::DocumentMode()==_v;\
+    bool checked = TreeParams::getDocumentMode()==_v;\
     if(_pcAction && _pcAction->isChecked()!=checked)\
         _pcAction->setChecked(checked,true);\
     return true;\
@@ -3617,7 +3616,7 @@ protected: \
         TreeParams::set##_name(checked);\
     }\
     virtual bool getOption(void) const {\
-        return TreeParams::_name();\
+        return TreeParams::get##_name();\
     }\
 };\
 StdTree##_name::StdTree##_name():StdCmdCheckableOption("Std_Tree" #_name)
@@ -3844,7 +3843,7 @@ protected: \
         ViewParams::set##_option(checked);\
     }\
     virtual bool getOption(void) const {\
-        return ViewParams::_option();\
+        return ViewParams::get##_option();\
     }\
 };\
 StdCmd##_name::StdCmd##_name():StdCmdCheckableOption("Std_" #_name)

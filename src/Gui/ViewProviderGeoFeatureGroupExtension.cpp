@@ -56,7 +56,7 @@ ViewProviderGeoFeatureGroupExtension::ViewProviderGeoFeatureGroupExtension()
 {
     initExtensionType(ViewProviderGeoFeatureGroupExtension::getExtensionClassTypeId());
 
-    if(ViewParams::LinkChildrenDirect()) {
+    if(ViewParams::getLinkChildrenDirect()) {
         linkView = new LinkView;
         pcGroupChildren = linkView->getLinkRoot();
     } else 

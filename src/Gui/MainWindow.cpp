@@ -708,7 +708,7 @@ void populateMenu(QMenu *menu, MenuType type, bool popup)
     QMenu *lockMenu = nullptr;
     menu->setToolTipsVisible(true);
 
-    if (ViewParams::EnableMenuBarCheckBox())
+    if (ViewParams::getEnableMenuBarCheckBox())
         popup = true;
 
     switch(type) {
@@ -2376,7 +2376,7 @@ void MainWindow::showMessage(const QString& message, int timeout) {
     }
     d->actionLabel->setText(message.simplified());
     if(timeout == 0)
-        timeout = ViewParams::StatusMessageTimeout();
+        timeout = ViewParams::getStatusMessageTimeout();
     if(timeout > 0) {
         d->actionTimer->setSingleShot(true);
         d->actionTimer->start(timeout);

@@ -63,17 +63,24 @@ import LinkParams
 LinkParams.define()
 ]]]*/
 
+namespace {
+
+// Auto generated code. See class document of LinkParams.
 class LinkParamsP: public ParameterGrp::ObserverType {
 public:
+    // Auto generated code. See class document of LinkParams.
     ParameterGrp::handle handle;
+
+    // Auto generated code. See class document of LinkParams.
     std::unordered_map<const char *,void(*)(LinkParamsP*),App::CStringHasher,App::CStringHasher> funcs;
 
-    bool HideScaleVector;
-    bool CreateInPlace;
-    bool CreateInContainer;
-    std::string ActiveContainerKey;
-    bool CopyOnChangeApplyToAll;
+    bool HideScaleVector; // Auto generated code. See class document of LinkParams.
+    bool CreateInPlace; // Auto generated code. See class document of LinkParams.
+    bool CreateInContainer; // Auto generated code. See class document of LinkParams.
+    std::string ActiveContainerKey; // Auto generated code. See class document of LinkParams.
+    bool CopyOnChangeApplyToAll; // Auto generated code. See class document of LinkParams.
 
+    // Auto generated code. See class document of LinkParams.
     LinkParamsP() {
         handle = App::GetApplication().GetParameterGroupByPath("User parameter:BaseApp/Preferences/Link");
         handle->Attach(this);
@@ -90,9 +97,11 @@ public:
         funcs["CopyOnChangeApplyToAll"] = &LinkParamsP::updateCopyOnChangeApplyToAll;
     }
 
+    // Auto generated code. See class document of LinkParams.
     ~LinkParamsP() {
     }
 
+    // Auto generated code. See class document of LinkParams.
     void OnChange(Base::Subject<const char*> &, const char* sReason) {
         if(!sReason)
             return;
@@ -103,120 +112,172 @@ public:
     }
 
 
+    // Auto generated code. See class document of LinkParams.
     static void updateHideScaleVector(LinkParamsP *self) {
         self->HideScaleVector = self->handle->GetBool("HideScaleVector", true);
     }
+    // Auto generated code. See class document of LinkParams.
     static void updateCreateInPlace(LinkParamsP *self) {
         self->CreateInPlace = self->handle->GetBool("CreateInPlace", true);
     }
+    // Auto generated code. See class document of LinkParams.
     static void updateCreateInContainer(LinkParamsP *self) {
         self->CreateInContainer = self->handle->GetBool("CreateInContainer", true);
     }
+    // Auto generated code. See class document of LinkParams.
     static void updateActiveContainerKey(LinkParamsP *self) {
         self->ActiveContainerKey = self->handle->GetASCII("ActiveContainerKey", "");
     }
+    // Auto generated code. See class document of LinkParams.
     static void updateCopyOnChangeApplyToAll(LinkParamsP *self) {
         self->CopyOnChangeApplyToAll = self->handle->GetBool("CopyOnChangeApplyToAll", true);
     }
 };
 
+// Auto generated code. See class document of LinkParams.
 LinkParamsP *instance() {
-    static LinkParamsP *inst;
-    if (!inst)
-        inst = new LinkParamsP;
+    static LinkParamsP *inst = new LinkParamsP;
     return inst;
 }
 
+} // Anonymous namespace
+
+// Auto generated code. See class document of LinkParams.
 ParameterGrp::handle LinkParams::getHandle() {
     return instance()->handle;
 }
 
+// Auto generated code. See class document of LinkParams.
 const char *LinkParams::docHideScaleVector() {
     return "";
 }
-const bool & LinkParams::HideScaleVector() {
+
+// Auto generated code. See class document of LinkParams.
+const bool & LinkParams::getHideScaleVector() {
     return instance()->HideScaleVector;
 }
+
+// Auto generated code. See class document of LinkParams.
 const bool & LinkParams::defaultHideScaleVector() {
     const static bool def = true;
     return def;
 }
+
+// Auto generated code. See class document of LinkParams.
 void LinkParams::setHideScaleVector(const bool &v) {
     instance()->handle->SetBool("HideScaleVector",v);
     instance()->HideScaleVector = v;
 }
+
+// Auto generated code. See class document of LinkParams.
 void LinkParams::removeHideScaleVector() {
     instance()->handle->RemoveBool("HideScaleVector");
 }
 
+// Auto generated code. See class document of LinkParams.
 const char *LinkParams::docCreateInPlace() {
     return "";
 }
-const bool & LinkParams::CreateInPlace() {
+
+// Auto generated code. See class document of LinkParams.
+const bool & LinkParams::getCreateInPlace() {
     return instance()->CreateInPlace;
 }
+
+// Auto generated code. See class document of LinkParams.
 const bool & LinkParams::defaultCreateInPlace() {
     const static bool def = true;
     return def;
 }
+
+// Auto generated code. See class document of LinkParams.
 void LinkParams::setCreateInPlace(const bool &v) {
     instance()->handle->SetBool("CreateInPlace",v);
     instance()->CreateInPlace = v;
 }
+
+// Auto generated code. See class document of LinkParams.
 void LinkParams::removeCreateInPlace() {
     instance()->handle->RemoveBool("CreateInPlace");
 }
 
+// Auto generated code. See class document of LinkParams.
 const char *LinkParams::docCreateInContainer() {
     return "";
 }
-const bool & LinkParams::CreateInContainer() {
+
+// Auto generated code. See class document of LinkParams.
+const bool & LinkParams::getCreateInContainer() {
     return instance()->CreateInContainer;
 }
+
+// Auto generated code. See class document of LinkParams.
 const bool & LinkParams::defaultCreateInContainer() {
     const static bool def = true;
     return def;
 }
+
+// Auto generated code. See class document of LinkParams.
 void LinkParams::setCreateInContainer(const bool &v) {
     instance()->handle->SetBool("CreateInContainer",v);
     instance()->CreateInContainer = v;
 }
+
+// Auto generated code. See class document of LinkParams.
 void LinkParams::removeCreateInContainer() {
     instance()->handle->RemoveBool("CreateInContainer");
 }
 
+// Auto generated code. See class document of LinkParams.
 const char *LinkParams::docActiveContainerKey() {
     return "";
 }
-const std::string & LinkParams::ActiveContainerKey() {
+
+// Auto generated code. See class document of LinkParams.
+const std::string & LinkParams::getActiveContainerKey() {
     return instance()->ActiveContainerKey;
 }
+
+// Auto generated code. See class document of LinkParams.
 const std::string & LinkParams::defaultActiveContainerKey() {
     const static std::string def = "";
     return def;
 }
+
+// Auto generated code. See class document of LinkParams.
 void LinkParams::setActiveContainerKey(const std::string &v) {
     instance()->handle->SetASCII("ActiveContainerKey",v);
     instance()->ActiveContainerKey = v;
 }
+
+// Auto generated code. See class document of LinkParams.
 void LinkParams::removeActiveContainerKey() {
     instance()->handle->RemoveASCII("ActiveContainerKey");
 }
 
+// Auto generated code. See class document of LinkParams.
 const char *LinkParams::docCopyOnChangeApplyToAll() {
     return "";
 }
-const bool & LinkParams::CopyOnChangeApplyToAll() {
+
+// Auto generated code. See class document of LinkParams.
+const bool & LinkParams::getCopyOnChangeApplyToAll() {
     return instance()->CopyOnChangeApplyToAll;
 }
+
+// Auto generated code. See class document of LinkParams.
 const bool & LinkParams::defaultCopyOnChangeApplyToAll() {
     const static bool def = true;
     return def;
 }
+
+// Auto generated code. See class document of LinkParams.
 void LinkParams::setCopyOnChangeApplyToAll(const bool &v) {
     instance()->handle->SetBool("CopyOnChangeApplyToAll",v);
     instance()->CopyOnChangeApplyToAll = v;
 }
+
+// Auto generated code. See class document of LinkParams.
 void LinkParams::removeCopyOnChangeApplyToAll() {
     instance()->handle->RemoveBool("CopyOnChangeApplyToAll");
 }
@@ -310,7 +371,7 @@ void LinkBaseExtension::setProperty(int idx, Property *prop) {
 
     switch(idx) {
     case PropScaleVector:
-        if (!GetApplication().isRestoring() && LinkParams::HideScaleVector())
+        if (!GetApplication().isRestoring() && LinkParams::getHideScaleVector())
             prop->setStatus(Property::Hidden, true);
         break;
     case PropLinkMode: {
@@ -2158,7 +2219,7 @@ void LinkBaseExtension::onExtendedDocumentRestored() {
             if(v.x == v.y && v.x == v.z && v.x != s)
                 getScaleVectorProperty()->setValue(s,s,s);
         }
-        if(_LinkVersion.getValue()<1 && LinkParams::HideScaleVector())
+        if(_LinkVersion.getValue()<1 && LinkParams::getHideScaleVector())
             getScaleVectorProperty()->setStatus(Property::Hidden, true);
     }
     update(parent,getVisibilityListProperty());

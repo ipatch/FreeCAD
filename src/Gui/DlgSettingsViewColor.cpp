@@ -49,10 +49,10 @@ DlgSettingsViewColor::DlgSettingsViewColor(QWidget* parent)
     ui->SelectionColor->setEnabled(ui->checkBoxSelection->isChecked());
 
     ui->SelectionColor->setColor(App::Color(
-                (uint32_t)ViewParams::SelectionColor()).asValue<QColor>());
+                (uint32_t)ViewParams::getSelectionColor()).asValue<QColor>());
 
     ui->HighlightColor->setColor(App::Color(
-                (uint32_t)ViewParams::HighlightColor()).asValue<QColor>());
+                (uint32_t)ViewParams::getHighlightColor()).asValue<QColor>());
 }
 
 /**

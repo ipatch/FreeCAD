@@ -269,11 +269,11 @@ ViewProviderPartExt::ViewProviderPartExt()
     VisualTouched = true;
     forceUpdateCount = 0;
 
-    unsigned long lcol = Gui::ViewParams::DefaultShapeLineColor(); // dark grey (25,25,25)
+    unsigned long lcol = Gui::ViewParams::getDefaultShapeLineColor(); // dark grey (25,25,25)
     float r,g,b;
     r = ((lcol >> 24) & 0xff) / 255.0; g = ((lcol >> 16) & 0xff) / 255.0; b = ((lcol >> 8) & 0xff) / 255.0;
-    int lwidth = Gui::ViewParamsDefaultShapeLineWidth();
-    int psize = Gui::ViewParamsDefaultShapePointSize();
+    int lwidth = Gui::ViewParams::getDefaultShapeLineWidth();
+    int psize = Gui::ViewParams::getDefaultShapePointSize();
 
     NormalsFromUV = PartParams::NormalsFromUVNodes();
 
@@ -1361,7 +1361,7 @@ static bool getLinkColor(const std::string &mapped, App::DocumentObject *&obj,
 std::vector<App::Color> ViewProviderPartExt::getShapeColors(const Part::TopoShape &shape, 
         App::Color &defColor, App::Document *sourceDoc, bool linkOnly)
 {
-    defColor.setPackedValue(Gui::ViewParams::instance()->getDefaultShapeColor());
+    defColor.setPackedValue(Gui::ViewParams::getDefaultShapeColor());
     defColor.a = 0;
 
     if(!sourceDoc) {

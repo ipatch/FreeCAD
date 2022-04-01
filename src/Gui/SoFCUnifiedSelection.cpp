@@ -147,12 +147,12 @@ SoFCUnifiedSelection::SoFCUnifiedSelection() : pcDocument(0), pcViewer(0), pcRay
 
     currentHighlight = static_cast<SoFullPath*>(new SoPath(20));
     currentHighlight->ref();
-    this->useNewSelection = ViewParams::UseNewSelection();
+    this->useNewSelection = ViewParams::getUseNewSelection();
 
     setPreSelection = false;
     selectAll = false;
     preSelection = -1;
-    useNewSelection = ViewParams::instance()->getUseNewSelection();
+    useNewSelection = ViewParams::getUseNewSelection();
 
     preselTime = SbTime::getTimeOfDay();
     preselTimer.setData(this);
@@ -191,15 +191,15 @@ bool SoFCUnifiedSelection::hasHighlight() {
 
 void SoFCUnifiedSelection::applySettings()
 {
-    this->highlightMode = ViewParams::EnablePreselection()?ON:OFF;
-    this->selectionMode = ViewParams::EnableSelection()?ON:OFF;
+    this->highlightMode = ViewParams::getEnablePreselection()?ON:OFF;
+    this->selectionMode = ViewParams::getEnableSelection()?ON:OFF;
 
     float trans;
     SbColor color;
-    color.setPackedValue(ViewParams::HighlightColor(),trans);
+    color.setPackedValue(ViewParams::getHighlightColor(),trans);
     this->colorHighlight = color;
 
-    color.setPackedValue(ViewParams::SelectionColor(),trans);
+    color.setPackedValue(ViewParams::getSelectionColor(),trans);
     this->colorSelection = color;
 }
 
@@ -403,11 +403,11 @@ SoFCUnifiedSelection::getPickedList(const SbVec2s &pos, const SbViewportRegion &
 
     FC_TIME_INIT(t);
 
-    float radius = ViewParams::PickRadius();
+    float radius = ViewParams::getPickRadius();
     pcRayPick->setRadius(radius);
     pcRayPick->setViewportRegion(viewport);
     pcRayPick->setPoint(pos);
-    pcRayPick->setPickAll(!singlePick || !ViewParams::UseNewRayPick());
+    pcRayPick->setPickAll(!singlePick || !ViewParams::getUseNewRayPick());
 
     SoPickStyleElement::set(pcRayPick->getState(),
             (!pcRayPick->pickBackFace() && singlePick) ?
@@ -887,7 +887,7 @@ bool SoFCUnifiedSelection::setSelection(const std::vector<PickedInfo> &infos,
             objectName << ", " << subName);
     std::string newElement;
     if(subSelected
-        && ((ViewParams::HierarchyAscend() && !ctrlDown && !shiftDown && !altDown)
+        && ((ViewParams::getHierarchyAscend() && !ctrlDown && !shiftDown && !altDown)
              || Data::ComplexGeoData::hasElementName(subSelected)))
     {
         newElement = Data::ComplexGeoData::newElementName(subSelected);
@@ -1035,7 +1035,7 @@ bool SoFCUnifiedSelection::setSelection(const std::vector<PickedInfo> &infos,
     //
     // TODO: find out why!
     //
-    if (pPath && !ViewParams::ShowSelectionOnTop()) {
+    if (pPath && !ViewParams::getShowSelectionOnTop()) {
         FC_TRACE("applying action");
         SoSelectionElementAction action(type);
         action.setColor(this->colorSelection.getValue());
@@ -1132,7 +1132,7 @@ SoFCUnifiedSelection::handleEvent(SoHandleEventAction * action)
         // down extremely the system on really big data sets. In this case we just check for a picked point if the data
         // set has been selected.
         if (mymode == AUTO || mymode == ON) {
-            double delay = ViewParams::PreSelectionDelay();
+            double delay = ViewParams::getPreSelectionDelay();
 
             preselPos = action->getEvent()->getPosition();
             preselViewport = action->getViewportRegion();
@@ -1155,7 +1155,7 @@ SoFCUnifiedSelection::handleEvent(SoHandleEventAction * action)
 static FC_COIN_THREAD_LOCAL bool _ShowBoundBox;
 
 bool SoFCUnifiedSelection::getShowSelectionBoundingBox() {
-    return ViewParams::ShowSelectionBoundingBox()
+    return ViewParams::getShowSelectionBoundingBox()
         || _ShowBoundBox;
 }
 
@@ -2267,11 +2267,11 @@ void SoFCSelectionRoot::setupSelectionLineRendering(
         float width = SoLineWidthElement::get(state);
         if(width < 1.0)
             width = 1.0;
-        if(Gui::ViewParams::SelectionLineThicken()>1.0) {
-            float w = width * Gui::ViewParams::SelectionLineThicken();
-            if (Gui::ViewParams::SelectionLineMaxWidth() > 1.0) {
+        if(Gui::ViewParams::getSelectionLineThicken()>1.0) {
+            float w = width * Gui::ViewParams::getSelectionLineThicken();
+            if (Gui::ViewParams::getSelectionLineMaxWidth() > 1.0) {
                 w = std::min<float>(w,
-                        std::max<float>(width, Gui::ViewParams::SelectionLineMaxWidth()));
+                        std::max<float>(width, Gui::ViewParams::getSelectionLineMaxWidth()));
             }
             width = w;
         }
@@ -2301,13 +2301,13 @@ bool SoFCSelectionRoot::renderBBox(SoGLRenderAction *action, SoNode *node,
     auto state = action->getState();
 
     if(!force && !action->isRenderingDelayedPaths()
-            && ViewParams::ShowSelectionOnTop())
+            && ViewParams::getShowSelectionOnTop())
         return false;
 
     data->bboxaction->setViewportRegion(action->getViewportRegion());
     SoSwitchElement::set(data->bboxaction->getState(), SoSwitchElement::get(action->getState()));
 
-    bool project = !mat && ViewParams::RenderProjectedBBox();
+    bool project = !mat && ViewParams::getRenderProjectedBBox();
     if(project || !node->isOfType(SoGroup::getClassTypeId()))
         data->bboxaction->apply(node);
     else {
@@ -2352,7 +2352,7 @@ bool SoFCSelectionRoot::renderBBox(SoGLRenderAction *action, SoNode *node,
 
     if(mat) {
         SoModelMatrixElement::mult(state, node, *mat);
-    } else if(ViewParams::RenderProjectedBBox()) {
+    } else if(ViewParams::getRenderProjectedBBox()) {
         // reset model matrix, since we will transform and project the bounding box
         // by ourself, so that it is always rendered to be aligned with the global
         // axes regardless of the current model matrix.
@@ -2381,7 +2381,7 @@ bool SoFCSelectionRoot::renderBBox(SoGLRenderAction *action, SoNode *node,
     setupSelectionLineRendering(state,node,&packed,false);
 
     SoDrawStyleElement::set(state,SoDrawStyleElement::LINES);
-    SoLineWidthElement::set(state,ViewParams::SelectionBBoxLineWidth());
+    SoLineWidthElement::set(state,ViewParams::getSelectionBBoxLineWidth());
 
     float x, y, z;
     bbox.getSize(x, y, z);
@@ -2537,11 +2537,11 @@ bool SoFCSelectionRoot::_renderPrivate(SoGLRenderAction * action, bool inPath, b
                     inherited::GLRenderBelowPath(action);
             }
 
-            if(_ShowBoundBox || !ViewParams::ShowSelectionOnTop()) {
+            if(_ShowBoundBox || !ViewParams::getShowSelectionOnTop()) {
                 SoCacheElement::invalidate(state);
-                if(ViewParams::UseTightBoundingBox() && viewProvider) {
+                if(ViewParams::getUseTightBoundingBox() && viewProvider) {
                     Base::Matrix4D mat;
-                    bool project = ViewParams::RenderProjectedBBox();
+                    bool project = ViewParams::getRenderProjectedBBox();
                     if(project)
                         mat = ViewProvider::convert(SoModelMatrixElement::get(state));
                     auto fcbox = viewProvider->getBoundingBox(0,&mat,project);
@@ -2602,7 +2602,7 @@ bool SoFCSelectionRoot::_renderPrivate(SoGLRenderAction * action, bool inPath, b
         if((selPushed = ctx->selAll))
             SelColorStack.push_back(ctx->selColor);
 
-        if(!ViewParams::ShowSelectionOnTop()
+        if(!ViewParams::getShowSelectionOnTop()
                 && selPushed
                 && style != SoFCSelectionRoot::Box)
         {
@@ -2699,7 +2699,7 @@ void SoFCSelectionRoot::moveActionStack(SoAction *from, SoAction *to, bool erase
 
 #define BEGIN_ACTION \
     auto &stack = ActionStacks[action];\
-    if(ViewParams::CoinCycleCheck() \
+    if(ViewParams::getCoinCycleCheck() \
         && !stack.nodeSet.insert(this).second) \
     {\
         std::time_t t = std::time(0);\
@@ -3334,7 +3334,7 @@ void SoFCPathAnnotation::GLRenderBelowPath(SoGLRenderAction * action)
                 SbColor selColor,hlColor;
                 SoFCSelectionRoot::checkSelection(sel,selColor,hl,hlColor);
                 if(!sel && !hl)
-                    selColor.setPackedValue(ViewParams::SelectionColor(),trans);
+                    selColor.setPackedValue(ViewParams::getSelectionColor(),trans);
 
                 // push a null entry to skip SoFCSwitch manipulation in
                 // case ViewProvider::getBoundingBox() needs to use SoGetBoundingBoxAction()
@@ -3345,8 +3345,8 @@ void SoFCPathAnnotation::GLRenderBelowPath(SoGLRenderAction * action)
                 } else {
                     auto state = action->getState();
 
-                    if(ViewParams::RenderProjectedBBox()) {
-                        if(!ViewParams::UseTightBoundingBox())
+                    if(ViewParams::getRenderProjectedBBox()) {
+                        if(!ViewParams::getUseTightBoundingBox())
                             SoFCSelectionRoot::renderBBox(action,this,hl?hlColor:selColor);
                         else {
                             Base::Matrix4D mat = ViewProvider::convert(SoModelMatrixElement::get(state));
@@ -3363,7 +3363,7 @@ void SoFCPathAnnotation::GLRenderBelowPath(SoGLRenderAction * action)
                                     vpd->getObject()->getSubObject(subname.c_str(),0,&mat));
                             if(vp) {
                                 SbMatrix matrix = ViewProvider::convert(mat);
-                                if(!ViewParams::UseTightBoundingBox())
+                                if(!ViewParams::getUseTightBoundingBox())
                                     SoFCSelectionRoot::renderBBox(action,vp->getRoot(),hl?hlColor:selColor,&matrix);
                                 else {
                                     auto fcbox = vp->getBoundingBox(0,0,false,viewer);
