@@ -917,6 +917,8 @@ bool ElementNameComp::operator()(const std::string &a, const std::string &b) con
             return false;
         return std::strcmp(&a[i],&b[i])<0;
     }
+    else if (a[0] == '#')
+        return false;
 
     // If the string does not start with '#', compare the non-digits prefix
     // using lexical order.
