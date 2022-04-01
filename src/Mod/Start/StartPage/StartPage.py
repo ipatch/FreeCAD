@@ -25,6 +25,7 @@
 # the html code of the start page. It is built only once per FreeCAD session for now...
 
 import sys,os,FreeCAD,FreeCADGui,tempfile,time,zipfile,re,hashlib
+import urllib.parse
 from . import TranslationTexts
 from PySide import QtCore,QtGui
 
@@ -220,7 +221,11 @@ def getInfo(filename):
         if zfile:
             # check for meta-file if it's really a FreeCAD document
             if files[0] == "Document.xml":
-                doc = str(zfile.read(files[0]))
+                try:
+                    doc = str(zfile.read(files[0]))
+                except OSError as e:
+                    print ("Fail to load corrupted FCStd file: '{0}' with this error: {1}".format(filename, str(e)))
+                    return None
                 doc = doc.replace("\n"," ")
             if  imagePath in files:
                 image = saveIcon(filename,zfile.read(imagePath),'png')
@@ -369,7 +374,7 @@ def buildCard(filename,method,arg=None):
                         f.write(cacheheader)
                         f.write(result)
 
-                return result.replace('$METHOD$', method).replace('$ARG$', arg)
+                return result.replace('$METHOD$', method).replace('$ARG$', urllib.parse.quote(arg))
 
     return result
 
