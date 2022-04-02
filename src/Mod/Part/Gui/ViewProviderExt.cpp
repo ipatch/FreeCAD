@@ -434,7 +434,7 @@ void ViewProviderPartExt::onChanged(const App::Property* prop)
         if (prop == &DiffuseColor
                 || prop == &LineColorArray
                 || prop == &PointColorArray)
-            getObject()->touch();
+            getObject()->touch(true);
     }
     
     if (isRestoring()) {
