@@ -605,7 +605,8 @@ ObjectIdentifier PropertyConstraintList::canonicalPath(const ObjectIdentifier &p
                         << ObjectIdentifier::MapComponent(ObjectIdentifier::String(name,true));
             }
         }
-        return p;
+        // return p;
+        return ObjectIdentifier(*this) << c1;
     }
     else if (c1.isSimple()) {
         // Do not return 'p' in case we are referenced through an App::Link. we
