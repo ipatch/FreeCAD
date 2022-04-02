@@ -274,21 +274,29 @@ Document::Document(App::Document* pcDocument,Application * app)
 
     d->connectStartSave = pcDocument->signalStartSave.connect(
         [this](const App::Document &doc, const std::string &) {
-            if (auto prop = d->getOnTopProperty(& const_cast<App::Document&>(doc), true)) {
-                try {
-                    std::vector<std::string> values;
-                    std::ostringstream ss;
-                    foreachView<View3DInventor>([&](View3DInventor* view) {
-                        for (auto &objT : view->getViewer()->getObjectsOnTop()) {
-                            ss.str("");
-                            ss << view->getID() << ":" << objT.getObjectName() << '.' << objT.getSubNameNoElement();
-                            values.push_back(ss.str());
-                        }
-                    });
+            try {
+                std::vector<std::string> values;
+                std::ostringstream ss;
+                foreachView<View3DInventor>([&](View3DInventor* view) {
+                    for (auto &objT : view->getViewer()->getObjectsOnTop()) {
+                        ss.str("");
+                        ss << view->getID() << ":" << objT.getObjectName() << '.' << objT.getSubNameNoElement();
+                        values.push_back(ss.str());
+                    }
+                });
+                // First try to get existing on top property
+                if (auto prop = d->getOnTopProperty(& const_cast<App::Document&>(doc), false)) {
                     prop->setValues(std::move(values));
-                } catch (Base::Exception &e) {
-                    e.ReportException();
                 }
+                else if (values.size()) {
+                    // If cannot, then only create the property if there is on
+                    // top object
+                    if (auto prop = d->getOnTopProperty(& const_cast<App::Document&>(doc), true))
+                        prop->setValues(std::move(values));
+                }
+
+            } catch (Base::Exception &e) {
+                e.ReportException();
             }
         });
 
