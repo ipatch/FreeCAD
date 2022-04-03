@@ -77,6 +77,7 @@
 #include "Action.h"
 #include "SelectionView.h"
 #include "PieMenu.h"
+#include "OverlayWidgets.h"
 #include "TreeParams.h"
 
 FC_LOG_LEVEL_INIT("Tree",false,true,true)
@@ -6014,8 +6015,10 @@ void TreeWidget::changeEvent(QEvent *e)
 {
     if (e->type() == QEvent::LanguageChange)
         setupText();
-    else if (e->type() == QEvent::StyleChange)
-        pimpl->refreshIcons();
+    else if (e->type() == QEvent::StyleChange) {
+        if (!OverlayManager::instance()->isChangingMode())
+            pimpl->refreshIcons();
+    }
     QTreeWidget::changeEvent(e);
 }
 

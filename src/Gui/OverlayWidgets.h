@@ -86,6 +86,8 @@ public:
 
     bool isUnderOverlay() const;
 
+    bool isChangingMode() const;
+
     void initDockWidget(QDockWidget *, QWidget *);
     void setupDockWidget(QDockWidget *, int dockArea = Qt::NoDockWidgetArea);
     void unsetupDockWidget(QDockWidget *);
