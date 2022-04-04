@@ -46,7 +46,6 @@ class ViewProviderDraftArray(ViewProviderDraft):
                                 QtCore.SIGNAL("triggered()"),
                                 self.toggleFuse)
         menu.addAction(action)
-        super(ViewProviderDraftArray, self).setupContextMenu(vobj, menu)
 
     def toggleFuse(self):
         FreeCAD.setActiveTransaction(QT_TRANSLATE_NOOP('Draft', 'Toggle fuse array'))
