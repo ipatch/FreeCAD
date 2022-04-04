@@ -2336,7 +2336,7 @@ void ViewProviderLink::updateElementList(App::LinkBaseExtension *ext) {
     }
     if(ext->getSyncGroupVisibilityValue() && ext->linkedPlainGroup())
         linkView->setChildren(elements);
-    else
+    else if (!ext->_getElementCountValue())
         linkView->setChildren(elements, ext->getVisibilityListValue(), LinkView::SnapshotVisible);
     applyColors();
 }
