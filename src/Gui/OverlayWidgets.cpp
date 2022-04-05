@@ -1018,7 +1018,10 @@ bool OverlayTabWidget::checkAutoHide() const
 
     if(ViewParams::getDockOverlayAutoView()) {
         auto view = getMainWindow()->activeWindow();
-        if(!view || !view->onHasMsg("CanPan"))
+        if (!view) return true;
+        if(!view->onHasMsg("CanPan")
+                && view->parentWidget()
+                && view->parentWidget()->isMaximized())
             return true;
     }
 
@@ -1390,7 +1393,10 @@ bool OverlayTabWidget::isTransparent() const
         return false;
     if(ViewParams::getDockOverlayAutoView()) {
         auto view = getMainWindow()->activeWindow();
-        if(!view || !view->onHasMsg("CanPan"))
+        if (!view) return false;
+        if(!view->onHasMsg("CanPan")
+                && view->parentWidget()
+                && view->parentWidget()->isMaximized())
             return false;
     }
     return true;
@@ -2859,6 +2865,7 @@ public:
     QTimer _reloadTimer;
 
     bool mouseTransparent = false;
+    bool intercepting = false;
 
     std::unordered_map<QDockWidget*, OverlayInfo*> _overlayMap;
     OverlayInfo _left;
@@ -2875,8 +2882,7 @@ public:
     QAction _actOverlay;
     std::array<QAction*, 3> _actions;
 
-    QList<QPointer<View3DInventorViewer> > _3dviews;
-    int _trackingView = -1;
+    QPointer<QWidget> _trackingWidget;
     OverlayTabWidget *_trackingOverlay = nullptr;
 
     bool updateStyle = false;
@@ -2915,8 +2921,6 @@ public:
 
         connect(qApp, SIGNAL(focusChanged(QWidget*,QWidget*)),
                 host, SLOT(onFocusChanged(QWidget*,QWidget*)));
-
-        qApp->installEventFilter(host);
 
         Application::Instance->signalActivateView.connect([this](const MDIView *) {
             refresh();
@@ -2960,6 +2964,8 @@ public:
                 handle->refreshIcons();
         }
     }
+
+    void interceptEvent(QWidget *, QEvent *);
 
     void setMouseTransparent(bool enabled)
     {
@@ -4053,6 +4059,7 @@ void OverlayManager::destruct()
 OverlayManager::OverlayManager()
 {
     d = new Private(this, getMainWindow());
+    qApp->installEventFilter(this);
 }
 
 OverlayManager::~OverlayManager()
@@ -4199,7 +4206,10 @@ void OverlayManager::raiseAll()
 
 bool OverlayManager::eventFilter(QObject *o, QEvent *ev)
 {
-    if (!o->isWidgetType())
+    if (d->intercepting || !getMainWindow() || !o->isWidgetType())
+        return false;
+    auto mdi = getMainWindow()->getMdiArea();
+    if (!mdi)
         return false;
 
     switch(ev->type()) {
@@ -4212,8 +4222,7 @@ bool OverlayManager::eventFilter(QObject *o, QEvent *ev)
         }
         break;
     case QEvent::ZOrderChange: {
-        if(!d->raising && getMainWindow() && o == getMainWindow()->getMdiArea()) {
-            auto mdi = getMainWindow()->getMdiArea();
+        if(!d->raising && getMainWindow() && o == mdi) {
             // On Windows, for some reason, it will raise mdi window on tab
             // change in any docked widget, which will then obscure any overlay
             // docked widget here.
@@ -4229,7 +4238,7 @@ bool OverlayManager::eventFilter(QObject *o, QEvent *ev)
         break;
     }
     case QEvent::Resize: {
-        if(getMainWindow() && o == getMainWindow()->getMdiArea())
+        if(getMainWindow() && o == mdi)
             refresh();
         return false;
     }
@@ -4291,16 +4300,14 @@ bool OverlayManager::eventFilter(QObject *o, QEvent *ev)
         } else if (qobject_cast<QScrollBar*>(o))
             return false;
 
-        if (d->_trackingView >= 0) {
-            View3DInventorViewer *view = nullptr;
-            if(!isTreeViewDragging() && d->_trackingView < d->_3dviews.size())
-                view = d->_3dviews[d->_trackingView];
-            if(view)
-                view->callEventFilter(ev);
-            if(!view || ev->type() == QEvent::MouseButtonRelease
-                     || QApplication::mouseButtons() == Qt::NoButton)
+        if (d->_trackingWidget) {
+            if(!isTreeViewDragging())
+                d->interceptEvent(d->_trackingWidget, ev);
+            if(isTreeViewDragging()
+                    || ev->type() == QEvent::MouseButtonRelease
+                    || QApplication::mouseButtons() == Qt::NoButton)
             {
-                d->_trackingView = -1;
+                d->_trackingWidget = nullptr;
                 if (d->_trackingOverlay == grabber
                         && ev->type() == QEvent::MouseButtonRelease)
                 {
@@ -4380,8 +4387,6 @@ bool OverlayManager::eventFilter(QObject *o, QEvent *ev)
 
         if (hit <= 0) {
             d->_lastPos.setX(INT_MAX);
-            d->_3dviews.clear();
-
             if (ev->type() == QEvent::Wheel) {
                 d->wheelDelay = QTime::currentTime().addMSecs(ViewParams::getDockOverlayWheelDelay());
                 d->wheelPos = pos;
@@ -4389,63 +4394,84 @@ bool OverlayManager::eventFilter(QObject *o, QEvent *ev)
             return false;
         }
 
-        if(d->_3dviews.isEmpty()) {
-            for(auto w : getMainWindow()->windows(QMdiArea::StackingOrder)) {
-                if(!w->isVisible())
-                    continue;
-                // It is possible to support mouse through for all MDIView.
-                // But then we would have to copy all types of intercepted
-                // event and manually map the local position inside. For
-                // View3DInventorViewer, we use its backdoor function
-                // callEventFilter() to pass event directly to
-                // Quarter::EventFilter, and subsequently to
-                // Quarter::Mouse, which we have modified to use the global
-                // position of the event instead of local one.
-                for(auto view : w->findChildren<View3DInventorViewer*>()) {
-                    if(view->isVisible())
-                        d->_3dviews.insert(0,view);
-                }
-            }
-            if(d->_3dviews.isEmpty())
-                return false;
-        }
+        auto hitWidget = mdi->childAt(mdi->mapFromGlobal(pos));
+        if (!hitWidget)
+            return false;
 
         if (!activeTabWidget)
             activeTabWidget = findTabWidget(qApp->widgetAt(QCursor::pos()));
         if(!activeTabWidget || activeTabWidget->isOverlayed() || !activeTabWidget->isTransparent())
             return false;
+
         ev->accept();
-        int i = -1;
-        for(auto &view : d->_3dviews) {
-            ++i;
-            if(!view || !view->isVisible())
-                continue;
-            auto p = view->mapFromGlobal(pos);
-            if(p.x()<0 || p.y()<0 || p.x()>view->width() || p.y()>view->height())
-                continue;
-
-            // We could have used sendEvent() here, but it won't work for Wheel
-            // event. It is (probably) filtered out by some unknown Qt event
-            // filter if the target widget is not under focus.  Calling
-            // setFocus() here does not seem to have any effect. So we have to
-            // use some kind of backdoor here.
-            view->callEventFilter(ev);
-
-            if (ev->type() == QEvent::MouseButtonPress) {
-                view->setFocus();
-                d->_trackingView = i;
-                d->_trackingOverlay = activeTabWidget;
-                d->_trackingOverlay->grabMouse();
-            }
-            return true;
+        d->interceptEvent(hitWidget, ev);
+        if (ev->isAccepted() && ev->type() == QEvent::MouseButtonPress) {
+            hitWidget->setFocus();
+            d->_trackingWidget = hitWidget;
+            d->_trackingOverlay = activeTabWidget;
+            d->_trackingOverlay->grabMouse();
         }
-        break;
+        return true;
     }
 #endif
     default:
         break;
     }
     return false;
+}
+
+void OverlayManager::Private::interceptEvent(QWidget *widget, QEvent *ev)
+{
+    Base::StateLocker guard(this->intercepting);
+    auto getChildAt = [](QWidget *w, const QPoint &pos) {
+        QWidget *res = w;
+        for (; w; w = w->childAt(w->mapFromGlobal(pos)))
+            res = w;
+        return res;
+    };
+
+    switch(ev->type()) {
+    case QEvent::MouseButtonRelease:
+    case QEvent::MouseButtonPress:
+    case QEvent::MouseMove:
+    case QEvent::MouseButtonDblClick: {
+        auto me = static_cast<QMouseEvent*>(ev);
+        QWidget *child = getChildAt(widget, me->globalPos());
+        QMouseEvent mouseEvent(ev->type(),
+                            child->mapFromGlobal(me->globalPos()),
+                            me->screenPos(),
+                            me->button(),
+                            me->buttons(),
+                            me->modifiers());
+        QApplication::sendEvent(child, &mouseEvent);
+        break;
+    }
+    case QEvent::Wheel: {
+        auto we = static_cast<QWheelEvent*>(ev);
+        QWidget *child = getChildAt(widget, we->globalPos());
+        QWheelEvent wheelEvent(child->mapFromGlobal(we->globalPos()),
+                               we->globalPos(),
+                               we->pixelDelta(),
+                               we->angleDelta(),
+                               we->buttons(),
+                               we->modifiers(),
+                               we->phase(),
+                               we->inverted(),
+                               we->source());
+        QApplication::sendEvent(child, &wheelEvent);
+        break;
+    }
+    case QEvent::ContextMenu: {
+        auto ce = static_cast<QContextMenuEvent*>(ev);
+        QWidget *child = getChildAt(widget, ce->globalPos());
+        QContextMenuEvent contextMenuEvent(ce->reason(), 
+                                           child->mapFromGlobal(ce->globalPos()),
+                                           ce->globalPos());
+        QApplication::sendEvent(child, &contextMenuEvent);
+    }
+    default:
+        break;
+    }
 }
 
 void OverlayManager::refresh(QWidget *widget, bool refreshStyle)
