@@ -3369,14 +3369,17 @@ PyObject *ViewProviderLink::getPyLinkView() {
 }
 
 std::map<std::string, App::Color> ViewProviderLink::getElementColors(const char *subname) const {
-    std::map<std::string, App::Color> colors;
     auto ext = getLinkExtension();
-    if(!ext || ! ext->getColoredElementsProperty())
-        return colors;
-    const auto &mat = ShapeMaterial.getValue();
-    return getElementColorsFrom(*this,subname,*ext->getColoredElementsProperty(),
-            OverrideColorList, OverrideMaterial.getValue(), &mat, ext->getElementCountValue());
-
+    if(ext && ext->getColoredElementsProperty()) {
+        const auto &mat = ShapeMaterial.getValue();
+        auto colors =  getElementColorsFrom(*this,subname,*ext->getColoredElementsProperty(),
+                OverrideColorList, OverrideMaterial.getValue(), &mat, ext->getElementCountValue());
+        if (!colors.empty())
+            return colors;
+    }
+    if (childVp)
+        return childVp->getElementColors(subname);
+    return {};
 }
 
 std::map<std::string, App::Color> ViewProviderLink::getElementColorsFrom(
