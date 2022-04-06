@@ -512,6 +512,28 @@ StdWorkbench::~StdWorkbench()
 
 void StdWorkbench::setupContextMenu(const char* recipient, MenuItem* item) const
 {
+    auto setupCommon = [item](const char *extraCmd) {
+        MenuItem* visu = new MenuItem;
+        visu->setCommand("Visibility");
+        *visu << "Std_ToggleVisibility" << "Std_ToggleGroupVisibility" << "Std_ToggleShowOnTop"
+                << "Std_ShowSelection" << "Std_HideSelection" << "Std_SelectVisibleObjects";
+        MenuItem* sel = new MenuItem;
+        sel->setCommand("Selection");
+        *sel << "Std_ToggleSelectability" << "Std_TreeSelectAllInstances"
+             << "Std_SelectVisibleObjects"
+             << "Std_SelectDependents" << "Std_SelectDependentsRecursive";
+        if (extraCmd)
+            *sel << extraCmd;
+        MenuItem* edit = new MenuItem;
+        edit->setCommand("Copy && Paste");
+        *edit << "Std_Cut" << "Std_Copy" << "Std_Paste" << "Std_Delete";
+        *item << visu << sel << edit << "Separator"
+              << "Std_SetAppearance"
+              << "Std_GroupRandomColor"
+              << "Std_SendToPythonConsole"
+              << "Separator";
+    };
+
     if (strcmp(recipient,"View") == 0)
     {
         createLinkMenu(item);
@@ -535,25 +557,14 @@ void StdWorkbench::setupContextMenu(const char* recipient, MenuItem* item) const
               << "Separator" << "Std_ViewDockUndockFullscreen";
 
         if (Gui::Selection().hasSelection()) {
-            *item << "Separator" << "Std_SetAppearance" << "Std_ToggleVisibility" << "Std_ToggleShowOnTop"
-                  << "Std_ToggleSelectability" << "Std_TreeSelection"
-                  << "Std_GroupRandomColor" << "Separator" << "Std_Delete"
-                  << "Std_SendToPythonConsole";
+            setupCommon("Std_TreeSelection");
+            *item << "Std_TransformManip";
         }
     }
     else if (strcmp(recipient,"Tree") == 0)
     {
-        if (Gui::Selection().hasSelection()) {
-            MenuItem* visu = new MenuItem;
-            visu->setCommand("Visibility");
-            *visu << "Std_ToggleVisibility" << "Std_ToggleGroupVisibility" << "Std_ToggleShowOnTop"
-                  << "Std_ShowSelection" << "Std_HideSelection";
-            *item << visu
-                  << "Std_ToggleSelectability" << "Std_TreeSelectAllInstances" << "Separator"
-                  << "Std_SetAppearance" << "Std_GroupRandomColor" << "Separator"
-                  << "Std_Cut" << "Std_Copy" << "Std_Paste" << "Std_Delete"
-                  << "Std_SendToPythonConsole" << "Separator";
-        }
+        if (Gui::Selection().hasSelection())
+            setupCommon(nullptr);
     }
 }
 

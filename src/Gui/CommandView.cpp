@@ -1222,6 +1222,89 @@ bool StdCmdHideObjects::isActive(void)
 }
 
 //===========================================================================
+// Std_SelectDependents
+//===========================================================================
+
+DEF_STD_CMD_A(StdCmdSelectDependents)
+
+StdCmdSelectDependents::StdCmdSelectDependents()
+    : Command("Std_SelectDependents")
+{
+    sGroup        = "Standard-View";
+    sMenuText     = QT_TR_NOOP("Select direct dependent objects");
+    sToolTipText  = QT_TR_NOOP("Select objects that are directly depended on the current selection");
+    sWhatsThis    = "Std_SelectDependents";
+    sStatusTip    = sMenuText;
+    eType         = Alter3DView;
+}
+
+void StdCmdSelectDependents::activated(int iMsg)
+{
+    Q_UNUSED(iMsg);
+    std::map<App::Document*, std::vector<App::DocumentObject*>> objmap;
+    std::set<App::DocumentObject*> objset;
+    auto sels = Gui::Selection().getCompleteSelection();
+    for (const auto &sel : sels)
+        objset.insert(sel.pObject);
+    for (const auto &sel : sels) {
+        for (auto obj : sel.pObject->getOutList()) {
+            if (objset.insert(obj).second)
+                objmap[obj->getDocument()].push_back(obj);
+        }
+    }
+    if (QApplication::queryKeyboardModifiers() != Qt::ControlModifier)
+        Selection().clearCompleteSelection();
+    for (const auto &v : objmap)
+        Selection().setSelection(v.first->getName(), v.second);
+}
+
+bool StdCmdSelectDependents::isActive(void)
+{
+    return Gui::Selection().hasSelection();
+}
+
+//===========================================================================
+// Std_SelectDependentsRecursive
+//===========================================================================
+
+DEF_STD_CMD_A(StdCmdSelectDependentsRecursive)
+
+StdCmdSelectDependentsRecursive::StdCmdSelectDependentsRecursive()
+    : Command("Std_SelectDependentsRecursive")
+{
+    sGroup        = "Standard-View";
+    sMenuText     = QT_TR_NOOP("Select all dependent objects");
+    sToolTipText  = QT_TR_NOOP("Select all dependent objects of the current selection");
+    sWhatsThis    = "Std_SelectDependentsRecursive";
+    sStatusTip    = sMenuText;
+    eType         = Alter3DView;
+}
+
+void StdCmdSelectDependentsRecursive::activated(int iMsg)
+{
+    Q_UNUSED(iMsg);
+    std::map<App::Document*, std::vector<App::DocumentObject*>> objmap;
+    std::vector<App::DocumentObject*> objs;
+    auto sels = Gui::Selection().getCompleteSelection();
+    for (const auto &sel : sels)
+        objs.push_back(sel.pObject);
+    std::set<App::DocumentObject*> objset(objs.begin(), objs.end());
+    for (auto obj : App::Document::getDependencyList(objs)) {
+        if (objset.insert(obj).second)
+            objmap[obj->getDocument()].push_back(obj);
+    }
+    if (QApplication::queryKeyboardModifiers() != Qt::ControlModifier)
+        Selection().clearCompleteSelection();
+    for (const auto &v : objmap)
+        Selection().setSelection(v.first->getName(), v.second);
+}
+
+bool StdCmdSelectDependentsRecursive::isActive(void)
+{
+    return Gui::Selection().hasSelection();
+}
+
+//===========================================================================
 // Std_SetAppearance
 //===========================================================================
 DEF_STD_CMD_A(StdCmdSetAppearance)
@@ -2996,9 +3079,9 @@ DEF_STD_CMD(StdTreeSelection)
 StdTreeSelection::StdTreeSelection()
   : Command("Std_TreeSelection")
 {
-    sGroup        = QT_TR_NOOP("TreeView");
-    sMenuText     = QT_TR_NOOP("Go to selection");
-    sToolTipText  = QT_TR_NOOP("Scroll to first selected item");
+    sGroup        = "TreeView";
+    sMenuText     = QT_TR_NOOP("Show selection in tree view");
+    sToolTipText  = QT_TR_NOOP("Scroll the tree view to the first selected item");
     sWhatsThis    = "Std_TreeSelection";
     sStatusTip    = QT_TR_NOOP("Scroll to first selected item");
     eType         = Alter3DView;
@@ -4474,6 +4557,8 @@ void CreateViewStdCommands(void)
     rcCmdMgr.addCommand(new StdCmdToggleObjects());
     rcCmdMgr.addCommand(new StdCmdShowObjects());
     rcCmdMgr.addCommand(new StdCmdHideObjects());
+    rcCmdMgr.addCommand(new StdCmdSelectDependents());
+    rcCmdMgr.addCommand(new StdCmdSelectDependentsRecursive());
     rcCmdMgr.addCommand(new StdOrthographicCamera());
     rcCmdMgr.addCommand(new StdPerspectiveCamera());
     rcCmdMgr.addCommand(new StdCmdToggleClipPlane());

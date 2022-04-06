@@ -2990,11 +2990,11 @@ void TreeWidget::contextMenuEvent (QContextMenuEvent * e)
 
     // ask workbenches and view provider, ...
     MenuItem view;
-    view << "Std_TreeViewActions";
 
     Gui::Application::Instance->setupContextMenu("Tree", &view);
 
-    view << "Std_Expressions";
+    view << "Std_TreeViewActions"
+         << "Std_Expressions";
     Workbench::createLinkMenu(&view);
 
     QMenu contextMenu;
