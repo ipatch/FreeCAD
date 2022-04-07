@@ -1152,11 +1152,6 @@ bool NaviCubeShared::drawNaviCube(SoCamera *cam, bool pickMode, int hiliteId, bo
 
 	glClear(GL_DEPTH_BUFFER_BIT);
 
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, (void*) m_VertexArray.data());
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	glTexCoordPointer(2, GL_FLOAT, 0, m_TextureCoordArray.data());
-
 	if (!pickMode) {
 		// Draw the axes
 		if (m_ShowCS) {
@@ -1216,6 +1211,11 @@ bool NaviCubeShared::drawNaviCube(SoCamera *cam, bool pickMode, int hiliteId, bo
             glPixelStorei(GL_UNPACK_ROW_LENGTH, rowlength);
 		}
 	}
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, (void*) m_VertexArray.data());
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glTexCoordPointer(2, GL_FLOAT, 0, m_TextureCoordArray.data());
 
 	// Draw the cube faces
 	if (pickMode) {
@@ -1306,11 +1306,12 @@ bool NaviCubeShared::drawNaviCube(SoCamera *cam, bool pickMode, int hiliteId, bo
 		}
 	}
 
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
     if (hit || (!m_AutoHideButton && !m_AutoHideCube)) {
         // Draw the rotate buttons
         glEnable(GL_CULL_FACE);
-        glDisableClientState(GL_VERTEX_ARRAY);
-        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
         glDisable(GL_DEPTH_TEST);
         glClear(GL_DEPTH_BUFFER_BIT);
