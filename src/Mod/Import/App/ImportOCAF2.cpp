@@ -298,7 +298,7 @@ bool ImportOCAF2::getColor(const TopoDS_Shape &shape, Info &info, bool check, bo
 }
 
 struct ImportOCAF2::ColorInfo {
-    TopTools_IndexedMapOfShape faceMap,edgeMap;
+    Part::TopoShape tshape;
     std::vector<App::Color> faceColors;
     std::vector<App::Color> edgeColors;
     App::Color faceColor;
@@ -371,7 +371,7 @@ Part::Feature *ImportOCAF2::expandShape(App::Document *doc,
                     int i=0;
                     for(TopExp_Explorer exp(it.Value(),TopAbs_FACE);exp.More();exp.Next()) {
                         App::Color &color = faceColors[i++];
-                        int idx = colors.faceMap.FindIndex(exp.Current())-1;
+                        int idx = colors.tshape.findShape(exp.Current())-1;
                         if(idx>=0 && idx<(int)colors.faceColors.size()) {
                             color = colors.faceColors[idx];
                             hasColors = true;
@@ -388,7 +388,7 @@ Part::Feature *ImportOCAF2::expandShape(App::Document *doc,
                     int i=0;
                     for(TopExp_Explorer exp(it.Value(),TopAbs_EDGE);exp.More();exp.Next()) {
                         App::Color &color = edgeColors[i++];
-                        int idx = colors.edgeMap.FindIndex(exp.Current())-1;
+                        int idx = colors.tshape.findShape(exp.Current())-1;
                         if(idx>=0 && idx<(int)colors.edgeColors.size()) {
                             color = colors.edgeColors[idx];
                             hasColors = true;
@@ -436,8 +436,9 @@ bool ImportOCAF2::createObject(App::Document *doc, TDF_Label label,
     bool hasFaceColors = false;
     bool hasEdgeColors = false;
 
-    Part::TopoShape tshape(shape);
     ColorInfo colors;
+    colors.tshape.setShape(shape);
+    Part::TopoShape &tshape = colors.tshape;
 
     TDF_LabelSequence seq;
     if(!label.IsNull() && aShapeTool->GetSubShapes(label,seq)) {
@@ -523,17 +524,19 @@ bool ImportOCAF2::createObject(App::Document *doc, TDF_Label label,
         feature = expandShape(doc,label,shape,colors);
         if(!feature)
             return false;
+        applyFaceColors(feature,{});
     } else {
         feature = static_cast<Part::Feature*>(doc->addObject("Part::Feature",tshape.shapeName().c_str()));
         feature->Shape.setValue(shape);
         // feature->Visibility.setValue(false);
+
+        applyFaceColors(feature,{info.faceColor});
+        applyEdgeColors(feature,{info.edgeColor});
+        if(colors.faceColors.size())
+            applyFaceColors(feature,colors.faceColors);
+        if(colors.edgeColors.size())
+            applyEdgeColors(feature,colors.edgeColors);
     }
-    applyFaceColors(feature,{info.faceColor});
-    applyEdgeColors(feature,{info.edgeColor});
-    if(colors.faceColors.size())
-        applyFaceColors(feature,colors.faceColors);
-    if(colors.edgeColors.size())
-        applyEdgeColors(feature,colors.edgeColors);
 
     info.propPlacement = &feature->Placement;
     info.obj = feature;
