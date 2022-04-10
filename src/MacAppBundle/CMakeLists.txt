@@ -132,6 +132,6 @@ install(CODE
     execute_process(
         COMMAND python2.7
         ${CMAKE_SOURCE_DIR}/src/Tools/MakeMacBundleRelocatable.py
-        ${APP_PATH} ${HOMEBREW_PREFIX}/opt/llvm/lib ${HOMEBREW_PREFIX}/opt/icu4c/lib ${HOMEBREW_PREFIX}${MACPORTS_PREFIX}/lib /usr/local/opt ${CONFIG_NGLIB} ${Qt5Core_DIR}/../../.. ${XCTEST_PATH} ${WEBKIT_FRAMEWORK_DIR}
+        ${APP_PATH} ${HOMEBREW_PREFIX}/opt/nglib@6.2.2105/Contents/Resources ${HOMEBREW_PREFIX}/opt/llvm/lib ${HOMEBREW_PREFIX}/opt/icu4c/lib ${HOMEBREW_PREFIX}${MACPORTS_PREFIX}/lib /usr/local/opt ${CONFIG_NGLIB} ${Qt5Core_DIR}/../../.. ${XCTEST_PATH} ${WEBKIT_FRAMEWORK_DIR}
     )"
 )
