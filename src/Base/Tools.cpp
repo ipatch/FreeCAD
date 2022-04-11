@@ -245,10 +245,12 @@ QString Base::Tools::escapeEncodeFilename(const QString& s)
     const int len = s.length();
     result.reserve(int(len * 1.1));
     for (int i = 0; i < len; ++i) {
-        if (s.at(i) == QLatin1Char('\"'))
-            result += QLatin1String("\\\"");
+        if (s.at(i) == QLatin1Char('\\'))
+            result += QStringLiteral("\\\\");
+        else if (s.at(i) == QLatin1Char('\"'))
+            result += QStringLiteral("\\\"");
         else if (s.at(i) == QLatin1Char('\''))
-            result += QLatin1String("\\\'");
+            result += QStringLiteral("\\\'");
         else
             result += s.at(i);
     }
@@ -261,7 +263,9 @@ std::string Base::Tools::escapeEncodeFilename(const std::string& s)
     std::string result;
     size_t len = s.size();
     for (size_t i = 0; i < len; ++i) {
-        if (s.at(i) == '\"')
+        if (s.at(i) == '\\')
+            result += "\\\\";
+        else if (s.at(i) == '\"')
             result += "\\\"";
         else if (s.at(i) == '\'')
             result += "\\\'";
