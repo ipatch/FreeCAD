@@ -529,9 +529,16 @@ void ToolBarManager::setup(ToolBarItem* toolBarItems)
         return; // empty menu bar
 
     static QPointer<QWidget> _ActionWidget;
-    if (!_ActionWidget)
+    if (!_ActionWidget) {
         _ActionWidget = new QWidget(getMainWindow());
-    else {
+        _ActionWidget->setObjectName(QStringLiteral("_fc_action_widget_"));
+		// Although _ActionWidget has zero size, on MacOS it somehow has a
+		// 'phantom' size without any visible content and will block the top
+		// left tool buttons of the application main window. So we move it out
+		// of the way.
+		_ActionWidget->move(QPoint(-100,-100));
+                
+    } else {
         for (auto action : _ActionWidget->actions())
             _ActionWidget->removeAction(action);
     }
