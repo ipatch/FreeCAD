@@ -1571,6 +1571,7 @@ void SoFCRayPickAction::finish() {
 SoFCRayPickAction::SoFCRayPickAction(const SbViewportRegion &vp)
     :SoRayPickAction(vp)
 {
+    skipFace = false;
     ppList.reset(new SoPickedPointList);
 }
 
@@ -1587,6 +1588,7 @@ void SoFCRayPickAction::cleanup() {
     reset();
     ppList->truncate(0);
     faceDistances.clear();
+    skipFace = false;
 }
 
 void SoFCRayPickAction::beginTraversal(SoNode * node) {
@@ -1621,6 +1623,10 @@ void SoFCRayPickAction::afterPick() {
             if(!detail)
                 continue;
             if(detail->isOfType(SoFaceDetail::getClassTypeId())) {
+                if (backFace == -1) {
+                    // picking only vertex or edge
+                    continue;
+                }
                 if(backFace == 1) {
                     ppFace = pps[i];
                     continue;
@@ -1678,6 +1684,8 @@ void SoFCRayPickAction::afterPick() {
 
     if(!pp) {
         pp = getPickedPoint();
+        if (skipFace && pp && pp->getDetail() && pp->getDetail()->isOfType(SoFaceDetail::getClassTypeId()))
+            pp = nullptr;
         if(!pp) {
             reset();
             return;
