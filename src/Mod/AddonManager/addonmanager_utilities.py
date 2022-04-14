@@ -99,7 +99,7 @@ def symlink(source, link_name):
                 raise ctypes.WinError()
 
 
-def urlopen(url):
+def urlopen(url, silent=False):
     """Opens an url with urllib2"""
 
     timeout = 5
@@ -130,8 +130,10 @@ def urlopen(url):
     try:
         u = urllib2.urlopen(req, timeout=timeout)
     except Exception:
-        import traceback
-        traceback.print_exc()
+        if not silent:
+            import traceback
+            traceback.print_exc()
+            FreeCAD.Console.PrintError(f'Failed to get url {url}\n')
         return None
     else:
         return u
