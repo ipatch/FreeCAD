@@ -233,6 +233,9 @@ std::string ComplexGeoData::noElementName(const char *name) {
 }
 
 const char *ComplexGeoData::findElementName(const char *subname) {
+    // skip leading dots
+    while(subname && subname[0] == '.')
+        ++subname;
     if(!subname || !subname[0] || isMappedElement(subname))
         return subname;
     const char *dot = strrchr(subname,'.');
