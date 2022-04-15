@@ -146,6 +146,15 @@ void DlgObjectSelection::init(const std::vector<App::DocumentObject*> &objs,
     }
     onItemSelectionChanged();
 
+    /**
+     * create useOriginalsBtn and add to the button box
+     * tried adding to .ui file, but could never get the
+     * formatting exactly the way I wanted it. -- <TheMarkster>
+     */
+    useOriginalsBtn = new QPushButton(tr("&Use Original Selections"));
+    useOriginalsBtn->setToolTip(tr("Ignore dependencies and proceed with objects\noriginally selected prior to opening this dialog"));
+    ui->buttonBox->addButton(useOriginalsBtn, QDialogButtonBox::ResetRole);
+
     connect(ui->treeWidget, SIGNAL(itemChanged(QTreeWidgetItem*,int)),
             this, SLOT(onObjItemChanged(QTreeWidgetItem*,int)));
     connect(ui->depList, SIGNAL(itemChanged(QTreeWidgetItem*,int)),
@@ -154,6 +163,8 @@ void DlgObjectSelection::init(const std::vector<App::DocumentObject*> &objs,
             this, SLOT(onDepItemChanged(QTreeWidgetItem*,int)));
     connect(ui->treeWidget, SIGNAL(itemSelectionChanged()),
             this, SLOT(onItemSelectionChanged()));
+    connect(useOriginalsBtn, SIGNAL(clicked()), 
+            this, SLOT(onUseOriginalsBtnClicked()));
 
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
     connect(ui->buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
@@ -326,6 +337,10 @@ void DlgObjectSelection::setItemState(App::DocumentObject *obj,
 }
 
 std::vector<App::DocumentObject*> DlgObjectSelection::getSelections(bool invert, bool sort) const {
+
+    if (returnOriginals)
+        return initSels;
+
     std::vector<App::DocumentObject*> res;
     if (!invert) {
         for (auto &v : itemMap) {
@@ -593,6 +608,11 @@ void DlgObjectSelection::onItemSelectionChanged() {
         ui->depList->setSortingEnabled(true);
     if (enabled2)
         ui->inList->setSortingEnabled(true);
+}
+
+void DlgObjectSelection::onUseOriginalsBtnClicked() {
+    returnOriginals = true;
+    QDialog::accept();
 }
 
 void DlgObjectSelection::accept() {
