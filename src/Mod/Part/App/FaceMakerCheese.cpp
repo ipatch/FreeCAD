@@ -112,7 +112,7 @@ bool FaceMakerCheese::Wire_Compare::operator() (const TopoDS_Wire& w1, const Top
         box2.SetGap(0.0);
     }
 
-    return box1.SquareExtent() < box2.SquareExtent();
+    return box2.SquareExtent() - box1.SquareExtent() > Precision::Confusion();
 }
 
 bool FaceMakerCheese::isInside(const TopoDS_Wire& wire1, const TopoDS_Wire& wire2)
