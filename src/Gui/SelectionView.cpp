@@ -738,7 +738,7 @@ App::SubObjectT SelectionMenu::doPick(const std::vector<App::SubObjectT> &sels) 
         Gui::Selection().enablePickedList(true);
 
     Gui::Selection().rmvPreselect();
-    QAction* picked = PieMenu::exec(this, QCursor::pos(), "Std_PickGeometry", false, true);
+    QAction* picked = PieMenu::exec(this, QCursor::pos(), "Std_PickGeometry");
     if(toggle)
         Gui::Selection().enablePickedList(false);
     return onPicked(picked);
