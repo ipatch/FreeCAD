@@ -116,13 +116,7 @@ public:
 
     void init()
     {
-#if QT_VERSION  >= 0x050000
         menu->aboutToShow();
-#else
-        // work around qt4 protected signal
-        connect(&master, SIGNAL(initMenu()), menu, SIGNAL(aboutToShow()));
-        master.initMenu();
-#endif
         QAction *first = nullptr;
         for(QAction *action : menu->actions()) {
             if (action->isSeparator())
@@ -813,7 +807,7 @@ QAction *PieMenu::exec(QMenu *menu,
         return nullptr;
 
     if (resetOffset)
-        pmenu.pimpl->offset = 0.;
+        pmenu.setOffset(0);
 
     if (!isEnabled(pmenu.pimpl->param.c_str())) {
         const auto &actions = menu->actions();
