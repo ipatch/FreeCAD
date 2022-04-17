@@ -427,6 +427,8 @@ void SoDatumLabel::GLRender(SoGLRenderAction * action)
     if (action->handleTransparency(true))
       return;
 
+    const SbViewVolume & vv = SoViewVolumeElement::get(state);
+
     /**Remark from Stefan Tröger:
     * The scale calculation is based on knowledge of SbViewVolume::getWorldToScreenScale
     * implementation internals. The factor returned from this function is calculated from the view frustums
@@ -434,16 +436,29 @@ void SoDatumLabel::GLRender(SoGLRenderAction * action)
     * to get the exact pixel scale factor.
     * This is not documented and therefore may change on later coin versions!
     */
-    const SbViewVolume & vv = SoViewVolumeElement::get(state);
     // As reference use the center point the camera is looking at on the near plane
     // because then independent of the camera we get a constant scale factor when panning.
     // If we used (0,0,0) instead then the scale factor would change heavily in perspective
     // rendering mode. See #0002921 and #0002922.
+
+#if 0
     SbVec3f center = vv.getSightPoint(vv.getNearDist() + vv.getDepth() * 0.5f);
     float scale = vv.getWorldToScreenScale(center, 1.f);
     const SbViewportRegion & vp = SoViewportRegionElement::get(state);
     SbVec2s vp_size = vp.getViewportSizePixels();
-    scale /= float(vp_size[0]);
+    scale /= vp_size[0];
+#else
+
+    // The above comment about potential scale change in perspective view does
+    // not seem to be true. On the contrary, it produces unusable scale factor.
+    // Using center 0 below seems to be just fine.
+    SbVec3f center(0,0,0);
+    float scale = vv.getWorldToScreenScale(center, 0.1f);
+    const SbViewportRegion & vp = SoViewportRegionElement::get(state);
+    SbVec2s vp_size = vp.getViewportSizePixels();
+    scale /= vp_size[0]/10.f;
+#endif
+
 
     const SbString* s = string.getValues(0);
     bool hasText = (s->getLength() > 0) ? true : false;
