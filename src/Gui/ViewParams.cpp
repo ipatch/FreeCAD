@@ -2251,7 +2251,8 @@ void ViewParams::removeSelectionLineMaxWidth() {
 // Auto generated code. See class document of ViewParams.
 const char *ViewParams::docSelectionPointScale() {
     return QT_TRANSLATE_NOOP("ViewParams",
-"Muplication factor to increase the size of the selected point.\\nIf zero, then use line multiplication factor.");
+"Muplication factor to increase the size of the selected point.\n"
+"If zero, then use line multiplication factor.");
 }
 
 // Auto generated code. See class document of ViewParams.
@@ -2661,7 +2662,8 @@ void ViewParams::removeUseBoundingBoxCache() {
 // Auto generated code. See class document of ViewParams.
 const char *ViewParams::docRenderProjectedBBox() {
     return QT_TRANSLATE_NOOP("ViewParams",
-"Show projected bounding box that is aligned to axes of\\nglobal coordinate space");
+"Show projected bounding box that is aligned to axes of\n"
+"global coordinate space");
 }
 
 // Auto generated code. See class document of ViewParams.
@@ -2771,7 +2773,9 @@ void ViewParams::removeMaxOnTopSelections() {
 // Auto generated code. See class document of ViewParams.
 const char *ViewParams::docMapChildrenPlacement() {
     return QT_TRANSLATE_NOOP("ViewParams",
-"Map child object into parent's coordinate space when showing on top.\\nNote that once activated, this option will also activate option ShowOnTop.\\nWARNING! This is an experimental option. Please use with caution.");
+"Map child object into parent's coordinate space when showing on top.\n"
+"Note that once activated, this option will also activate option ShowOnTop.\n"
+"WARNING! This is an experimental option. Please use with caution.");
 }
 
 // Auto generated code. See class document of ViewParams.
@@ -3019,7 +3023,8 @@ void ViewParams::removeDockOverlaySplitterHandleTimeout() {
 // Auto generated code. See class document of ViewParams.
 const char *ViewParams::docDockOverlayActivateOnHover() {
     return QT_TRANSLATE_NOOP("ViewParams",
-"Show auto hidden dock overlay on mouse over.\\nIf disabled, then show on mouse click.");
+"Show auto hidden dock overlay on mouse over.\n"
+"If disabled, then show on mouse click.");
 }
 
 // Auto generated code. See class document of ViewParams.
@@ -3103,7 +3108,8 @@ void ViewParams::removeDockOverlayWheelPassThrough() {
 // Auto generated code. See class document of ViewParams.
 const char *ViewParams::docDockOverlayWheelDelay() {
     return QT_TRANSLATE_NOOP("ViewParams",
-"Delay capturing mouse wheel event for passing through if it is\\npreviously handled by other widget.");
+"Delay capturing mouse wheel event for passing through if it is\n"
+"previously handled by other widget.");
 }
 
 // Auto generated code. See class document of ViewParams.
@@ -3131,7 +3137,10 @@ void ViewParams::removeDockOverlayWheelDelay() {
 // Auto generated code. See class document of ViewParams.
 const char *ViewParams::docDockOverlayAlphaRadius() {
     return QT_TRANSLATE_NOOP("ViewParams",
-"If auto mouse click through is enabled, then this radius\\ndefines a region of alpha test under the mouse cursor.\\nAuto click through is only activated if all pixels within\\nthe region are non-opaque.");
+"If auto mouse click through is enabled, then this radius\n"
+"defines a region of alpha test under the mouse cursor.\n"
+"Auto click through is only activated if all pixels within\n"
+"the region are non-opaque.");
 }
 
 // Auto generated code. See class document of ViewParams.
@@ -4126,7 +4135,9 @@ void ViewParams::removeShadowLightColor() {
 // Auto generated code. See class document of ViewParams.
 const char *ViewParams::docShadowShowGround() {
     return QT_TRANSLATE_NOOP("ViewParams",
-"Whether to show auto generated ground face. You can specify you own ground\\nobject by changing its view property 'ShadowStyle' to 'Shadowed', meaning\\nthat it will only receive but not cast shadow.");
+"Whether to show auto generated ground face. You can specify you own ground\n"
+"object by changing its view property 'ShadowStyle' to 'Shadowed', meaning\n"
+"that it will only receive but not cast shadow.");
 }
 
 // Auto generated code. See class document of ViewParams.
@@ -4182,7 +4193,8 @@ void ViewParams::removeShadowGroundBackFaceCull() {
 // Auto generated code. See class document of ViewParams.
 const char *ViewParams::docShadowGroundScale() {
     return QT_TRANSLATE_NOOP("ViewParams",
-"The auto generated ground face is determined by the scene bounding box\\nmultiplied by this scale");
+"The auto generated ground face is determined by the scene bounding box\n"
+"multiplied by this scale");
 }
 
 // Auto generated code. See class document of ViewParams.
@@ -4291,7 +4303,8 @@ void ViewParams::removeShadowGroundTexture() {
 // Auto generated code. See class document of ViewParams.
 const char *ViewParams::docShadowGroundTextureSize() {
     return QT_TRANSLATE_NOOP("ViewParams",
-"Specifies the physcal length of the ground texture image size.\\nTexture mappings beyond this size will be wrapped around");
+"Specifies the physcal length of the ground texture image size.\n"
+"Texture mappings beyond this size will be wrapped around");
 }
 
 // Auto generated code. See class document of ViewParams.
@@ -4319,7 +4332,9 @@ void ViewParams::removeShadowGroundTextureSize() {
 // Auto generated code. See class document of ViewParams.
 const char *ViewParams::docShadowGroundTransparency() {
     return QT_TRANSLATE_NOOP("ViewParams",
-"Specifics the ground transparency. When set to 0, the non-shadowed part\\nof the ground will be complete transparent, showing only the shadowed part\\nof the ground with some transparency.");
+"Specifics the ground transparency. When set to 0, the non-shadowed part\n"
+"of the ground will be complete transparent, showing only the shadowed part\n"
+"of the ground with some transparency.");
 }
 
 // Auto generated code. See class document of ViewParams.
@@ -4347,7 +4362,8 @@ void ViewParams::removeShadowGroundTransparency() {
 // Auto generated code. See class document of ViewParams.
 const char *ViewParams::docShadowGroundShading() {
     return QT_TRANSLATE_NOOP("ViewParams",
-"Render ground with shading. If disabled, the ground and the shadow casted\\non ground will not change shading when viewing in different angle.");
+"Render ground with shading. If disabled, the ground and the shadow casted\n"
+"on ground will not change shading when viewing in different angle.");
 }
 
 // Auto generated code. See class document of ViewParams.
@@ -4402,7 +4418,9 @@ void ViewParams::removeShadowExtraRedraw() {
 // Auto generated code. See class document of ViewParams.
 const char *ViewParams::docShadowSmoothBorder() {
     return QT_TRANSLATE_NOOP("ViewParams",
-"Specifies the blur raidus of the shadow edge. Higher number will result in\\nslower rendering speed on scene change. Use a lower 'Precision' value to\\ncounter the effect.");
+"Specifies the blur raidus of the shadow edge. Higher number will result in\n"
+"slower rendering speed on scene change. Use a lower 'Precision' value to\n"
+"counter the effect.");
 }
 
 // Auto generated code. See class document of ViewParams.
@@ -4430,7 +4448,8 @@ void ViewParams::removeShadowSmoothBorder() {
 // Auto generated code. See class document of ViewParams.
 const char *ViewParams::docShadowSpreadSize() {
     return QT_TRANSLATE_NOOP("ViewParams",
-"Specifies the spread size for a soft shadow. The resulting spread size is\\ndependent on the model scale");
+"Specifies the spread size for a soft shadow. The resulting spread size is\n"
+"dependent on the model scale");
 }
 
 // Auto generated code. See class document of ViewParams.
@@ -4458,7 +4477,10 @@ void ViewParams::removeShadowSpreadSize() {
 // Auto generated code. See class document of ViewParams.
 const char *ViewParams::docShadowSpreadSampleSize() {
     return QT_TRANSLATE_NOOP("ViewParams",
-"Specifies the sample size used for rendering shadow spread. A value 0\\ncorresponds to a sampling square of 2x2. And 1 corresponds to 3x3, etc.\\nThe bigger the size the slower the rendering speed. You can use a lower\\n'Precision' value to counter the effect.");
+"Specifies the sample size used for rendering shadow spread. A value 0\n"
+"corresponds to a sampling square of 2x2. And 1 corresponds to 3x3, etc.\n"
+"The bigger the size the slower the rendering speed. You can use a lower\n"
+"'Precision' value to counter the effect.");
 }
 
 // Auto generated code. See class document of ViewParams.
@@ -4486,7 +4508,9 @@ void ViewParams::removeShadowSpreadSampleSize() {
 // Auto generated code. See class document of ViewParams.
 const char *ViewParams::docShadowPrecision() {
     return QT_TRANSLATE_NOOP("ViewParams",
-"Specifies shadow precision. This parameter affects the internal texture\\nsize used to hold the casted shadows. You might want a bigger texture if\\nyou want a hard shadow but a smaller one for soft shadow.");
+"Specifies shadow precision. This parameter affects the internal texture\n"
+"size used to hold the casted shadows. You might want a bigger texture if\n"
+"you want a hard shadow but a smaller one for soft shadow.");
 }
 
 // Auto generated code. See class document of ViewParams.
@@ -4514,7 +4538,9 @@ void ViewParams::removeShadowPrecision() {
 // Auto generated code. See class document of ViewParams.
 const char *ViewParams::docShadowEpsilon() {
     return QT_TRANSLATE_NOOP("ViewParams",
-"Epsilon is used to offset the shadow map depth from the model depth.\\nShould be set to as low a number as possible without causing flickering\\nin the shadows or on non-shadowed objects.");
+"Epsilon is used to offset the shadow map depth from the model depth.\n"
+"Should be set to as low a number as possible without causing flickering\n"
+"in the shadows or on non-shadowed objects.");
 }
 
 // Auto generated code. See class document of ViewParams.
@@ -4570,7 +4596,9 @@ void ViewParams::removeShadowThreshold() {
 // Auto generated code. See class document of ViewParams.
 const char *ViewParams::docShadowBoundBoxScale() {
     return QT_TRANSLATE_NOOP("ViewParams",
-"Scene bounding box is used to determine the scale of the shadow texture.\\nYou can increase the bounding box scale to avoid execessive clipping of\\nshadows when viewing up close in certain angle.");
+"Scene bounding box is used to determine the scale of the shadow texture.\n"
+"You can increase the bounding box scale to avoid execessive clipping of\n"
+"shadows when viewing up close in certain angle.");
 }
 
 // Auto generated code. See class document of ViewParams.
@@ -4598,7 +4626,9 @@ void ViewParams::removeShadowBoundBoxScale() {
 // Auto generated code. See class document of ViewParams.
 const char *ViewParams::docShadowMaxDistance() {
     return QT_TRANSLATE_NOOP("ViewParams",
-"Specifics the clipping distance for when rendering shadows.\\nYou can increase the bounding box scale to avoid execessive\\nclipping of shadows when viewing up close in certain angle.");
+"Specifics the clipping distance for when rendering shadows.\n"
+"You can increase the bounding box scale to avoid execessive\n"
+"clipping of shadows when viewing up close in certain angle.");
 }
 
 // Auto generated code. See class document of ViewParams.
@@ -4654,7 +4684,8 @@ void ViewParams::removeShadowTransparentShadow() {
 // Auto generated code. See class document of ViewParams.
 const char *ViewParams::docShadowUpdateGround() {
     return QT_TRANSLATE_NOOP("ViewParams",
-"Auto update shadow ground on scene changes. You can manually\\nupdate the ground by using the 'Fit view' command");
+"Auto update shadow ground on scene changes. You can manually\n"
+"update the ground by using the 'Fit view' command");
 }
 
 // Auto generated code. See class document of ViewParams.
@@ -4709,7 +4740,8 @@ void ViewParams::removePropertyViewTimer() {
 // Auto generated code. See class document of ViewParams.
 const char *ViewParams::docHierarchyAscend() {
     return QT_TRANSLATE_NOOP("ViewParams",
-"Enable selection of upper hierarchy by repeatedly click some already\\nselected sub-element.");
+"Enable selection of upper hierarchy by repeatedly click some already\n"
+"selected sub-element.");
 }
 
 // Auto generated code. See class document of ViewParams.
@@ -5521,7 +5553,8 @@ void ViewParams::removeNoSectionOnTop() {
 // Auto generated code. See class document of ViewParams.
 const char *ViewParams::docSectionFillGroup() {
     return QT_TRANSLATE_NOOP("ViewParams",
-"Render cross section filling of objects with similar materials together.\\nIntersecting objects will act as boolean cut operation");
+"Render cross section filling of objects with similar materials together.\n"
+"Intersecting objects will act as boolean cut operation");
 }
 
 // Auto generated code. See class document of ViewParams.
@@ -5688,7 +5721,8 @@ void ViewParams::removeTransformOnTop() {
 // Auto generated code. See class document of ViewParams.
 const char *ViewParams::docSelectionColorDifference() {
     return QT_TRANSLATE_NOOP("ViewParams",
-"Color difference threshold for auto making distinct\\nselection highlight color");
+"Color difference threshold for auto making distinct\n"
+"selection highlight color");
 }
 
 // Auto generated code. See class document of ViewParams.
@@ -5716,7 +5750,9 @@ void ViewParams::removeSelectionColorDifference() {
 // Auto generated code. See class document of ViewParams.
 const char *ViewParams::docRenderCacheMergeCount() {
     return QT_TRANSLATE_NOOP("ViewParams",
-"Merge draw caches of multiple objects to reduce number of draw\\ncalls and improve render performance. Set zero to disable. Only\\neffective when using experimental render cache.");
+"Merge draw caches of multiple objects to reduce number of draw\n"
+"calls and improve render performance. Set zero to disable. Only\n"
+"effective when using experimental render cache.");
 }
 
 // Auto generated code. See class document of ViewParams.
@@ -5856,7 +5892,8 @@ void ViewParams::removeRenderCacheMergeDepthMin() {
 // Auto generated code. See class document of ViewParams.
 const char *ViewParams::docForceSolidSingleSideLighting() {
     return QT_TRANSLATE_NOOP("ViewParams",
-"Force single side lighting on solid. This can help visualizing invalid\\nsolid shapes with flipped normals.");
+"Force single side lighting on solid. This can help visualizing invalid\n"
+"solid shapes with flipped normals.");
 }
 
 // Auto generated code. See class document of ViewParams.

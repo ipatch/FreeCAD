@@ -54,7 +54,7 @@ Params = [
     ParamFloat('SelectionLineMaxWidth',  4.0,
        "Limit the selected line width when applying line thickening."),
     ParamFloat('SelectionPointScale',  2.5,
-       "Muplication factor to increase the size of the selected point.\\n"
+       "Muplication factor to increase the size of the selected point.\n"
        "If zero, then use line multiplication factor."),
     ParamFloat('SelectionPointMaxSize',  6.0,
        "Limit the selected point size when applying size scale."),
@@ -75,15 +75,15 @@ Params = [
         "Show more accurate bounds when using bounding box selection style"),
     ParamBool('UseBoundingBoxCache', True),
     ParamBool('RenderProjectedBBox', True,
-        "Show projected bounding box that is aligned to axes of\\n"
+        "Show projected bounding box that is aligned to axes of\n"
         "global coordinate space"),
     ParamBool('SelectionFaceWire', False,
         "Show hidden tirangulation wires for selected face"),
     ParamFloat('NewDocumentCameraScale', 100.0),
     ParamInt('MaxOnTopSelections', 20),
     ParamBool('MapChildrenPlacement', False, on_change=True, doc=
-        "Map child object into parent's coordinate space when showing on top.\\n"
-        "Note that once activated, this option will also activate option ShowOnTop.\\n"
+        "Map child object into parent's coordinate space when showing on top.\n"
+        "Note that once activated, this option will also activate option ShowOnTop.\n"
         "WARNING! This is an experimental option. Please use with caution."),
     ParamInt('CornerNaviCube', 1, on_change=True),
     ParamBool('NaviRotateToNearest',  True,
@@ -97,19 +97,19 @@ Params = [
     ParamInt('DockOverlaySplitterHandleTimeout', 0,
          "Overlay splitter handle auto hide delay. Set zero to disable auto hiding."),
     ParamBool('DockOverlayActivateOnHover', True,
-         "Show auto hidden dock overlay on mouse over.\\n"
+         "Show auto hidden dock overlay on mouse over.\n"
          "If disabled, then show on mouse click."),
     ParamBool('DockOverlayAutoMouseThrough', True,
          "Auto mouse click through transparent part of dock overlay."),
     ParamBool('DockOverlayWheelPassThrough', True,
          "Auto pass through mouse wheel event on transparent dock overlay."),
     ParamInt('DockOverlayWheelDelay', 1000,
-         "Delay capturing mouse wheel event for passing through if it is\\n"
+         "Delay capturing mouse wheel event for passing through if it is\n"
          "previously handled by other widget."),
     ParamInt('DockOverlayAlphaRadius', 2,
-         "If auto mouse click through is enabled, then this radius\\n"
-         "defines a region of alpha test under the mouse cursor.\\n"
-         "Auto click through is only activated if all pixels within\\n"
+         "If auto mouse click through is enabled, then this radius\n"
+         "defines a region of alpha test under the mouse cursor.\n"
+         "Auto click through is only activated if all pixels within\n"
          "the region are non-opaque."),
     ParamBool('DockOverlayCheckNaviCube', True, on_change=True,
         doc="Leave space for Navigation Cube in dock overlay"),
@@ -163,66 +163,66 @@ Params = [
     ParamFloat('ShadowLightDirectionZ',  -1.0),
     ParamUInt('ShadowLightColor',  0xf0fdffff),
     ParamBool('ShadowShowGround',  True,
-       "Whether to show auto generated ground face. You can specify you own ground\\n"
-       "object by changing its view property 'ShadowStyle' to 'Shadowed', meaning\\n"
+       "Whether to show auto generated ground face. You can specify you own ground\n"
+       "object by changing its view property 'ShadowStyle' to 'Shadowed', meaning\n"
        "that it will only receive but not cast shadow."),
     ParamBool('ShadowGroundBackFaceCull',  True,
        "Whether to show the ground when viewing from under the ground face"),
     ParamFloat('ShadowGroundScale',  2.0,
-       "The auto generated ground face is determined by the scene bounding box\\n"
+       "The auto generated ground face is determined by the scene bounding box\n"
        "multiplied by this scale"),
     ParamUInt('ShadowGroundColor',  0x7d7d7dff),
     ParamString('ShadowGroundBumpMap', ''),
     ParamString('ShadowGroundTexture', ''),
     ParamFloat('ShadowGroundTextureSize',  100.0,
-       "Specifies the physcal length of the ground texture image size.\\n"
+       "Specifies the physcal length of the ground texture image size.\n"
        "Texture mappings beyond this size will be wrapped around"),
     ParamFloat('ShadowGroundTransparency',  0.0,
-       "Specifics the ground transparency. When set to 0, the non-shadowed part\\n"
-       "of the ground will be complete transparent, showing only the shadowed part\\n"
+       "Specifics the ground transparency. When set to 0, the non-shadowed part\n"
+       "of the ground will be complete transparent, showing only the shadowed part\n"
        "of the ground with some transparency."),
     ParamBool('ShadowGroundShading',  True,
-        "Render ground with shading. If disabled, the ground and the shadow casted\\n"
+        "Render ground with shading. If disabled, the ground and the shadow casted\n"
         "on ground will not change shading when viewing in different angle."),
     ParamBool('ShadowExtraRedraw',  True),
     ParamInt('ShadowSmoothBorder',  0,
-        "Specifies the blur raidus of the shadow edge. Higher number will result in\\n"
-        "slower rendering speed on scene change. Use a lower 'Precision' value to\\n"
+        "Specifies the blur raidus of the shadow edge. Higher number will result in\n"
+        "slower rendering speed on scene change. Use a lower 'Precision' value to\n"
         "counter the effect."),
     ParamInt('ShadowSpreadSize',  0,
-        "Specifies the spread size for a soft shadow. The resulting spread size is\\n"
+        "Specifies the spread size for a soft shadow. The resulting spread size is\n"
         "dependent on the model scale"),
     ParamInt('ShadowSpreadSampleSize',  0,
-        "Specifies the sample size used for rendering shadow spread. A value 0\\n"
-        "corresponds to a sampling square of 2x2. And 1 corresponds to 3x3, etc.\\n"
-        "The bigger the size the slower the rendering speed. You can use a lower\\n"
+        "Specifies the sample size used for rendering shadow spread. A value 0\n"
+        "corresponds to a sampling square of 2x2. And 1 corresponds to 3x3, etc.\n"
+        "The bigger the size the slower the rendering speed. You can use a lower\n"
         "'Precision' value to counter the effect."),
     ParamFloat('ShadowPrecision',  1.0,
-        "Specifies shadow precision. This parameter affects the internal texture\\n"
-        "size used to hold the casted shadows. You might want a bigger texture if\\n"
+        "Specifies shadow precision. This parameter affects the internal texture\n"
+        "size used to hold the casted shadows. You might want a bigger texture if\n"
         "you want a hard shadow but a smaller one for soft shadow."),
     ParamFloat('ShadowEpsilon',  1e-5,
-        "Epsilon is used to offset the shadow map depth from the model depth.\\n"
-        "Should be set to as low a number as possible without causing flickering\\n"
+        "Epsilon is used to offset the shadow map depth from the model depth.\n"
+        "Should be set to as low a number as possible without causing flickering\n"
         "in the shadows or on non-shadowed objects."),
     ParamFloat('ShadowThreshold',  0.0,
         "Can be used to avoid light bleeding in merged shadows cast from different objects."),
     ParamFloat('ShadowBoundBoxScale',  1.2,
-        "Scene bounding box is used to determine the scale of the shadow texture.\\n"
-        "You can increase the bounding box scale to avoid execessive clipping of\\n"
+        "Scene bounding box is used to determine the scale of the shadow texture.\n"
+        "You can increase the bounding box scale to avoid execessive clipping of\n"
         "shadows when viewing up close in certain angle."),
     ParamFloat('ShadowMaxDistance',  0.0,
-        "Specifics the clipping distance for when rendering shadows.\\n"
-        "You can increase the bounding box scale to avoid execessive\\n"
+        "Specifics the clipping distance for when rendering shadows.\n"
+        "You can increase the bounding box scale to avoid execessive\n"
         "clipping of shadows when viewing up close in certain angle."),
     ParamBool('ShadowTransparentShadow',  False,
         "Whether to cast shadow from transparent objects."),
     ParamBool('ShadowUpdateGround',  True,
-        "Auto update shadow ground on scene changes. You can manually\\n"
+        "Auto update shadow ground on scene changes. You can manually\n"
         "update the ground by using the 'Fit view' command"),
     ParamUInt('PropertyViewTimer',  100),
     ParamBool('HierarchyAscend',  False,
-        "Enable selection of upper hierarchy by repeatedly click some already\\n"
+        "Enable selection of upper hierarchy by repeatedly click some already\n"
         "selected sub-element."),
     ParamInt('CommandHistorySize',  20, "Maximum number of commands saved in history"),
     ParamInt('PieMenuIconSize',  24, "Pie menu icon size"),
@@ -259,7 +259,7 @@ Params = [
     ParamBool('SectionConcave',  False, "Cross section in concave."),
     ParamBool('NoSectionOnTop',  True, "Ignore section clip planes when rendering on top."),
     ParamBool('SectionFillGroup',  True,
-        "Render cross section filling of objects with similar materials together.\\n"
+        "Render cross section filling of objects with similar materials together.\n"
         "Intersecting objects will act as boolean cut operation"),
     ParamBool('ShowClipPlane',  False,  "Show clip plane"),
     ParamFloat('ClipPlaneSize',  40.0,  "Clip plane visual size"),
@@ -267,11 +267,11 @@ Params = [
     ParamFloat('ClipPlaneLineWidth',  2.0,  "Clip plane line width"),
     ParamBool('TransformOnTop',  True),
     ParamFloat('SelectionColorDifference',  25.0,
-        "Color difference threshold for auto making distinct\\n"
+        "Color difference threshold for auto making distinct\n"
         "selection highlight color"),
     ParamInt('RenderCacheMergeCount',  0,
-        "Merge draw caches of multiple objects to reduce number of draw\\n"
-        "calls and improve render performance. Set zero to disable. Only\\n"
+        "Merge draw caches of multiple objects to reduce number of draw\n"
+        "calls and improve render performance. Set zero to disable. Only\n"
         "effective when using experimental render cache."),
     ParamInt('RenderCacheMergeCountMin',  10, "Internal use to limit the render cache merge count"),
     ParamInt('RenderCacheMergeCountMax',  0, "Maximum draw crash merges on any hierarchy. Zero means no limit."),
@@ -280,7 +280,7 @@ Params = [
     ParamInt('RenderCacheMergeDepthMin',  1,
         "Minimum hierarchy depth that the cache merge can happen."),
     ParamBool('ForceSolidSingleSideLighting',  True,
-        "Force single side lighting on solid. This can help visualizing invalid\\n"
+        "Force single side lighting on solid. This can help visualizing invalid\n"
         "solid shapes with flipped normals."),
     ParamInt('DefaultFontSize',  0, on_change=True),
     ParamBool('EnableTaskPanelKeyTranslate',  False, on_change=True),
