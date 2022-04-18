@@ -101,7 +101,7 @@ void PropertyLinkBase::hasSetValue() {
 
 bool PropertyLinkBase::isSame(const Property &other) const
 {
-    if(other.isDerivedFrom(PropertyLinkBase::getClassTypeId())
+    if(!other.isDerivedFrom(PropertyLinkBase::getClassTypeId())
         || getScope() != static_cast<const PropertyLinkBase*>(&other)->getScope())
         return false;
 
