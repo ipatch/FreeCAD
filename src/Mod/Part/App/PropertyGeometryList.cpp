@@ -315,7 +315,19 @@ unsigned int PropertyGeometryList::getMemSize(void) const
 
 bool PropertyGeometryList::isSame(const Property &_other) const
 {
-    return isSameContent(_other);
+    if(!_other.isDerivedFrom(getClassTypeId()))
+        return false;
+    const auto &other = static_cast<const PropertyGeometryList &>(_other);
+    if (_lValueList.size() != other._lValueList.size())
+        return false;
+    for (size_t i=0; i<_lValueList.size(); ++i) {
+        const auto *g1 = _lValueList[i];
+        const auto *g2 = other._lValueList[i];
+        if (!g1->isSame(*g2, Precision::Confusion(), Precision::Angular())
+                || !g1->hasSameExtensions(*g2))
+            return false;
+    }
+    return true;
 }
 
 void PropertyGeometryList::moveValues(PropertyGeometryList &&other)

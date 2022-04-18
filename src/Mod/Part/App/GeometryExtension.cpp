@@ -26,6 +26,7 @@
 #include <Base/Writer.h>
 #include <Base/Reader.h>
 #include <Base/Tools.h>
+#include <App/Property.h>
 
 #include "GeometryExtension.h"
 #include "GeometryExtensionPy.h"
@@ -81,3 +82,14 @@ void GeometryPersistenceExtension::Restore(Base::XMLReader &reader)
 {
     restoreAttributes(reader);
 }
+
+bool GeometryPersistenceExtension::isSame(const GeometryPersistenceExtension &other) const
+{
+    FC_STATIC Base::StringWriter writer,writer2;
+    writer.clear();
+    Save(writer);
+    writer2.clear();
+    other.Save(writer2);
+    return writer.getString() == writer2.getString();
+}
+

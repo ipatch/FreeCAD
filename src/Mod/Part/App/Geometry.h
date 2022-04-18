@@ -102,6 +102,7 @@ public:
     boost::uuids::uuid getTag() const;
 
     virtual bool isSame(const Geometry &other, double tol, double atol) const = 0;
+    bool hasSameExtensions(const Geometry &other) const;
 
     std::vector<std::weak_ptr<const GeometryExtension>> getExtensions() const;
 

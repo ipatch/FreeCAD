@@ -208,6 +208,35 @@ Geometry::~Geometry()
 
 }
 
+bool Geometry::hasSameExtensions(const Geometry &other) const
+{
+    // We skip non persistent extension while doing comparison. Not sure if
+    // this will cause any problem.
+    size_t i = 0;
+    for (const auto &e : extensions) {
+        if (auto ext = Base::freecad_dynamic_cast<
+                const GeometryPersistenceExtension>(e.get())) {
+            for (;i < other.extensions.size(); ++i) {
+                if (auto extOther = Base::freecad_dynamic_cast<
+                        const GeometryPersistenceExtension>(other.extensions[i].get())) {
+                    if (!ext->isSame(*extOther))
+                        return false;
+                    break;
+                }
+            }
+            if (i >= other.extensions.size())
+                return false;
+            ++i;
+        }
+    }
+    for (;i < other.extensions.size(); ++i) {
+        if (Base::freecad_dynamic_cast<const GeometryPersistenceExtension>(
+                    other.extensions[i].get()))
+            return false;
+    }
+    return true;
+}
+
 // Persistence implementer
 unsigned int Geometry::getMemSize (void) const
 {
@@ -2078,7 +2107,9 @@ bool GeomTrimmedCurve::isSame(const Geometry &_other, double tol, double atol) c
 
     std::unique_ptr<Geometry> b(makeFromCurve(basis));
     std::unique_ptr<Geometry> b1(makeFromCurve(basis1));
-    return b && b1 && b->isSame(*b1, tol, atol);
+    if (b && b1 && b->isSame(*b1, tol, atol))
+        return true;
+    return false;
 }
 
 bool GeomTrimmedCurve::intersectBasisCurves(  const GeomTrimmedCurve * c,
