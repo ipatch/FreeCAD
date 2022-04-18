@@ -640,6 +640,8 @@ public:
     virtual ~PresetsAction();
     void addTo(QWidget * w);
     void popup(const QPoint &pt);
+    void push(const QString &name);
+    static PresetsAction *instance();
 
 protected Q_SLOTS:
     void onShowMenu();

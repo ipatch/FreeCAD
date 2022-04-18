@@ -44,6 +44,7 @@
 #include "ui_DlgParameter.h"
 #include "Application.h"
 #include "Command.h"
+#include "Action.h"
 #include "MainWindow.h"
 #include "DlgParameterImp.h"
 #include "DlgParameterFind.h"
@@ -1453,6 +1454,11 @@ void DlgParameterImp::doImportOrMerge(ParameterGrp *hGrp, bool merge)
         paramValue->clear();
         if (iter != monitors.end())
             iter->second.changes.clear();
+    }
+
+    if (hGrp == &App::GetApplication().GetUserParameter()) {
+        if (auto action = PresetsAction::instance())
+            action->push(merge ? tr("Merge") : tr("Import"));
     }
 
     try

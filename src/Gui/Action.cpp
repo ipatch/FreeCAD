@@ -2955,15 +2955,10 @@ void PresetsAction::onAction(QAction *action) {
             action->data().toByteArray().constData());
     if (param) {
         bool revert = (QApplication::queryKeyboardModifiers() == Qt::ControlModifier);
-        ParameterManager *manager = new ParameterManager;
-        manager->CreateDocument();
         QString title = action->text();
         if (revert)
             title = tr("Revert ") + title;
-        _undos.emplace_back(title, manager);
-        if (_undos.size() > 10)
-            _undos.pop_front();
-        App::GetApplication().GetUserParameter().copyTo(_undos.back().second);
+        push(title);
         if (revert)
             App::GetApplication().GetUserParameter().revert(param);
         else {
@@ -2975,6 +2970,24 @@ void PresetsAction::onAction(QAction *action) {
             manager->RemoveASCII("ToolTip");
         }
     }
+}
+
+PresetsAction *PresetsAction::instance()
+{
+    auto cmd = Application::Instance->commandManager().getCommandByName("Std_CmdPresets");
+    if (cmd)
+        return static_cast<PresetsAction*>(cmd->getAction());
+    return nullptr;
+}
+
+void PresetsAction::push(const QString &title)
+{
+    ParameterManager *manager = new ParameterManager;
+    manager->CreateDocument();
+    _undos.emplace_back(title, manager);
+    if (_undos.size() > 10)
+        _undos.pop_front();
+    App::GetApplication().GetUserParameter().copyTo(_undos.back().second);
 }
 
 void PresetsAction::onShowMenu()
