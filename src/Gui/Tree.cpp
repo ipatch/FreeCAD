@@ -2314,8 +2314,9 @@ void TreeWidgetItemDelegate::paint(QPainter *painter,
     auto style = tree->style();
     if (index.column() == 0
             && tree->testAttribute(Qt::WA_NoSystemBackground)
-            && opt.backgroundBrush.style() == Qt::NoBrush
-            && _TreeItemBackground.style() != Qt::NoBrush)
+            && ((opt.state & QStyle::State_Selected)
+                || (opt.backgroundBrush.style() == Qt::NoBrush
+                    && _TreeItemBackground.style() != Qt::NoBrush)))
     {
         QRect rect = opt.rect;
         int width = opt.fontMetrics.boundingRect(opt.text).width()
@@ -2326,28 +2327,35 @@ void TreeWidgetItemDelegate::paint(QPainter *painter,
         }
         if (width < rect.width())
             rect.setWidth(width);
-        painter->fillRect(rect, _TreeItemBackground);
+        if (opt.state & QStyle::State_Selected) {
+            opt.rect = rect;
+            opt.rect.setWidth(rect.width() + 5);
+        } else
+            painter->fillRect(rect, _TreeItemBackground);
     }
 
-    bool selGroup = false;
-    auto titem = tree->itemFromIndex(index);
-    if (titem->type() == TreeWidget::ObjectType)
-        selGroup = static_cast<DocumentObjectItem*>(titem)->isSelGroup();
-    else if (titem->type() == TreeWidget::DocumentType)
-        selGroup = static_cast<DocumentItem*>(titem)->isSelGroup();
-    if (selGroup) {
-        QBrush brush;
-        auto color = App::Color((uint32_t)TreeParams::getSelectingGroupColor()).asValue<QColor>();
-        brush = QBrush(color);
-        auto rect = opt.rect;
-        if (opt.backgroundBrush.style() != Qt::NoBrush) {
-            painter->fillRect(rect, opt.backgroundBrush);
-            opt.backgroundBrush = QBrush();
-            auto vrect = tree->visualItemRect(titem);
-            rect.setRight(std::min(rect.right(), vrect.left() + vrect.width()/2));
+    if (!opt.state.testFlag(QStyle::State_Selected)) {
+        bool selGroup = false;
+        auto titem = tree->itemFromIndex(index);
+        if (titem->type() == TreeWidget::ObjectType)
+            selGroup = static_cast<DocumentObjectItem*>(titem)->isSelGroup();
+        else if (titem->type() == TreeWidget::DocumentType)
+            selGroup = static_cast<DocumentItem*>(titem)->isSelGroup();
+        if (selGroup) {
+            QBrush brush;
+            auto color = App::Color((uint32_t)TreeParams::getSelectingGroupColor()).asValue<QColor>();
+            brush = QBrush(color);
+            auto rect = opt.rect;
+            if (opt.backgroundBrush.style() != Qt::NoBrush) {
+                painter->fillRect(rect, opt.backgroundBrush);
+                opt.backgroundBrush = QBrush();
+                auto vrect = tree->visualItemRect(titem);
+                rect.setRight(std::min(rect.right(), vrect.left() + vrect.width()/2));
+            }
+            painter->fillRect(rect, brush);
         }
-        painter->fillRect(rect, brush);
     }
+
     style->drawControl(QStyle::CE_ItemViewItem, &opt, painter, tree);
 
     if (tree->pimpl->reorderingIndex == index) {
