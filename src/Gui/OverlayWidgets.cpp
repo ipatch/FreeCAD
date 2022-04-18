@@ -4280,11 +4280,11 @@ bool OverlayManager::eventFilter(QObject *o, QEvent *ev)
         }
         break;
     // case QEvent::NativeGesture:
-    case QEvent::MouseButtonDblClick:
     case QEvent::Wheel:
         if (!ViewParams::getDockOverlayWheelPassThrough())
             return false;
         // fall through
+    case QEvent::MouseButtonDblClick:
     case QEvent::MouseButtonRelease:
     case QEvent::MouseButtonPress:
     case QEvent::MouseMove:
