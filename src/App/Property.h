@@ -578,7 +578,7 @@ public:
     void setValue(const_reference value) {
         ListT vals;
         vals.resize(1,value);
-        setValues(vals);
+        setValues(std::move(vals));
     }
 
     virtual void setValues(ListT &&newValues) {
@@ -604,7 +604,7 @@ public:
     const_reference operator[] (int idx) const {return _lValueList[idx];} 
 
     virtual bool isSame(const Property &_other) const override {
-        auto other = dynamic_cast<const this_type*>(&_other);
+        auto other = Base::freecad_dynamic_cast<const this_type>(&_other);
         return other && this->getValues() == other->getValues();
     }
 
