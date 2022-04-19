@@ -302,6 +302,12 @@ public:
 
     virtual bool pressButton(Base::Vector2d onSketchPos)
     {
+        Q_UNUSED(onSketchPos);
+        return true;
+    }
+
+    virtual bool releaseButton(Base::Vector2d onSketchPos)
+    {
         if (Mode==STATUS_SEEK_First){
             EditCurve[0] = onSketchPos;
             Mode = STATUS_SEEK_Second;
@@ -311,12 +317,6 @@ public:
             sketchgui->drawEdit(EditCurve);
             Mode = STATUS_End;
         }
-        return true;
-    }
-
-    virtual bool releaseButton(Base::Vector2d onSketchPos)
-    {
-        Q_UNUSED(onSketchPos);
         if (Mode==STATUS_End){
             unsetCursor();
             resetPositionText();
@@ -472,6 +472,12 @@ public:
 
     virtual bool pressButton(Base::Vector2d onSketchPos)
     {
+        Q_UNUSED(onSketchPos);
+        return true;
+    }
+
+    void preprocess(const Base::Vector2d &onSketchPos)
+    {
         if (Mode==STATUS_SEEK_First){
             EditCurve[0] = onSketchPos;
             EditCurve[4] = onSketchPos;
@@ -484,12 +490,11 @@ public:
             sketchgui->drawEdit(EditCurve);
             Mode = STATUS_End;
         }
-        return true;
     }
 
     virtual bool releaseButton(Base::Vector2d onSketchPos)
     {
-        Q_UNUSED(onSketchPos);
+        preprocess(onSketchPos);
         if (Mode==STATUS_End){
             unsetCursor();
             resetPositionText();
@@ -897,6 +902,18 @@ public:
 
     virtual bool pressButton(Base::Vector2d onSketchPos)
     {
+        Q_UNUSED(onSketchPos);
+        // This function used to do what preprocess() below does. It is changed
+        // to be done inside releaseButton(), this is to handle navigation style
+        // that uses both left and right mouse button for actions, e.g. Blender
+        // uses left and right button press for panning. If the user first
+        // press the left button and then the left button, the left button
+        // release event will be swallowed.
+        return true;
+    }
+
+    void preprocess(const Base::Vector2d &onSketchPos)
+    {
         if (Mode == STATUS_SEEK_First) {
 
             EditCurve[0] = onSketchPos; // this may be overwritten if previousCurve is found
@@ -965,11 +982,11 @@ public:
                     * in continuous creation mode because the
                     * handler is destroyed by the quit() method on pressing the
                     * right button of the mouse */
-                    return true;
+                    return;
                 }
                 else{
                     sketchgui->purgeHandler(); // no code after this line, Handler get deleted in ViewProvider
-                    return true;
+                    return;
                 }
             }
 
@@ -987,11 +1004,11 @@ public:
                     Mode = STATUS_Close;
             }
         }
-        return true;
     }
 
     virtual bool releaseButton(Base::Vector2d onSketchPos)
     {
+        preprocess(onSketchPos);
         if (Mode == STATUS_Do || Mode == STATUS_Close) {
             bool addedGeometry = true;
             if (SegmentMode == SEGMENT_MODE_Line) {
@@ -1418,6 +1435,18 @@ public:
 
     virtual bool pressButton(Base::Vector2d onSketchPos)
     {
+        Q_UNUSED(onSketchPos);
+        // This function used to do what preprocess() below does. It is changed
+        // to be done inside releaseButton(), this is to handle navigation style
+        // that uses both left and right mouse button for actions, e.g. Blender
+        // uses left and right button press for panning. If the user first
+        // press the left button and then the left button, the left button
+        // release event will be swallowed.
+        return true;
+    }
+
+    void preprocess(const Base::Vector2d &onSketchPos)
+    {
         if (Mode==STATUS_SEEK_First){
             CenterPoint = onSketchPos;
             EditCurve.resize(34);
@@ -1451,13 +1480,11 @@ public:
             applyCursor();
             Mode = STATUS_End;
         }
-
-        return true;
     }
 
     virtual bool releaseButton(Base::Vector2d onSketchPos)
     {
-        Q_UNUSED(onSketchPos);
+        preprocess(onSketchPos);
         if (Mode==STATUS_End) {
             unsetCursor();
             resetPositionText();
@@ -1697,6 +1724,18 @@ public:
 
     virtual bool pressButton(Base::Vector2d onSketchPos)
     {
+        Q_UNUSED(onSketchPos);
+        // This function used to do what preprocess() below does. It is changed
+        // to be done inside releaseButton(), this is to handle navigation style
+        // that uses both left and right mouse button for actions, e.g. Blender
+        // uses left and right button press for panning. If the user first
+        // press the left button and then the left button, the left button
+        // release event will be swallowed.
+        return true;
+    }
+
+    void preprocess(const Base::Vector2d &onSketchPos)
+    {
         if (Mode==STATUS_SEEK_First){
             // 32 point curve + center + endpoint
             EditCurve.resize(34);
@@ -1719,13 +1758,11 @@ public:
             applyCursor();
             Mode = STATUS_End;
         }
-
-        return true;
     }
 
     virtual bool releaseButton(Base::Vector2d onSketchPos)
     {
-        Q_UNUSED(onSketchPos);
+        preprocess(onSketchPos);
         // Need to look at.  rx might need fixing.
         if (Mode==STATUS_End) {
             unsetCursor();
@@ -1981,6 +2018,18 @@ public:
 
     virtual bool pressButton(Base::Vector2d onSketchPos)
     {
+        Q_UNUSED(onSketchPos);
+        // This function used to do what preprocess() below does. It is changed
+        // to be done inside releaseButton(), this is to handle navigation style
+        // that uses both left and right mouse button for actions, e.g. Blender
+        // uses left and right button press for panning. If the user first
+        // press the left button and then the left button, the left button
+        // release event will be swallowed.
+        return true;
+    }
+
+    void preprocess(const Base::Vector2d &onSketchPos)
+    {
         if (Mode==STATUS_SEEK_First){
             EditCurve[0] = onSketchPos;
             Mode = STATUS_SEEK_Second;
@@ -1988,12 +2037,11 @@ public:
             EditCurve[1] = onSketchPos;
             Mode = STATUS_Close;
         }
-        return true;
     }
 
     virtual bool releaseButton(Base::Vector2d onSketchPos)
     {
-        Q_UNUSED(onSketchPos);
+        preprocess(onSketchPos);
         if (Mode==STATUS_Close) {
             double rx = EditCurve[1].x - EditCurve[0].x;
             double ry = EditCurve[1].y - EditCurve[0].y;
@@ -2265,6 +2313,18 @@ public:
      */
     virtual bool pressButton(Base::Vector2d onSketchPos)
     {
+        Q_UNUSED(onSketchPos);
+        // This function used to do what preprocess() below does. It is changed
+        // to be done inside releaseButton(), this is to handle navigation style
+        // that uses both left and right mouse button for actions, e.g. Blender
+        // uses left and right button press for panning. If the user first
+        // press the left button and then the left button, the left button
+        // release event will be swallowed.
+        return true;
+    }
+
+    void preprocess(const Base::Vector2d &onSketchPos)
+    {
         if (method == PERIAPSIS_APOAPSIS_B) {
             if (mode == STATUS_SEEK_PERIAPSIS) {
                 periapsis = onSketchPos;
@@ -2290,7 +2350,6 @@ public:
                 mode = STATUS_Close;
             }
         }
-        return true;
     }
 
     /**
@@ -2300,7 +2359,7 @@ public:
      */
     virtual bool releaseButton(Base::Vector2d onSketchPos)
     {
-        Q_UNUSED(onSketchPos);
+        preprocess(onSketchPos);
         if (mode == STATUS_Close) {
             saveEllipse();
             ParameterGrp::handle hGrp = App::GetApplication().GetParameterGroupByPath("User parameter:BaseApp/Preferences/Mod/Sketcher");
@@ -3043,6 +3102,18 @@ public:
 
     virtual bool pressButton(Base::Vector2d onSketchPos)
     {
+        Q_UNUSED(onSketchPos);
+        // This function used to do what preprocess() below does. It is changed
+        // to be done inside releaseButton(), this is to handle navigation style
+        // that uses both left and right mouse button for actions, e.g. Blender
+        // uses left and right button press for panning. If the user first
+        // press the left button and then the left button, the left button
+        // release event will be swallowed.
+        return true;
+    }
+
+    void preprocess(const Base::Vector2d &onSketchPos)
+    {
         if (Mode==STATUS_SEEK_First){
             EditCurve[0] = onSketchPos;
             centerPoint = onSketchPos;
@@ -3064,12 +3135,11 @@ public:
 
             Mode = STATUS_Close;
         }
-        return true;
     }
 
     virtual bool releaseButton(Base::Vector2d onSketchPos)
     {
-        Q_UNUSED(onSketchPos);
+        preprocess(onSketchPos);
         if (Mode==STATUS_Close) {
             unsetCursor();
             resetPositionText();
@@ -3372,6 +3442,18 @@ public:
 
     virtual bool pressButton(Base::Vector2d onSketchPos)
     {
+        Q_UNUSED(onSketchPos);
+        // This function used to do what preprocess() below does. It is changed
+        // to be done inside releaseButton(), this is to handle navigation style
+        // that uses both left and right mouse button for actions, e.g. Blender
+        // uses left and right button press for panning. If the user first
+        // press the left button and then the left button, the left button
+        // release event will be swallowed.
+        return true;
+    }
+
+    void preprocess(const Base::Vector2d &onSketchPos)
+    {
         if (Mode==STATUS_SEEK_First){
             EditCurve[0] = onSketchPos;
             centerPoint = onSketchPos;
@@ -3395,11 +3477,12 @@ public:
 
             Mode = STATUS_Close;
         }
-        return true;
     }
 
-    virtual bool releaseButton(Base::Vector2d /*onSketchPos*/)
+    virtual bool releaseButton(Base::Vector2d onSketchPos)
     {
+        preprocess(onSketchPos);
+
         if (Mode==STATUS_Close) {
             unsetCursor();
             resetPositionText();
@@ -3712,6 +3795,18 @@ public:
 
     virtual bool pressButton(Base::Vector2d onSketchPos)
     {
+        Q_UNUSED(onSketchPos);
+        // This function used to do what preprocess() below does. It is changed
+        // to be done inside releaseButton(), this is to handle navigation style
+        // that uses both left and right mouse button for actions, e.g. Blender
+        // uses left and right button press for panning. If the user first
+        // press the left button and then the left button, the left button
+        // release event will be swallowed.
+        return true;
+    }
+
+    void preprocess(const Base::Vector2d &onSketchPos)
+    {
         if (Mode==STATUS_SEEK_First){
             EditCurve[0] = onSketchPos;
             focusPoint = onSketchPos;
@@ -3734,11 +3829,11 @@ public:
             endPoint = onSketchPos;
             Mode = STATUS_Close;
         }
-        return true;
     }
 
-    virtual bool releaseButton(Base::Vector2d /*onSketchPos*/)
+    virtual bool releaseButton(Base::Vector2d onSketchPos)
     {
+        preprocess(onSketchPos);
         if (Mode==STATUS_Close) {
             unsetCursor();
             resetPositionText();
@@ -4083,6 +4178,18 @@ public:
 
     virtual bool pressButton(Base::Vector2d onSketchPos)
     {
+        Q_UNUSED(onSketchPos);
+        // This function used to do what preprocess() below does. It is changed
+        // to be done inside releaseButton(), this is to handle navigation style
+        // that uses both left and right mouse button for actions, e.g. Blender
+        // uses left and right button press for panning. If the user first
+        // press the left button and then the left button, the left button
+        // release event will be swallowed.
+        return true;
+    }
+
+    void preprocess(const Base::Vector2d &onSketchPos)
+    {
         if (Mode == STATUS_SEEK_FIRST_CONTROLPOINT) {
 
             EditCurve[0] = onSketchPos;
@@ -4105,7 +4212,7 @@ public:
 
                 static_cast<Sketcher::SketchObject *>(sketchgui->getObject())->solve();
 
-                return false;
+                return;
             }
 
             //Gui::Command::commitCommand();
@@ -4144,7 +4251,7 @@ public:
                     EditCurve.pop_back();
                     sugConstr.pop_back();
 
-                    return true;
+                    return;
                 }
 
 
@@ -4173,7 +4280,7 @@ public:
 
                 static_cast<Sketcher::SketchObject *>(sketchgui->getObject())->solve();
 
-                return false;
+                return;
             }
 
             //Gui::Command::commitCommand();
@@ -4195,11 +4302,11 @@ public:
             }
 
         }
-        return true;
     }
 
-    virtual bool releaseButton(Base::Vector2d /*onSketchPos*/)
+    virtual bool releaseButton(Base::Vector2d onSketchPos)
     {
+        preprocess(onSketchPos);
         if (Mode==STATUS_CLOSE) {
             unsetCursor();
             resetPositionText();
@@ -4655,6 +4762,18 @@ public:
 
     virtual bool pressButton(Base::Vector2d onSketchPos)
     {
+        Q_UNUSED(onSketchPos);
+        // This function used to do what preprocess() below does. It is changed
+        // to be done inside releaseButton(), this is to handle navigation style
+        // that uses both left and right mouse button for actions, e.g. Blender
+        // uses left and right button press for panning. If the user first
+        // press the left button and then the left button, the left button
+        // release event will be swallowed.
+        return true;
+    }
+
+    void preprocess(const Base::Vector2d &onSketchPos)
+    {
         if (Mode == STATUS_SEEK_First) {
             // N point curve + center + endpoint
             EditCurve.resize(N+2);
@@ -4675,12 +4794,11 @@ public:
             Mode = STATUS_End;
         }
 
-        return true;
     }
 
     virtual bool releaseButton(Base::Vector2d onSketchPos)
     {
-        Q_UNUSED(onSketchPos);
+        preprocess(onSketchPos);
         // Need to look at.  rx might need fixing.
         if (Mode==STATUS_End) {
             unsetCursor();
@@ -4901,14 +5019,15 @@ public:
 
     virtual bool pressButton(Base::Vector2d onSketchPos)
     {
-        EditPoint = onSketchPos;
-        selectionDone = true;
+        Q_UNUSED(onSketchPos);
         return true;
     }
 
     virtual bool releaseButton(Base::Vector2d onSketchPos)
     {
-        Q_UNUSED(onSketchPos);
+        EditPoint = onSketchPos;
+        selectionDone = true;
+
         if (selectionDone){
             unsetCursor();
             resetPositionText();
@@ -6754,20 +6873,21 @@ public:
 
     virtual bool pressButton(Base::Vector2d onSketchPos)
     {
-        if (Mode==STATUS_SEEK_First){
+        Q_UNUSED(onSketchPos);
+        return true;
+    }
+
+    virtual bool releaseButton(Base::Vector2d onSketchPos)
+    {
+        if (Mode == STATUS_SEEK_First) {
             StartPos = onSketchPos;
             Mode = STATUS_SEEK_Second;
         }
         else {
             Mode = STATUS_End;
         }
-        return true;
-    }
 
-    virtual bool releaseButton(Base::Vector2d onSketchPos)
-    {
-        Q_UNUSED(onSketchPos);
-        if (Mode==STATUS_End){
+        if (Mode == STATUS_End) {
             unsetCursor();
             resetPositionText();
 
@@ -6985,6 +7105,12 @@ public:
 
     virtual bool pressButton(Base::Vector2d onSketchPos)
     {
+        Q_UNUSED(onSketchPos);
+        return true;
+    }
+
+    virtual bool releaseButton(Base::Vector2d onSketchPos)
+    {
         if (Mode==STATUS_SEEK_First){
             StartPos = onSketchPos;
             Mode = STATUS_SEEK_Second;
@@ -6992,12 +7118,6 @@ public:
         else {
             Mode = STATUS_End;
         }
-        return true;
-    }
-
-    virtual bool releaseButton(Base::Vector2d onSketchPos)
-    {
-        Q_UNUSED(onSketchPos);
         if (Mode==STATUS_End){
             unsetCursor();
             resetPositionText();
