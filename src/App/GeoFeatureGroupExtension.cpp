@@ -57,10 +57,7 @@ GeoFeatureGroupExtension::GeoFeatureGroupExtension(void)
     initExtensionType(GeoFeatureGroupExtension::getExtensionClassTypeId());
     Group.setScope(LinkScope::Child);
 
-    _ExportChildren.setScope(LinkScope::Hidden);
-    _ExportChildren.setStatus(Property::NoModify,true);
-    EXTENSION_ADD_PROPERTY_TYPE(_ExportChildren,(0),"Base",
-            (App::PropertyType)(Prop_Output|Prop_Hidden|Prop_ReadOnly),"");
+    ClaimAllChildren.setValue(false);
 }
 
 GeoFeatureGroupExtension::~GeoFeatureGroupExtension(void)

@@ -147,6 +147,8 @@ public:
     PropertyLinkList Group;
     PropertyBool _GroupTouched;
     PropertyInteger _GroupVersion;
+    PropertyLinkList _ExportChildren;
+    PropertyBool ClaimAllChildren;
 
     enum ExportModeValue {
         ExportDisabled,

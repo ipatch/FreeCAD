@@ -32,6 +32,7 @@
 #include "DocumentObjectGroupPy.h"
 #include "GroupExtensionPy.h"
 #include "Document.h"
+#include "GroupParams.h"
 #include "FeaturePythonPyImp.h"
 #include "GeoFeatureGroupExtension.h"
 #include "Link.h"
@@ -75,6 +76,18 @@ GroupExtension::GroupExtension()
             "and export them as visible object regardless of their actual visibility.\n\n"
             "Both: same as 'Child Query' but with their current visibility.");
 
+
+    _ExportChildren.setScope(LinkScope::Hidden);
+    _ExportChildren.setStatus(Property::NoModify,true);
+    EXTENSION_ADD_PROPERTY_TYPE(_ExportChildren,(0),"Base",
+            (App::PropertyType)(Prop_Output|Prop_Hidden|Prop_ReadOnly),"");
+
+    ClaimAllChildren.setStatus(Property::Hidden, true);
+    EXTENSION_ADD_PROPERTY_TYPE(ClaimAllChildren,
+                                (GroupParams::getClaimAllChildren()),
+                                "Base",
+                                Prop_None,
+                                GroupParams::docClaimAllChildren());
 }
 
 GroupExtension::~GroupExtension()
@@ -709,8 +722,7 @@ void GroupExtension::onExtendedDocumentRestored() {
 void GroupExtension::initSetup() {
     _GroupVersion.setValue(1);
     if(!this->extensionIsDerivedFrom(App::GeoFeatureGroupExtension::getExtensionClassTypeId())) {
-        auto hGrp = App::GetApplication().GetParameterGroupByPath("User parameter:BaseApp/Preference/Group");
-        if(hGrp->GetBool("KeepHiddenChildren",true)) {
+        if(GroupParams::getKeepHiddenChildren()) {
             auto hiddenChildren = Base::freecad_dynamic_cast<PropertyMap>(
                     getExtendedObject()->getPropertyByName("HiddenChildren"));
             if(!hiddenChildren || hiddenChildren->getContainer()!=getExtendedObject())

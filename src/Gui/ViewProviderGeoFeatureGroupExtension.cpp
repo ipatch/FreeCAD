@@ -88,22 +88,6 @@ void ViewProviderGeoFeatureGroupExtension::extensionClaimChildren3D(
     }
 }
 
-void ViewProviderGeoFeatureGroupExtension::extensionClaimChildren(
-        std::vector<App::DocumentObject *> &children) const 
-{
-    auto* group = getExtendedViewProvider()->getObject()->getExtensionByType<App::GeoFeatureGroupExtension>();
-    auto objs = group->_ExportChildren.getValues();
-    children.insert(children.end(), objs.begin(), objs.end());
-}
-
-void ViewProviderGeoFeatureGroupExtension::extensionFinishRestoring()
-{
-    auto* group = getExtendedViewProvider()->getObject()->getExtensionByType<App::GeoFeatureGroupExtension>();
-    if (!group->_ExportChildren.getSize())
-        buildExport();
-    ViewProviderGroupExtension::extensionFinishRestoring();
-}
-
 void ViewProviderGeoFeatureGroupExtension::extensionAttach(App::DocumentObject* pcObject)
 {
     ViewProviderGroupExtension::extensionAttach(pcObject);
@@ -174,14 +158,7 @@ void ViewProviderGeoFeatureGroupExtension::extensionUpdateData(const App::Proper
     auto obj = getExtendedViewProvider()->getObject();
     auto group = obj->getExtensionByType<App::GeoFeatureGroupExtension>();
     if(group) {
-        if (prop == &group->_GroupTouched) {
-            if (!obj->getDocument()->testStatus(App::Document::Restoring))
-                buildExport();
-        } else if (prop == &group->Group) {
-
-            if (!obj->getDocument()->testStatus(App::Document::Restoring))
-                buildExport();
-
+        if (prop == &group->Group) {
             impl->conns.clear();
             if(linkView) {
                 for(auto obj : group->Group.getValues()) {
@@ -201,71 +178,6 @@ void ViewProviderGeoFeatureGroupExtension::extensionUpdateData(const App::Proper
             getExtendedViewProvider()->setTransformation ( group->placement().getValue().toMatrix() );
     }
     ViewProviderGroupExtension::extensionUpdateData ( prop );
-}
-
-static void filterLinksByScope(const App::DocumentObject *obj, std::vector<App::DocumentObject *> &children)
-{
-    if(!obj || !obj->getNameInDocument())
-        return;
-
-    std::vector<App::Property*> list;
-    obj->getPropertyList(list);
-    std::set<App::DocumentObject *> links;
-    for(auto prop : list) {
-        auto link = Base::freecad_dynamic_cast<App::PropertyLinkBase>(prop);
-        if(link && link->getScope()!=App::LinkScope::Global)
-            link->getLinkedObjects(std::inserter(links,links.end()),true);
-    }
-    for(auto it=children.begin();it!=children.end();) {
-        if(!links.count(*it))
-            it = children.erase(it);
-        else
-            ++it;
-    }
-}
-
-void ViewProviderGeoFeatureGroupExtension::buildExport() const {
-    App::DocumentObject * obj = getExtendedViewProvider()->getObject();
-    auto* group = obj->getExtensionByType<App::GeoFeatureGroupExtension>();
-    if(!group)
-        return;
-
-    if(obj->testStatus(App::PendingRecompute) && !obj->isRecomputing())
-        return;
-
-    auto model = group->Group.getValues ();
-    std::set<App::DocumentObject*> outSet; //< set of objects not to claim (childrens of childrens)
-
-    // search for objects handled (claimed) by the features
-    for (auto obj: model) {
-        if (!obj || !shouldCheckExport(obj)) { continue; }
-
-        Gui::ViewProvider* vp = Gui::Application::Instance->getViewProvider ( obj );
-        if (!vp || vp == getExtendedViewProvider()) { continue; }
-
-        auto children = vp->claimChildren();
-        filterLinksByScope(obj,children);
-        outSet.insert(children.begin(),children.end());
-    }
-
-    // remove the otherwise handled objects, preserving their order so the order in the TreeWidget is correct
-    for(auto it=model.begin();it!=model.end();) {
-        auto obj = *it;
-        if(!obj || !obj->getNameInDocument() || outSet.count(obj))
-            it = model.erase(it);
-        else
-            ++it;
-    }
-
-    if(group->_ExportChildren.getValues()!=model)
-        group->_ExportChildren.setValues(std::move(model));
-}
-
-bool ViewProviderGeoFeatureGroupExtension::shouldCheckExport(App::DocumentObject *obj) const
-{
-    //By default, do not check geofeaturegroup children for export exclusion,
-    //because stuff in another geofeaturegroup is normally not in the model
-    return !obj->hasExtension(App::GeoFeatureGroupExtension::getExtensionClassTypeId());
 }
 
 void ViewProviderGeoFeatureGroupExtension::extensionModeSwitchChange(void)

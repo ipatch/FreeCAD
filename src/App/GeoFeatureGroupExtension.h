@@ -55,7 +55,6 @@ class AppExport GeoFeatureGroupExtension : public App::GroupExtension
 
 public:
     PropertyBool QueryChildExport;
-    PropertyLinkList _ExportChildren;
 
     PropertyPlacement& placement();
     

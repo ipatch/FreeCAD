@@ -116,24 +116,109 @@ void ViewProviderGroupExtension::extensionDropObject(App::DocumentObject* obj) {
 
 void ViewProviderGroupExtension::extensionUpdateData(const App::Property *prop)
 {
-    App::DocumentObject* grp = static_cast<App::DocumentObject*>(getExtendedViewProvider()->getObject());
-    if (!grp->isRestoring()) {
-        auto ext = grp->getExtensionByType<App::GroupExtension>(true);
-        if (ext && prop == &ext->ExportMode) {
-            for (auto obj : ext->getExportGroupProperty(App::DocumentObject::GS_DEFAULT).getValues()) {
-                auto vp = Application::Instance->getViewProvider(obj);
-                if (vp)
-                    vp->signalChangeIcon();
+    if (auto obj = static_cast<App::DocumentObject*>(getExtendedViewProvider()->getObject())) {
+        if (!obj->getDocument()->testStatus(App::Document::Restoring)) {
+            if (auto ext = obj->getExtensionByType<App::GroupExtension>(true)) {
+                if (prop == &ext->ExportMode) {
+                    for (auto obj : ext->getExportGroupProperty(App::DocumentObject::GS_DEFAULT).getValues()) {
+                        auto vp = Application::Instance->getViewProvider(obj);
+                        if (vp)
+                            vp->signalChangeIcon();
+                    }
+                } else if (prop == &ext->_GroupTouched || prop == &ext->Group)
+                    buildExport();
             }
         }
     }
+    ViewProviderExtension::extensionUpdateData ( prop );
 }
 
-void ViewProviderGroupExtension::extensionClaimChildren(std::vector<App::DocumentObject*> &children) const {
 
+void ViewProviderGroupExtension::extensionClaimChildren(
+        std::vector<App::DocumentObject *> &children) const 
+{
     auto* group = getExtendedViewProvider()->getObject()->getExtensionByType<App::GroupExtension>();
-    const auto &objs = group->Group.getValues();
-    children.insert(children.end(),objs.begin(),objs.end());
+    auto & prop = group->ClaimAllChildren.getValue() ? group->Group : group->_ExportChildren;
+    auto objs = prop.getValues();
+    children.insert(children.end(), objs.begin(), objs.end());
+}
+
+void ViewProviderGroupExtension::extensionFinishRestoring()
+{
+    auto* group = getExtendedViewProvider()->getObject()->getExtensionByType<App::GroupExtension>();
+    if (!group->ClaimAllChildren.getValue() && !group->_ExportChildren.getSize())
+        buildExport();
+    ViewProviderExtension::extensionFinishRestoring();
+}
+
+static void filterLinksByScope(const App::DocumentObject *obj, std::vector<App::DocumentObject *> &children)
+{
+    if(!obj || !obj->getNameInDocument())
+        return;
+
+    std::vector<App::Property*> list;
+    obj->getPropertyList(list);
+    std::set<App::DocumentObject *> links;
+    for(auto prop : list) {
+        auto link = Base::freecad_dynamic_cast<App::PropertyLinkBase>(prop);
+        if(link && link->getScope()!=App::LinkScope::Global)
+            link->getLinkedObjects(std::inserter(links,links.end()),true);
+    }
+    for(auto it=children.begin();it!=children.end();) {
+        if(!links.count(*it))
+            it = children.erase(it);
+        else
+            ++it;
+    }
+}
+
+void ViewProviderGroupExtension::buildExport() const {
+    App::DocumentObject * obj = getExtendedViewProvider()->getObject();
+    auto* group = obj->getExtensionByType<App::GroupExtension>();
+    if(!group)
+        return;
+
+    if (group->ClaimAllChildren.getValue()) {
+        group->_ExportChildren.setValues({});
+        return;
+    }
+
+    if(obj->testStatus(App::PendingRecompute) && !obj->isRecomputing())
+        return;
+
+    auto model = group->Group.getValues ();
+    std::set<App::DocumentObject*> outSet; //< set of objects not to claim (childrens of childrens)
+
+    // search for objects handled (claimed) by the features
+    for (auto obj: model) {
+        if (!obj || !shouldCheckExport(obj)) { continue; }
+
+        Gui::ViewProvider* vp = Gui::Application::Instance->getViewProvider ( obj );
+        if (!vp || vp == getExtendedViewProvider()) { continue; }
+
+        auto children = vp->claimChildren();
+        filterLinksByScope(obj,children);
+        outSet.insert(children.begin(),children.end());
+    }
+
+    // remove the otherwise handled objects, preserving their order so the order in the TreeWidget is correct
+    for(auto it=model.begin();it!=model.end();) {
+        auto obj = *it;
+        if(!obj || !obj->getNameInDocument() || outSet.count(obj))
+            it = model.erase(it);
+        else
+            ++it;
+    }
+
+    if(group->_ExportChildren.getValues()!=model)
+        group->_ExportChildren.setValues(std::move(model));
+}
+
+bool ViewProviderGroupExtension::shouldCheckExport(App::DocumentObject *obj) const
+{
+    //By default, do not check geofeaturegroup children for export exclusion,
+    //because stuff in another geofeaturegroup is normally not in the model
+    return !obj->hasExtension(App::GeoFeatureGroupExtension::getExtensionClassTypeId());
 }
 
 bool ViewProviderGroupExtension::extensionOnDelete(const std::vector< std::string >& ) {

@@ -44,7 +44,6 @@ public:
     virtual ~ViewProviderGeoFeatureGroupExtension();
 
     virtual void extensionClaimChildren3D(std::vector< App::DocumentObject* > &) const override;
-    virtual void extensionClaimChildren(std::vector< App::DocumentObject* > &) const override;
     virtual SoGroup* extensionGetChildRoot(void) const override {return pcGroupChildren;};
     virtual void extensionAttach(App::DocumentObject* pcObject) override;
     virtual void extensionSetDisplayMode(const char* ModeName) override;
@@ -58,8 +57,6 @@ public:
     virtual void extensionHide(void) override {
         ViewProviderExtension::extensionHide();
     }
-
-    virtual void extensionFinishRestoring() override;
 
     virtual bool extensionGetElementPicked(const SoPickedPoint *, std::string &) const override;
     virtual bool extensionGetDetailPath(const char *, SoFullPath *, SoDetail *&) const override;
@@ -75,9 +72,7 @@ public:
     static bool needUpdateChildren(App::DocumentObject *obj);
 
 protected:
-    void buildExport() const;
     virtual void buildChildren3D();
-    virtual bool shouldCheckExport(App::DocumentObject *) const;
 
 protected:
     SoGroup *pcGroupChildren;

@@ -52,11 +52,17 @@ public:
 
     virtual void extensionAttach(App::DocumentObject* pcObject) override;
 
+    virtual void extensionFinishRestoring() override;
+
     virtual int extensionReorderObjects(const std::vector<App::DocumentObject*> &objs, App::DocumentObject* before) override;
     virtual int extensionCanReorderObject(App::DocumentObject* obj, App::DocumentObject* before) override;
 
     virtual bool extensionGetToolTip(const QByteArray &tag, QString &tooltip) const override;
     virtual bool extensionIconMouseEvent(QMouseEvent *, const QByteArray &) override;
+
+protected:
+    void buildExport() const;
+    virtual bool shouldCheckExport(App::DocumentObject *) const;
 };
 
 typedef ViewProviderExtensionPythonT<Gui::ViewProviderGroupExtension> ViewProviderGroupExtensionPython;
