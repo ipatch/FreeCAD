@@ -41,6 +41,7 @@
 #include "DlgSettingsMacroImp.h"
 #include "DlgSettingsUnitsImp.h"
 #include "DlgSettingsDocumentImp.h"
+#include "DlgSettingsObjects.h"
 //#include "DlgOnlineHelpImp.h"
 #include "DlgReportViewImp.h"
 #include "DlgSettingsLazyLoadedImp.h"
@@ -72,6 +73,7 @@ WidgetFactorySupplier::WidgetFactorySupplier()
     DlgGeneralImp::attachObserver();
   //new PrefPageProducer<DlgOnlineHelpImp>         ( QT_TRANSLATE_NOOP("QObject","General") );
     new PrefPageProducer<DlgSettingsDocumentImp>   ( QT_TRANSLATE_NOOP("QObject","General") );
+    new PrefPageProducer<DlgSettingsObjects>       ( QT_TRANSLATE_NOOP("QObject","General") );
     new PrefPageProducer<DlgSettingsSelection>     ( QT_TRANSLATE_NOOP("QObject","General") );
     new PrefPageProducer<DlgSettingsEditorImp>     ( QT_TRANSLATE_NOOP("QObject","General") );
     new PrefPageProducer<DlgReportViewImp>         ( QT_TRANSLATE_NOOP("QObject","General") );
