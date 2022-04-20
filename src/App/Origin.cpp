@@ -35,6 +35,7 @@
 #include <App/Application.h>
 #include <App/Document.h>
 #include "OriginFeature.h"
+#include "GroupParams.h"
 
 #include "Origin.h"
 
@@ -131,8 +132,7 @@ App::DocumentObjectExecReturn *Origin::execute(void) {
 
 void Origin::setupObject () {
     DocumentObject::setupObject();
-    auto hGrp = App::GetApplication().GetParameterGroupByPath("User parameter:BaseApp/Preference/Group");
-    if(hGrp->GetBool("CreateOrigin",false))
+    if(GroupParams::getCreateOrigin())
         initObjects();
 }
 

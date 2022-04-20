@@ -135,6 +135,7 @@ SET(Document_CPP_SRCS
     StringIDPyImp.cpp
     Document.cpp
     DocumentParams.cpp
+    GroupParams.cpp
     DocumentObject.cpp
     Extension.cpp
     ExtensionPyImp.cpp
@@ -185,6 +186,7 @@ SET(Document_HPP_SRCS
     StringHasher.h
     Document.h
     DocumentParams.h
+    GroupParams.h
     DocumentObject.h
     Extension.h
     ExtensionContainer.h

@@ -31,6 +31,7 @@
 #include "DocumentObjectGroupPy.h"
 #include "Document.h"
 #include "FeaturePythonPyImp.h"
+#include "GroupParams.h"
 
 using namespace App;
 
@@ -40,8 +41,7 @@ DocumentObjectGroup::DocumentObjectGroup(void): DocumentObject(), GroupExtension
 
     GroupExtension::initExtension(this);
 
-    auto hGrp = App::GetApplication().GetParameterGroupByPath("User parameter:BaseApp/Preference/Group");
-    if(hGrp->GetBool("ExportChildren",true)) {
+    if(GroupParams::getExportChildren()) {
         ExportMode.setStatus(Property::Hidden,false);
         ExportMode.setValue(ExportByVisibility);
     }
