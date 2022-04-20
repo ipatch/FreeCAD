@@ -31,7 +31,7 @@ GroupParams.declare()
 #include <Base/Parameter.h>
 
 namespace App {
-/** Convenient class to obtain App::GroupExtension/GeoFeatureGroupExtension related parameters
+/** Convenient class to obtain group object (App::GroupExtension and GeoFeatureGroupExtension) related parameters
 
  * The parameters are under group "User parameter:BaseApp/Preferences/Group"
  *
@@ -80,7 +80,7 @@ public:
     //@{
     /// Accessor for parameter KeepHiddenChildren
     ///
-    /// Remember invisible children objects and restore only visible objects
+    /// Remember invisible children objects and keep those objects hidden
     /// when the group is made visible.
     static const bool & getKeepHiddenChildren();
     static const bool & defaultKeepHiddenChildren();
@@ -92,8 +92,8 @@ public:
     //@{
     /// Accessor for parameter ExportChildren
     ///
-    /// Export visible children. Note, that once this option is enabled,
-    /// the group object will be touched when its child toggles visibility.
+    /// Export visible children (e.g. when doing STEP export). Note, that once this option
+    /// is enabled, the group object will be touched when its child toggles visibility.
     static const bool & getExportChildren();
     static const bool & defaultExportChildren();
     static void removeExportChildren();
@@ -112,6 +112,19 @@ public:
     static void removeCreateOrigin();
     static void setCreateOrigin(const bool &v);
     static const char *docCreateOrigin();
+    //@}
+
+    //@{
+    /// Accessor for parameter GeoGroupAllowCrossLink
+    ///
+    /// Allow objects to be contained in more than one GeoFeatureGroup (e.g. App::Part).
+    /// If diabled, adding an object to one group will auto remove it from other groups.
+    /// WARNING! Disabling this option may produce an invalid group after changing its children.
+    static const bool & getGeoGroupAllowCrossLink();
+    static const bool & defaultGeoGroupAllowCrossLink();
+    static void removeGeoGroupAllowCrossLink();
+    static void setGeoGroupAllowCrossLink(const bool &v);
+    static const char *docGeoGroupAllowCrossLink();
     //@}
 
     // Auto generated code. See class document of GroupParams.

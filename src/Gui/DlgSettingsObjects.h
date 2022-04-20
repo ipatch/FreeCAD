@@ -72,6 +72,7 @@ private:
     Gui::PrefCheckBox *checkBoxKeepHiddenChildren = nullptr;
     Gui::PrefCheckBox *checkBoxExportChildren = nullptr;
     Gui::PrefCheckBox *checkBoxCreateOrigin = nullptr;
+    Gui::PrefCheckBox *checkBoxGeoGroupAllowCrossLink = nullptr;
 };
 } // namespace {dialog_namespace}
 } // namespace {namespace}

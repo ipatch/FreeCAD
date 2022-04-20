@@ -84,7 +84,6 @@ public:
     FC_DOCUMENT_PARAM(NoPartialLoading, bool, Bool, false) \
     FC_DOCUMENT_PARAM(ThumbnailNoBackground, bool, Bool, false) \
     FC_DOCUMENT_PARAM(ThumbnailSampleSize, int, Int, 0) \
-    FC_DOCUMENT_PARAM(GeoGroupAllowCrossLink, bool, Bool, true) \
     FC_DOCUMENT_PARAM(DuplicateLabels, bool, Bool, false) \
     FC_DOCUMENT_PARAM(TransactionOnRecompute, bool, Bool, false) \
     FC_DOCUMENT_PARAM(EnableMaterialEdit, bool, Bool, true) \

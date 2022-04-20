@@ -49,6 +49,7 @@ public:
     bool KeepHiddenChildren; // Auto generated code. See class document of GroupParams.
     bool ExportChildren; // Auto generated code. See class document of GroupParams.
     bool CreateOrigin; // Auto generated code. See class document of GroupParams.
+    bool GeoGroupAllowCrossLink; // Auto generated code. See class document of GroupParams.
 
     // Auto generated code. See class document of GroupParams.
     GroupParamsP() {
@@ -63,6 +64,8 @@ public:
         funcs["ExportChildren"] = &GroupParamsP::updateExportChildren;
         CreateOrigin = handle->GetBool("CreateOrigin", false);
         funcs["CreateOrigin"] = &GroupParamsP::updateCreateOrigin;
+        GeoGroupAllowCrossLink = handle->GetBool("GeoGroupAllowCrossLink", false);
+        funcs["GeoGroupAllowCrossLink"] = &GroupParamsP::updateGeoGroupAllowCrossLink;
     }
 
     // Auto generated code. See class document of GroupParams.
@@ -95,6 +98,10 @@ public:
     // Auto generated code. See class document of GroupParams.
     static void updateCreateOrigin(GroupParamsP *self) {
         self->CreateOrigin = self->handle->GetBool("CreateOrigin", false);
+    }
+    // Auto generated code. See class document of GroupParams.
+    static void updateGeoGroupAllowCrossLink(GroupParamsP *self) {
+        self->GeoGroupAllowCrossLink = self->handle->GetBool("GeoGroupAllowCrossLink", false);
     }
 };
 
@@ -143,7 +150,7 @@ void GroupParams::removeClaimAllChildren() {
 // Auto generated code. See class document of GroupParams.
 const char *GroupParams::docKeepHiddenChildren() {
     return QT_TRANSLATE_NOOP("GroupParams",
-"Remember invisible children objects and restore only visible objects\n"
+"Remember invisible children objects and keep those objects hidden\n"
 "when the group is made visible.");
 }
 
@@ -172,8 +179,8 @@ void GroupParams::removeKeepHiddenChildren() {
 // Auto generated code. See class document of GroupParams.
 const char *GroupParams::docExportChildren() {
     return QT_TRANSLATE_NOOP("GroupParams",
-"Export visible children. Note, that once this option is enabled,\n"
-"the group object will be touched when its child toggles visibility.");
+"Export visible children (e.g. when doing STEP export). Note, that once this option\n"
+"is enabled, the group object will be touched when its child toggles visibility.");
 }
 
 // Auto generated code. See class document of GroupParams.
@@ -226,6 +233,36 @@ void GroupParams::setCreateOrigin(const bool &v) {
 // Auto generated code. See class document of GroupParams.
 void GroupParams::removeCreateOrigin() {
     instance()->handle->RemoveBool("CreateOrigin");
+}
+
+// Auto generated code. See class document of GroupParams.
+const char *GroupParams::docGeoGroupAllowCrossLink() {
+    return QT_TRANSLATE_NOOP("GroupParams",
+"Allow objects to be contained in more than one GeoFeatureGroup (e.g. App::Part).\n"
+"If diabled, adding an object to one group will auto remove it from other groups.\n"
+"WARNING! Disabling this option may produce an invalid group after changing its children.");
+}
+
+// Auto generated code. See class document of GroupParams.
+const bool & GroupParams::getGeoGroupAllowCrossLink() {
+    return instance()->GeoGroupAllowCrossLink;
+}
+
+// Auto generated code. See class document of GroupParams.
+const bool & GroupParams::defaultGeoGroupAllowCrossLink() {
+    const static bool def = false;
+    return def;
+}
+
+// Auto generated code. See class document of GroupParams.
+void GroupParams::setGeoGroupAllowCrossLink(const bool &v) {
+    instance()->handle->SetBool("GeoGroupAllowCrossLink",v);
+    instance()->GeoGroupAllowCrossLink = v;
+}
+
+// Auto generated code. See class document of GroupParams.
+void GroupParams::removeGeoGroupAllowCrossLink() {
+    instance()->handle->RemoveBool("GeoGroupAllowCrossLink");
 }
 //[[[end]]]
 

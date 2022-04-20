@@ -75,6 +75,12 @@ DlgSettingsObjects::DlgSettingsObjects(QWidget* parent)
     checkBoxCreateOrigin->setChecked(false);
     checkBoxCreateOrigin->setEntryName("CreateOrigin");
     checkBoxCreateOrigin->setParamGrpPath("Group");
+    // Auto generated code. See class document of DlgSettingsObjects.
+    checkBoxGeoGroupAllowCrossLink = new Gui::PrefCheckBox(this);
+    layoutGroupObjects->addWidget(checkBoxGeoGroupAllowCrossLink, 4, 0);
+    checkBoxGeoGroupAllowCrossLink->setChecked(false);
+    checkBoxGeoGroupAllowCrossLink->setEntryName("GeoGroupAllowCrossLink");
+    checkBoxGeoGroupAllowCrossLink->setParamGrpPath("Group");
     layout->addItem(new QSpacerItem(40, 20, QSizePolicy::Fixed, QSizePolicy::Expanding));
     retranslateUi();
 }
@@ -91,6 +97,7 @@ void DlgSettingsObjects::saveSettings()
     checkBoxKeepHiddenChildren->onSave();
     checkBoxExportChildren->onSave();
     checkBoxCreateOrigin->onSave();
+    checkBoxGeoGroupAllowCrossLink->onSave();
 }
 
 void DlgSettingsObjects::loadSettings()
@@ -100,6 +107,7 @@ void DlgSettingsObjects::loadSettings()
     checkBoxKeepHiddenChildren->onRestore();
     checkBoxExportChildren->onRestore();
     checkBoxCreateOrigin->onRestore();
+    checkBoxGeoGroupAllowCrossLink->onRestore();
 }
 
 void DlgSettingsObjects::retranslateUi()
@@ -123,6 +131,10 @@ void DlgSettingsObjects::retranslateUi()
     checkBoxCreateOrigin->setToolTip(QApplication::translate(
                                     "GroupParams",
                                     App::GroupParams::docCreateOrigin()));
+    checkBoxGeoGroupAllowCrossLink->setText(QObject::tr("Allow cross coordinate links in GeoFeatureGroup (App::Part)"));
+    checkBoxGeoGroupAllowCrossLink->setToolTip(QApplication::translate(
+                                    "GroupParams",
+                                    App::GroupParams::docGeoGroupAllowCrossLink()));
 }
 
 void DlgSettingsObjects::changeEvent(QEvent *e)

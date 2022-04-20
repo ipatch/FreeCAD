@@ -34,7 +34,7 @@
 #include "OriginFeature.h"
 #include "Origin.h"
 #include "OriginGroupExtension.h"
-#include "DocumentParams.h"
+#include "GroupParams.h"
 #include <Base/Console.h>
 #include <Base/Tools.h>
 //#include "GeoFeatureGroupPy.h"
@@ -255,6 +255,7 @@ void GeoFeatureGroupExtension::extensionOnChanged(const Property* p) {
             bool error = false;
             auto children = Group.getValues();
             std::unordered_map<App::DocumentObject*, bool> objMap;
+            std::vector<App::DocumentObject *> crossLinks;
             for(auto it=children.begin(),itNext=it;it!=children.end();it=itNext) {
                 ++itNext;
                 auto obj = *it;
@@ -304,7 +305,7 @@ void GeoFeatureGroupExtension::extensionOnChanged(const Property* p) {
                         auto iter = objMap.find(link);
                         if(iter == objMap.end() || !iter->second) {
                             const char *action;
-                            if (DocumentParams::GeoGroupAllowCrossLink())
+                            if (GroupParams::getGeoGroupAllowCrossLink())
                                 action = "Invalid child ";
                             else {
                                 action = "Remove ";
