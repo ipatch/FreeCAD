@@ -1536,7 +1536,7 @@ Gui--PieButton:pressed,
 Gui--PieButton:pressed:checked,
 QPushButton:pressed,
 QPushButton:pressed:checked {
-    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #65A2E5, stop:1 #65A2E5);
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #4582E5, stop:1 #4582E5);
 }
 
 Gui--PieButton:checked,
