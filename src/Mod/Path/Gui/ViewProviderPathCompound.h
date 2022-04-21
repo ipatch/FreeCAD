@@ -34,6 +34,7 @@ class PathGuiExport ViewProviderPathCompound: public ViewProviderPath
     PROPERTY_HEADER(PathGui::ViewProviderPathCompound);
 
 public:
+    ViewProviderPathCompound();
 
     std::vector<App::DocumentObject*> claimChildren(void)const;
     virtual bool canDragObjects() const;
@@ -43,7 +44,6 @@ public:
     virtual void dropObject(App::DocumentObject*);
     virtual bool canReorderObject(App::DocumentObject* obj, App::DocumentObject* before);
     virtual bool reorderObjects(const std::vector<App::DocumentObject*> &objs, App::DocumentObject* before);
-    QIcon getIcon(void) const;
 
 protected:
     virtual bool setEdit(int ModNum);

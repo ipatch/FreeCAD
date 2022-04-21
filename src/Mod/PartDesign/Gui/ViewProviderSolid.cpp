@@ -37,7 +37,7 @@ PROPERTY_SOURCE(PartDesignGui::ViewProviderSolid, PartGui::ViewProviderPart)
 
 ViewProviderSolid::ViewProviderSolid()
 {
-    sPixmap = "PartDesign_Solid.svg";
+    sPixmap = "PartDesign_Solid";
 }
 
 void ViewProviderSolid::updateData(const App::Property* prop) {
@@ -51,8 +51,10 @@ void ViewProviderSolid::updateData(const App::Property* prop) {
 
 QIcon ViewProviderSolid::getIcon(void) const {
     auto owner = Base::freecad_dynamic_cast<PartDesign::Solid>(getObject());
-    if(owner && owner->Active.getValue())
+    if(owner && owner->Active.getValue()) {
+        Gui::BitmapCacheContext ctx(getObject() ? getObject()->getTypeId().getName() : getTypeId().getName());
         return Gui::BitmapFactory().pixmap("PartDesign_Solid_Active.svg");
+    }
     return inherited::getIcon();
 }
 

@@ -33,9 +33,9 @@ PROPERTY_SOURCE(SurfaceGui::ViewProviderExtend, PartGui::ViewProviderSpline)
 
 namespace SurfaceGui {
 
-QIcon ViewProviderExtend::getIcon(void) const
+ViewProviderExtend::ViewProviderExtend()
 {
-    return Gui::BitmapFactory().pixmap("Surface_Extend");
+    sPixmap = "Surface_Extend";
 }
 
 } //namespace SurfaceGui

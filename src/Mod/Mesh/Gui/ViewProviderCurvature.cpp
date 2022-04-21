@@ -87,6 +87,8 @@ PROPERTY_SOURCE(MeshGui::ViewProviderMeshCurvature, Gui::ViewProviderDocumentObj
 
 ViewProviderMeshCurvature::ViewProviderMeshCurvature()
 {
+    sPixmap = "Mesh_Tree_Curvature_Plot.svg";
+
     pcColorRoot = new SoSeparator();
     pcColorRoot->renderCaching = SoSeparator::OFF;
     pcColorRoot->ref();
@@ -351,12 +353,6 @@ void ViewProviderMeshCurvature::setVertexCurvatureMode(int mode)
             pcColorMat->transparency.set1Value(j, 0.8f);
         }
     }
-}
-
-QIcon ViewProviderMeshCurvature::getIcon() const
-{
-    static QPixmap px = Gui::BitmapFactory().pixmap(":/icons/Mesh_Tree_Curvature_Plot.svg");
-    return px;
 }
 
 void ViewProviderMeshCurvature::setDisplayMode(const char* ModeName)

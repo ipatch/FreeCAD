@@ -1950,7 +1950,7 @@ QIcon ViewProviderLink::getIcon() const {
         }
     }
     overlayCacheKey = 0;
-    return Gui::BitmapFactory().pixmap(sPixmap);
+    return ViewProviderDocumentObject::getIcon();
 }
 
 QPixmap ViewProviderLink::getOverlayPixmap() const {

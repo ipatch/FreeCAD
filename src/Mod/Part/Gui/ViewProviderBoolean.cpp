@@ -176,11 +176,6 @@ std::vector<App::DocumentObject*> ViewProviderMultiFuse::claimChildren(void)cons
     return std::vector<App::DocumentObject*>(static_cast<Part::MultiFuse*>(getObject())->Shapes.getValues());
 }
 
-QIcon ViewProviderMultiFuse::getIcon(void) const
-{
-    return Gui::BitmapFactory().iconFromTheme("Part_Fuse");
-}
-
 void ViewProviderMultiFuse::updateData(const App::Property* prop)
 {
     PartGui::ViewProviderPart::updateData(prop);
@@ -305,11 +300,6 @@ ViewProviderMultiCommon::~ViewProviderMultiCommon()
 std::vector<App::DocumentObject*> ViewProviderMultiCommon::claimChildren(void)const
 {
     return std::vector<App::DocumentObject*>(static_cast<Part::MultiCommon*>(getObject())->Shapes.getValues());
-}
-
-QIcon ViewProviderMultiCommon::getIcon(void) const
-{
-    return Gui::BitmapFactory().iconFromTheme("Part_Common");
 }
 
 void ViewProviderMultiCommon::updateData(const App::Property* prop)

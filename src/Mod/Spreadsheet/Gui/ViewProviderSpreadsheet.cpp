@@ -63,6 +63,7 @@ PROPERTY_SOURCE(SpreadsheetGui::ViewProviderSheet, Gui::ViewProviderDocumentObje
 ViewProviderSheet::ViewProviderSheet()
     : Gui::ViewProviderDocumentObject()
 {
+    sPixmap = "Spreadsheet";
 }
 
 ViewProviderSheet::~ViewProviderSheet()
@@ -87,6 +88,7 @@ std::vector<std::string> ViewProviderSheet::getDisplayModes(void) const
 
 QIcon ViewProviderSheet::getIcon() const
 {
+#if 0
     static const char * const Points_Feature_xpm[] = {
         "16 16 3 1",
         "       c None",
@@ -110,6 +112,9 @@ QIcon ViewProviderSheet::getIcon() const
         "                "};
     QPixmap px(Points_Feature_xpm);
     return px;
+#else
+    return Gui::ViewProviderDocumentObject::getIcon();
+#endif
 }
 
 bool ViewProviderSheet::setEdit(int ModNum)

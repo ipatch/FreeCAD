@@ -148,6 +148,8 @@ PROPERTY_SOURCE(PathGui::ViewProviderPath, Gui::ViewProviderGeometryObject)
 ViewProviderPath::ViewProviderPath()
     :pt0Index(-1),blockPropertyChange(false),edgeStart(-1),coordStart(-1),coordEnd(-1),bboxCached(false)
 {
+    sPixmap = "Path_Toolpath";
+
     ParameterGrp::handle hGrp = App::GetApplication().GetParameterGroupByPath("User parameter:BaseApp/Preferences/Mod/Path");
     unsigned long lcol = hGrp->GetUnsigned("DefaultNormalPathColor",11141375UL); // dark green (0,170,0)
     float lr,lg,lb;
@@ -728,11 +730,6 @@ Base::BoundBox3d ViewProviderPath::_getBoundingBox(
     xbox.project().getBounds(bbox.MinX,bbox.MinY,bbox.MinZ,
                              bbox.MaxX,bbox.MaxY,bbox.MaxZ);
     return bbox;
-}
-
-QIcon ViewProviderPath::getIcon() const
-{
-    return Gui::BitmapFactory().pixmap("Path_Toolpath");
 }
 
 void ViewProviderPath::setupContextMenu(QMenu* menu, QObject* receiver, const char* member)

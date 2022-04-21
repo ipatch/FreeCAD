@@ -72,7 +72,6 @@ public:
     void setDisplayMode(const char* ModeName);
     std::vector<std::string> getDisplayModes() const;
     void updateData(const App::Property*);
-    virtual QIcon getIcon() const;
 
     virtual bool useNewSelectionModel(void) const;
     virtual std::string getElement(const SoDetail *) const;

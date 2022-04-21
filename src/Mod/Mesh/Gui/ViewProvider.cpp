@@ -236,6 +236,8 @@ PROPERTY_SOURCE(MeshGui::ViewProviderMesh, Gui::ViewProviderGeometryObject)
 
 ViewProviderMesh::ViewProviderMesh() : pcOpenEdge(0)
 {
+    sPixmap = "Mesh_Tree";
+
     static const char *osgroup = "Object Style";
 
     ADD_PROPERTY_TYPE(LineTransparency,(0), osgroup, App::Prop_None, "Set line transparency.");
@@ -508,8 +510,7 @@ void ViewProviderMesh::updateData(const App::Property* prop)
 QIcon ViewProviderMesh::getIcon() const
 {
 #if 1
-    static QIcon icon = Gui::BitmapFactory().pixmap("Mesh_Tree");
-    return icon;
+    return Gui::ViewProviderGeometryObject::getIcon();
 #else
     static const char * const Mesh_Feature_xpm[] = {
         "16 16 4 1",

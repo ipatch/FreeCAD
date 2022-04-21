@@ -73,11 +73,6 @@ ViewProviderSpline::~ViewProviderSpline()
 {
 }
 
-QIcon ViewProviderSpline::getIcon(void) const
-{
-    return Gui::BitmapFactory().pixmap(sPixmap);
-}
-
 void ViewProviderSpline::setupContextMenu(QMenu* menu, QObject* receiver, const char* member)
 {
     ViewProviderPartExt::setupContextMenu(menu, receiver, member);

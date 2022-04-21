@@ -40,6 +40,10 @@ using namespace PathGui;
 
 PROPERTY_SOURCE(PathGui::ViewProviderPathCompound, PathGui::ViewProviderPath)
 
+ViewProviderPathCompound::ViewProviderPathCompound()
+{
+    sPixmap = "Path_Compound";
+}
 
 bool ViewProviderPathCompound::setEdit(int ModNum)
 {
@@ -123,11 +127,6 @@ void ViewProviderPathCompound::dropObject(App::DocumentObject* obj)
             feat->Group.touch();
         }
     }
-}
-
-QIcon ViewProviderPathCompound::getIcon() const
-{
-    return Gui::BitmapFactory().pixmap("Path_Compound");
 }
 
 bool ViewProviderPathCompound::canReorderObject(App::DocumentObject* obj,

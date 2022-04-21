@@ -37,9 +37,9 @@ using namespace PathGui;
 
 PROPERTY_SOURCE(PathGui::ViewProviderPathShape, PathGui::ViewProviderPath)
 
-QIcon ViewProviderPathShape::getIcon() const
+ViewProviderPathShape::ViewProviderPathShape()
 {
-    return Gui::BitmapFactory().pixmap("Path_Shape");
+    sPixmap = "Path_Shape";
 }
 
 std::vector<App::DocumentObject*> ViewProviderPathShape::claimChildren(void) const

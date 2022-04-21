@@ -106,6 +106,8 @@ QIcon ViewProviderWrap::getIcon() const
         }
     }
 
+    Gui::BitmapCacheContext ctx(
+            getObject() ? getObject()->getTypeId().getName() : getTypeId().getName());
     QPixmap px = Gui::BitmapFactory().pixmapFromSvg(
             "PartDesign_Wrap_Overlay.svg", QSizeF(64,64), colormap);
     return Gui::BitmapFactory().merge(vp->getIcon().pixmap(64),

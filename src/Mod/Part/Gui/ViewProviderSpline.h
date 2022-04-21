@@ -42,7 +42,6 @@ public:
     // Display properties
     App::PropertyBool ControlPoints;
 
-    QIcon getIcon(void) const;
     void updateData(const App::Property* prop);
     void setupContextMenu(QMenu* menu, QObject* receiver, const char* member);
 
