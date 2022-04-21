@@ -988,8 +988,28 @@ Action * Command::createAction(void)
 
 void Command::refreshIcon()
 {
-    if (_pcAction && sPixmap)
-        _pcAction->setIcon(Gui::BitmapFactory().iconFromTheme(sPixmap));
+    if (!_pcAction)
+        return;
+    BitmapCacheContext ctx(getName());
+    auto icon = BitmapFactory().iconFromTheme(getPixmap());
+    if (!icon.isNull())
+        _pcAction->setIcon(icon);
+    if (auto group = qobject_cast<ActionGroup*>(_pcAction)) {
+        QVariant data = _pcAction->property("defaultAction");
+        int idx = -1;
+        if (data.canConvert<int>())
+            idx = data.toInt();
+        int i = -1;
+        for (auto action : group->actions()) {
+            ++i;
+            auto icon = Gui::BitmapFactory().iconFromTheme(action->objectName().toUtf8().constData(), true);
+            if (!icon.isNull()) {
+                action->setIcon(icon);
+                if (i == idx)
+                    _pcAction->setIcon(icon);
+            }
+        }
+    }
 }
 
 void Command::languageChange()
@@ -1083,11 +1103,14 @@ static inline QIcon commandIcon(Command *cmd)
 
 bool GroupCommand::isActive() {
     if(_pcAction && triggerSource() == TriggerNone) {
-        int idx = _pcAction->property("defaultAction").toInt();
-        if(idx >= 0) {
-            auto cmd = cmds[idx].first;
-            _pcAction->setChecked(cmd->getAction()->isChecked(),true);
-            _pcAction->setIcon(commandIcon(cmd));
+        QVariant data = _pcAction->property("defaultAction");
+        if (data.canConvert<int>()) {
+            int idx = data.toInt();
+            if(idx >= 0) {
+                auto cmd = cmds[idx].first;
+                _pcAction->setChecked(cmd->getAction()->isChecked(),true);
+                _pcAction->setIcon(commandIcon(cmd));
+            }
         }
     }
     return true;
@@ -1566,9 +1589,7 @@ Action * PythonCommand::createAction(void)
 
 void PythonCommand::refreshIcon()
 {
-    const char * pixmap = getResource("Pixmap");
-    if (_pcAction && pixmap && pixmap[0])
-        _pcAction->setIcon(Gui::BitmapFactory().iconFromTheme(pixmap));
+    Command::refreshIcon();
 }
 
 const char* PythonCommand::getWhatsThis() const
