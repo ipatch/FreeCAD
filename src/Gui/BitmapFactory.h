@@ -83,7 +83,7 @@ public:
     /** Returns the QIcon corresponding to name in the current icon theme.
      * If no such icon is found in the current theme fallback is returned instead.
      */
-    QIcon iconFromTheme(const char* name, const QIcon& fallback = QIcon());
+    QIcon iconFromTheme(const char* name, bool silent = false, const QIcon& fallback = QIcon());
     /** Retrieves a pixmap by name
      * @param name: pixmap cache name
      * @param silent: do not output error if the requested pixmap does not exist

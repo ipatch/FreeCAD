@@ -46,6 +46,8 @@
 #include <QWebFrame>
 #endif
 
+#include <boost/algorithm/string/predicate.hpp>
+
 #include <string>
 #include <Inventor/fields/SoSFImage.h>
 
@@ -290,7 +292,7 @@ const std::set<std::string> &BitmapFactoryInst::getContext(const char *name) con
     return dummy;
 }
 
-QIcon BitmapFactoryInst::iconFromTheme(const char* name, const QIcon& fallback)
+QIcon BitmapFactoryInst::iconFromTheme(const char* name, bool silent, const QIcon& fallback)
 {
     if (!name)
         return QIcon();
@@ -308,7 +310,7 @@ QIcon BitmapFactoryInst::iconFromTheme(const char* name, const QIcon& fallback)
         return icon;
 
     if (it == d->xpmCache.end())
-        return pixmap(name);
+        return pixmap(name, silent);
     else if (!it->pixmap.isNull())
         return it->pixmap;
     else
@@ -341,6 +343,18 @@ QPixmap BitmapFactoryInst::pixmap(const char* name, bool silent, QPixmap *origin
     if (!name || *name == '\0')
         return QPixmap();
 
+    // Remove redundant ending '.svg' if this is not an absolute path for better
+    // icon key search in DlgIconBrowser
+    std::string _name;
+    if (boost::iends_with(name, ".svg")
+            && !strchr(name, '/')
+            && !strchr(name, '\\')
+            && !strchr(name, ':'))
+    {
+        _name = name;
+        _name.resize(_name.size()-4);
+        name = _name.c_str();
+    }
     QPixmap icon;
     if (findPixmapInCache(name, icon, original))
         return icon;
