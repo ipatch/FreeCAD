@@ -104,12 +104,12 @@
       </property>
       <column>
        <property name="text">
-        <string>Icon</string>
+        <string>Resource key</string>
        </property>
       </column>
       <column>
        <property name="text">
-        <string>Styled Icon</string>
+        <string>Styled icon</string>
        </property>
       </column>
       <column>
@@ -191,13 +191,13 @@ TreeItemInvisible, iconset:MyIcons/TreeItemInvisible.svg
    <header>Gui/PrefWidgets.h</header>
   </customwidget>
   <customwidget>
-   <class>Gui::PrefLineEdit</class>
-   <extends>QLineEdit</extends>
+   <class>Gui::PrefComboBox</class>
+   <extends>QComboBox</extends>
    <header>Gui/PrefWidgets.h</header>
   </customwidget>
   <customwidget>
-   <class>Gui::PrefComboBox</class>
-   <extends>QComboBox</extends>
+   <class>Gui::PrefLineEdit</class>
+   <extends>QLineEdit</extends>
    <header>Gui/PrefWidgets.h</header>
   </customwidget>
  </customwidgets>
