@@ -177,7 +177,7 @@ inline BitmapFactoryInst& BitmapFactory(void)
 }
 
 /// Help class to provide some context of the icon cache
-class BitmapCacheContext
+class GuiExport BitmapCacheContext
 {
 private:
     /// Private new operator to prevent heap allocation
