@@ -465,7 +465,6 @@ void PropertySheet::pasteCells(XMLReader &reader, Range dstRange, int type) {
                         if(!dst.isValid())
                             continue;
                         owner->clear(dst);
-                        owner->cellUpdated(dst);
                     }
                 }
                 range.next();
@@ -513,7 +512,6 @@ void PropertySheet::pasteCells(XMLReader &reader, Range dstRange, int type) {
                             recomputeDependencies(dst);
                     }
                     dirty.insert(dst);
-                    owner->cellUpdated(dst);
                 }
             }
         }
@@ -526,11 +524,12 @@ void PropertySheet::pasteCells(XMLReader &reader, Range dstRange, int type) {
                         if(!dst.isValid())
                             continue;
                         owner->clear(dst);
-                        owner->cellUpdated(dst);
                     }
                 }
             }while(range.next());
         }
+
+        owner->rangeUpdated(Range(from, to));
     }
     signaller.tryInvoke();
 }
