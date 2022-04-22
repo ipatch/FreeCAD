@@ -67,7 +67,7 @@ public:
     FC_UI_CHECKBOX(ExprParams, AutoHideEditorIcon, "Auto hide editor icon") \
     FC_UI_LINEEDIT(ExprParams, EditorTrigger, "Editor trigger shortcut") \
     FC_UI_CHECKBOX(ExprParams, NoSystemBackground, "In place editing") \
-    FC_UI_CHECKBOX(ExprParams, EditDialogBGAlpha, "Background opacity") \
+    FC_UI_SPINBOX(ExprParams, EditDialogBGAlpha, "Background opacity", 0, 255, 1) \
 
 #define FC_PIEMENU_PARAMS \
     FC_UI_SPINBOX(ViewParams, PieMenuIconSize, "Icon size", 0, 64, 1) \
