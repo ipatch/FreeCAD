@@ -124,7 +124,7 @@ void DlgRunExternal::finished (int exitCode, QProcess::ExitStatus exitStatus)
 void DlgRunExternal::on_chooseProgram_clicked()
 {
     QString fn;
-    fn = QFileDialog::getOpenFileName(this, tr("Select a file"), ui->programPath->text());
+    fn = FileDialog::getOpenFileName(this, tr("Select a file"), ui->programPath->text());
     if (!fn.isEmpty()) {
         ui->programPath->setText(fn);
     }

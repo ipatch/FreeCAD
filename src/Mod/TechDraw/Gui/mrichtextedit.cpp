@@ -53,6 +53,7 @@
 #include <Base/Tools.h>
 
 #include <App/Application.h>
+#include <Gui/FileDialog.h>
 
 #include "PreferencesGui.h"
 #include "mrichtextedit.h"
@@ -671,7 +672,7 @@ void MRichTextEdit::setText(const QString& text) {
 void MRichTextEdit::insertImage() {
     QSettings s;
     QString attdir = s.value(QString::fromUtf8("general/filedialog-path")).toString();
-    QString file = QFileDialog::getOpenFileName(this,
+    QString file = Gui::FileDialog::getOpenFileName(this,
                                     tr("Select an image"),
                                     attdir,
                                     tr("JPEG (*.jpg);; GIF (*.gif);; PNG (*.png);; BMP (*.bmp);; All (*)"));

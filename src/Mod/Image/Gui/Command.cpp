@@ -32,6 +32,7 @@
 #include <Gui/MainWindow.h>
 #include <Gui/Command.h>
 #include <Gui/BitmapFactory.h>
+#include <Gui/FileDialog.h>
 #include "ImageOrientationDialog.h"
 
 #if HAVE_OPENCV2
@@ -73,7 +74,7 @@ void CmdImageOpen::activated(int iMsg)
     }
     str << ");;" << QObject::tr("All files") << " (*.*)";
     // Reading an image
-    QString s = QFileDialog::getOpenFileName(Gui::getMainWindow(), QObject::tr("Choose an image file to open"),
+    QString s = Gui::FileDialog::getOpenFileName(Gui::getMainWindow(), QObject::tr("Choose an image file to open"),
                                              QString(), formats);
     if (!s.isEmpty()) {
         try {
@@ -121,7 +122,7 @@ void CmdCreateImagePlane::activated(int iMsg)
     }
     str << ");;" << QObject::tr("All files") << " (*.*)";
     // Reading an image
-    QString s = QFileDialog::getOpenFileName(Gui::getMainWindow(), QObject::tr("Choose an image file to open"),
+    QString s = Gui::FileDialog::getOpenFileName(Gui::getMainWindow(), QObject::tr("Choose an image file to open"),
                                              QString(), formats);
     if (!s.isEmpty()) {
 

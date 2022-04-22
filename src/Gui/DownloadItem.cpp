@@ -326,7 +326,7 @@ void DownloadItem::getFileName()
     QString defaultFileName = saveFileName(downloadDirectory);
     QString fileName = defaultFileName;
     if (m_requestFileName) {
-        fileName = QFileDialog::getSaveFileName(this, tr("Save File"), defaultFileName);
+        fileName = FileDialog::getSaveFileName(this, tr("Save File"), defaultFileName);
         if (fileName.isEmpty()) {
             m_reply->close();
             fileNameLabel->setText(tr("Download canceled: %1").arg(QFileInfo(defaultFileName).fileName()));

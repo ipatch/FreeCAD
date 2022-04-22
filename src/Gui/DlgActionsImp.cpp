@@ -41,6 +41,7 @@
 #include "Action.h"
 #include "Application.h"
 #include "Command.h"
+#include "FileDialog.h"
 #include "BitmapFactory.h"
 #include "Widgets.h"
 #include "ShortcutManager.h"
@@ -626,7 +627,7 @@ void IconFolders::addFolder()
         if (it->first->isHidden()) {
             countHidden++;
             if (countHidden == 0) {
-                QString dir = QFileDialog::getExistingDirectory(this, IconDialog::tr("Add icon folder"), QString());
+                QString dir = FileDialog::getExistingDirectory(this, IconDialog::tr("Add icon folder"), QString());
                 if (!dir.isEmpty() && paths.indexOf(dir) < 0) {
                     QLineEdit* edit = it->first;
                     edit->setVisible(true);
