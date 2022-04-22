@@ -206,7 +206,7 @@ Property* DynamicProperty::_addDynamicProperty(PropertyContainer &pc, const char
             docID = document->Hasher->getID(doc);
     }
     auto res = props.get<0>().emplace(pcProperty,
-            getUniquePropertyName(pc,name), nullptr, group, doc, docID, attr, ro, hidden);
+            name, nullptr, group, doc, docID, attr, ro, hidden);
 
     pcProperty->setContainer(&pc);
     pcProperty->myName = res.first->name.c_str();
