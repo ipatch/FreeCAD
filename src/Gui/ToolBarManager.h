@@ -50,8 +50,8 @@ public:
     void setCommand(const std::string&);
     const std::string & command() const;
 
-    void setID(const std::string&);
-    const std::string & id() const;
+    void setID(const QString&);
+    const QString & id() const;
 
     bool hasItems() const;
     ToolBarItem* findItem(const std::string&);
@@ -69,7 +69,7 @@ public:
 
 private:
     std::string _name;
-    std::string _id;
+    QString _id;
     QList<ToolBarItem*> _items;
 };
 
@@ -95,6 +95,11 @@ public:
     bool isDefaultMovable() const;
     void retranslate();
     static void checkToolbar();
+
+    void removeToolBar(const QString &);
+
+    static bool isCustomToolBarName(const char *name);
+    static QString generateToolBarID(const char *groupName, const char *name);
 
 protected Q_SLOTS:
     void onToggleToolBar(bool);

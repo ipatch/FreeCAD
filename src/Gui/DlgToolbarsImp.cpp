@@ -272,7 +272,10 @@ void DlgCustomToolbars::importCustomToolbars(const QByteArray& name)
         toplevel->setData(0, Qt::UserRole, id);
 
         bool active = h->GetBool("Active", true);
-        id = QString::fromLatin1("Custom_%1_%2").arg(QString::fromLatin1(name.constData()), id);
+
+        if (ToolBarManager::isCustomToolBarName(h->GetGroupName()))
+            id = ToolBarManager::generateToolBarID(name.constData(), h->GetGroupName());
+
         auto toolbar = getMainWindow()->findChild<QToolBar*>(id);
         if (toolbar)
             active = toolbar->toggleViewAction()->isVisible();
@@ -537,6 +540,7 @@ void DlgCustomToolbars::on_newButton_clicked()
                 break;
         }
 
+        QSignalBlocker blocker(ui->toolbarTreeWidget);
         QTreeWidgetItem* item = new QTreeWidgetItem;
         ui->toolbarTreeWidget->insertTopLevelItem(i, item);
         item->setText(0, text);
@@ -791,20 +795,16 @@ bool DlgCustomToolbars::checkWorkbench(QString *id) const
             return false;
     }
 
-    if (id)
-        *id = QString::fromLatin1("Custom_%1_%2").arg(QString::fromLatin1(data.constData()), *id);
+    if (id && ToolBarManager::isCustomToolBarName(id->toUtf8().constData()))
+        *id = QString::fromLatin1("Custom_%1_%2").arg(
+                QString::fromLatin1(data.constData()), *id);
     return true;
 }
 
 void DlgCustomToolbarsImp::removeCustomToolbar(QString id)
 {
-    if (checkWorkbench(&id)) {
-        auto tb = getMainWindow()->findChild<QToolBar*>(id);
-        if (tb) {
-            getMainWindow()->removeToolBar(tb);
-            delete tb;
-        }
-    }
+    checkWorkbench(&id);
+    ToolBarManager::getInstance()->removeToolBar(id);
 }
 
 void DlgCustomToolbarsImp::renameCustomToolbar(QString id, const QString& new_name)

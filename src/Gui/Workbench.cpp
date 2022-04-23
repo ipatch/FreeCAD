@@ -266,10 +266,11 @@ void Workbench::setupCustomToolbars(ToolBarItem* root, const char *group, const 
         ToolBarItem* bar = new ToolBarItem(root);
         bar->setCommand("Custom");
 
-        int dummy;
-        // Check for new custom toolbar name
-        if (sscanf((*it)->GetGroupName(), "Custom%d", &dummy)==1)
-            bar->setID(std::string(group) + "_" + (*it)->GetGroupName());
+        // Check for new style custom toolbar name
+        if (ToolBarManager::isCustomToolBarName((*it)->GetGroupName())) {
+            // Create an unique ID by combining the workbench name with the toolbar name
+            bar->setID(ToolBarManager::generateToolBarID(group, (*it)->GetGroupName()));
+        }
 
         // get the elements of the subgroups
         std::vector<std::pair<std::string,std::string> > items = hGrp->GetGroup((*it)->GetGroupName())->GetASCIIMap();
