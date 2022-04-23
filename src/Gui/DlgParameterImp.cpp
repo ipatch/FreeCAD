@@ -1092,7 +1092,7 @@ void DlgParameterImp::slotParamChanged(ParameterGrp *Param,
             // This means the group itself is deleted. But currently we can
             // only sync for value changes. So just erase any current changes
             // under this group for now.
-            auto item = paramGroup->findItem(Param);
+            auto item = paramGroup->findItem(Param, false);
             if (item) {
                 auto curItem = paramGroup->currentItem();
                 clearGroupItem(item, changes); 
@@ -1102,17 +1102,12 @@ void DlgParameterImp::slotParamChanged(ParameterGrp *Param,
             }
         } else if (Name == Value) {
             // This means new group
-            auto item = paramGroup->findItem(Param);
-            if (!item) {
-                auto parent = paramGroup->findItem(Param->Parent());
-                if (parent) {
-                    auto item = new ParameterGroupItem(parent, Param);
-                    paramGroup->scrollToItem(item);
-                }
-            }
+            auto item = paramGroup->findItem(Param, true);
+            if (item)
+                paramGroup->scrollToItem(item);
         } else if (Value) {
             // This means group rename. Value is the old name. Name is the new.
-            auto item = paramGroup->findItem(Param);
+            auto item = paramGroup->findItem(Param, false);
             if (item) {
                 item->setText(0,QString::fromUtf8(Name));
                 // changes with empty keys means all parameters under the group
@@ -1124,11 +1119,10 @@ void DlgParameterImp::slotParamChanged(ParameterGrp *Param,
         return;
     }
 
-    auto groupItem = paramGroup->findItem(Param, true);
-
     auto iter = changes.find(Param);
     ParamKey key(Type, Name);
     if (Value) {
+        auto groupItem = paramGroup->findItem(Param, true);
         // Means either value changed or new value
         if (iter == changes.end())
             changes[Param].insert(key);
@@ -1143,6 +1137,7 @@ void DlgParameterImp::slotParamChanged(ParameterGrp *Param,
             paramGroup->scrollToItem(groupItem);
         }
     } else {
+        auto groupItem = paramGroup->findItem(Param, false);
         // Means parameter removed
         if (iter != changes.end() && iter->second.size()) {
             iter->second.erase(key);
@@ -1281,7 +1276,12 @@ ParameterGroupItem *ParameterGroup::findItem(ParameterGrp *hGrp, bool create)
     auto parent = findItem(hGrp->Parent(), true);
     if (parent) {
         parent->setExpanded(true);
-        return new ParameterGroupItem(parent,hGrp);
+        // ParameterGroupItem will populate its children groups in its
+        // constructor, so we need to search the item again.
+        it = itemMap.find(hGrp);
+        if (it != itemMap.end())
+            return it->second;
+        return new ParameterGroupItem(parent, hGrp);
     }
     return nullptr;
 }
@@ -1876,12 +1876,14 @@ void ParameterGroupItem::fillUp(void)
     if (_owner)
         _owner->itemMap[_hcGrp] = this;
 
+    setText(0,QString::fromUtf8(_hcGrp->GetGroupName()));
+
     // filling up groups
     std::vector<Base::Reference<ParameterGrp> > vhcParamGrp = _hcGrp->GetGroups();
-
-    setText(0,QString::fromUtf8(_hcGrp->GetGroupName()));
-    for(std::vector<Base::Reference<ParameterGrp> >::iterator It=vhcParamGrp.begin();It!=vhcParamGrp.end();++It)
+    for(std::vector<Base::Reference<ParameterGrp> >::iterator It=vhcParamGrp.begin();It!=vhcParamGrp.end();++It) {
+        assert(_owner->itemMap.count(*It) == 0);
         (void)new ParameterGroupItem(this,*It);
+    }
 }
 
 void ParameterGroupItem::setData ( int column, int role, const QVariant & value )
