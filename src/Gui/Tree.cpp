@@ -4013,9 +4013,36 @@ void TreeWidget::onToolTipTimer()
                    "including link, reorder, or replace depending on dropping site.");
     }
 
-    QString tooltip = QStringLiteral("%1\n%2%3%4").arg(
+    QString internalName, typeName;
+    if (Obj->Label.getStrValue() != Obj->getNameInDocument())
+        internalName = QStringLiteral("\nInternal name: %1").arg(
+                QString::fromUtf8(Obj->getNameInDocument()));
+
+    if (QApplication::queryKeyboardModifiers() == Qt::ControlModifier) {
+        if (Obj->getDocument() != item->getOwnerDocument()->document()->getDocument())
+            internalName += QStringLiteral("\nDocument: %1").arg(
+                QString::fromUtf8(Obj->getDocument()->Label.getValue()));
+        typeName = QStringLiteral("\nType: %1").arg(
+                QString::fromUtf8(Obj->getTypeId().getName()));
+        QByteArray proxyType;
+        if (auto prop = Base::freecad_dynamic_cast<App::PropertyPythonObject>(
+                Obj->getPropertyByName("Proxy"))) {
+            Base::PyGILStateLocker lock;
+            Py::Object proxy = prop->getValue();
+            if(!proxy.isNone() && !proxy.isString() && !proxy.isNumeric()) {
+                QString proxyType = QStringLiteral("\nProxy type: %1");
+                if (proxy.hasAttr("__class__"))
+                    typeName += proxyType.arg(QString::fromUtf8(proxy.getAttr("__class__").as_string().c_str()));
+                else 
+                    typeName += proxyType.arg(QString::fromUtf8(proxy.ptr()->ob_type->tp_name));
+            }
+        }
+    }
+
+    QString tooltip = QStringLiteral("%1%2%3%4%5").arg(
             QString::fromUtf8(Obj->Label.getValue()),
-            QString::fromUtf8(Obj->getFullName().c_str()),
+            internalName,
+            typeName,
             info.size() ? QStringLiteral("\n\n") : QString(),
             info);
 

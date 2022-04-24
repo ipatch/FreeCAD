@@ -673,6 +673,13 @@ QVariant PropertyItem::data(int column, int role) const
             QString type = QStringLiteral("Type: %1\nName: %2").arg(
                     QString::fromLatin1(propertyItems[0]->getTypeId().getName()), objectName());
             QString doc = QApplication::translate("App::Property", propertyItems[0]->getDocumentation());
+            if (linked && propertyItems[0]->getContainer()
+                       && QApplication::queryKeyboardModifiers() == Qt::ControlModifier)
+            {
+                type += QStringLiteral("\nOwner: %1").arg(
+                        QString::fromUtf8(propertyItems[0]->getContainer()->getFullName().c_str()));
+            }
+
             if(doc.size())
                 return type + QStringLiteral("\n\n") + doc;
             return type;
