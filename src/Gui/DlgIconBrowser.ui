@@ -119,6 +119,16 @@
       </column>
      </widget>
      <widget class="QPlainTextEdit" name="editOutput">
+      <property name="toolTip">
+       <string>Click 'Save' button to save the content here to create your own icon set. Or, you
+can manually copy the content and append to your existing icon set configuration.
+
+Note, tree view, toolbar, and workbench tab bar support non-square icons. The
+size can be specified by adding an extra field as follow. Only SVG icon requires
+explicit setting of dimention.
+
+TreeItemInvisible, iconset:MyIcons/TreeItemInvisible.svg, 128x64</string>
+      </property>
       <property name="readOnly">
        <bool>true</bool>
       </property>
@@ -163,7 +173,12 @@ Gui--MainWindow {
   qproperty-overrideIcons : url(
 TreeItemVisible, iconset:MyIcons/TreeItemVisible.svg
 TreeItemInvisible, iconset:MyIcons/TreeItemInvisible.svg
-);}</string>
+);}
+
+Note, tree view, toolbar, and workbench tab bar support non-square icons. The
+size can be specified as follow,
+
+TreeItemInvisible, iconset:MyIcons/TreeItemInvisible.svg, 128x64</string>
        </property>
        <property name="text">
         <string>Save</string>

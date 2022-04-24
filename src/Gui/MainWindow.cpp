@@ -2287,17 +2287,31 @@ void MainWindowP::applyOverrideIcons(const QString &icons)
         auto pair = s.split(QLatin1Char(','));
         if (pair.isEmpty())
             continue;
-        if (pair.size() > 2) {
+        if (pair.size() > 3 ) {
             FC_WARN("Invalid icon override in stylesheet: " << s.toUtf8().constData());
             continue;
         }
         QByteArray name = pair[0].trimmed().toLatin1();
         QPixmap icon;
-        if (pair.size() == 2) {
+        if (pair.size() >= 2) {
             QString path = pair[1].trimmed();
             if (path.size()) {
-                if (!BitmapFactory().loadPixmap(path, icon))
-                    FC_WARN("Cannot find icon for " << name.constData()
+                QSize size(64, 64);
+                if (pair.size() == 3) {
+                    auto sz = pair[2].trimmed().split(QLatin1Char('x'), QString::KeepEmptyParts, Qt::CaseInsensitive);
+                    if (sz.size() >= 1) {
+                        size.setWidth(sz[0].toInt());
+                        if (sz.size() > 1)
+                            size.setHeight(sz[1].toInt());
+                    }
+                }
+                QFileInfo fi(path);
+                if (fi.exists() && fi.suffix().toLower() == QLatin1String("svg"))
+                    icon = BitmapFactory().pixmapFromSvg(path.toUtf8().constData(), size);
+                else
+                    BitmapFactory().loadPixmap(path, icon);
+                if (icon.isNull())
+                    FC_WARN("Failed to load icon for " << name.constData()
                             << " from " << path.toUtf8().constData());
             }
         }

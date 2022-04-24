@@ -319,6 +319,21 @@ ToolBarManager::ToolBarManager()
         toolbar->toggleViewAction()->setVisible(false);
         setToolBarVisible(toolbar, false);
     }
+
+    timerResize.setSingleShot(true);
+    QObject::connect(&timerResize, &QTimer::timeout, [this]() {
+        auto hGrp = App::GetApplication().GetUserParameter().GetGroup(
+                "BaseApp/Preferences/General");
+        int s = std::max(hGrp->GetInt("ToolbarIconSize"), 16l);
+        for (const auto &v : resizingToolBars) {
+            if (!v.second) continue;
+            auto tb = v.first;
+            QSize size = actionsIconSize(QSize(s, s), tb->actions());
+            if (size != tb->iconSize())
+                tb->setIconSize(size);
+        }
+        resizingToolBars.clear();
+    });
 }
 
 ToolBarManager::~ToolBarManager()
@@ -1105,6 +1120,42 @@ bool ToolBarManager::eventFilter(QObject *o, QEvent *e)
         break;
     }
     return res;
+}
+
+QSize ToolBarManager::actionsIconSize(const QSize &s, const QList<QAction*> &actions)
+{
+    QSize iconSize = s;
+    for (auto action : actions) {
+        if (!action->isVisible())
+            continue;
+        auto icon = action->icon();
+        if (icon.isNull())
+            continue;
+        auto size = icon.actualSize(iconSize);
+        if (size.height() < iconSize.height()) {
+            iconSize.setWidth(static_cast<float>(iconSize.height())/size.height()*size.width());
+        }
+    }
+    return iconSize;
+}
+
+void ToolBarManager::checkToolbarIconSize(QToolBar *tb)
+{
+    if (!tb)
+        return;
+    auto &v = resizingToolBars[tb];
+    if (!v) {
+        timerResize.start(100);
+        v = tb;
+    }
+}
+
+void ToolBarManager::checkToolbarIconSize(QAction *action)
+{
+    for (auto w : action->associatedWidgets()) {
+        if (auto tb = qobject_cast<QToolBar*>(w))
+            checkToolbarIconSize(tb);
+    }
 }
 
 #include "moc_ToolBarManager.cpp"

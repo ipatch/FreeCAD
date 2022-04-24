@@ -101,6 +101,10 @@ public:
     static bool isCustomToolBarName(const char *name);
     static QString generateToolBarID(const char *groupName, const char *name);
 
+    static QSize actionsIconSize(const QSize &s, const QList<QAction*> &actions);
+    void checkToolbarIconSize(QAction *action);
+    void checkToolbarIconSize(QToolBar *tb);
+
 protected Q_SLOTS:
     void onToggleToolBar(bool);
     void onMovableChanged(bool);
@@ -127,6 +131,7 @@ protected:
 private:
     QTimer timer;
     QTimer timerChild;
+    QTimer timerResize;
     QStringList toolbarNames;
     static ToolBarManager* _instance;
     ParameterGrp::handle hPref;
@@ -143,6 +148,8 @@ private:
     std::set<QString> globalToolBarNames;
     std::map<QToolBar*, QPointer<QToolBar>> connectedToolBars;
     StatusBarArea *statusBarArea = nullptr;
+
+    std::map<QToolBar*, QPointer<QToolBar>> resizingToolBars;
 };
 
 } // namespace Gui
