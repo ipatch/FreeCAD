@@ -575,7 +575,7 @@ bool Document::setEdit(Gui::ViewProvider* p, int ModNum, const char *subname)
     }
     guard.active = false;
     App::AutoTransaction::setEnable(false);
-    guard2.detach();
+    guard2.detach(/*reset*/d->_editViewProvider==nullptr);
     App::Document::clearPendingRemove();
     return d->_editViewProvider != nullptr;
 }
