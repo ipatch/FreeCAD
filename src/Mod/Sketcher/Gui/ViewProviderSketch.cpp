@@ -1976,18 +1976,7 @@ void ViewProviderSketch::onSelectionChanged(const Gui::SelectionChanges& msg)
         else if (msg.Type == Gui::SelectionChanges::SetPreselect) {
             if (selObj == getObject()) {
                 if (msg.pSubName) {
-                    if (boost::starts_with(msg.pSubName, "Edge")) {
-                        int GeoId = std::atoi(&msg.pSubName[4]) - 1;
-                        resetPreselectPoint();
-                        edit->PreselectCurve = GeoId;
-                        edit->PreselectCross = -1;
-                        edit->PreselectConstraintSet.clear();
-
-                        if (edit->sketchHandler)
-                            edit->sketchHandler->applyCursor();
-                        this->updateColor();
-                    } 
-                    else if (boost::starts_with(msg.pSubName, "Edge")) {
+                    if (boost::istarts_with(msg.pSubName, "Edge")) {
                         int GeoId = std::atoi(&msg.pSubName[4]) - 1;
                         resetPreselectPoint();
                         edit->PreselectCurve = GeoId;
@@ -2010,7 +1999,7 @@ void ViewProviderSketch::onSelectionChanged(const Gui::SelectionChanges& msg)
                             edit->sketchHandler->applyCursor();
                         this->updateColor();
                     }
-                    else if (boost::starts_with(msg.pSubName, "Vertex")) {
+                    else if (boost::istarts_with(msg.pSubName, "Vertex")) {
                         int PtIndex = std::atoi(&msg.pSubName[6]) - 1;
                         setPreselectPoint(PtIndex);
                         edit->PreselectCurve = -1;
