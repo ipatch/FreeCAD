@@ -342,7 +342,7 @@ def buildCard(filename,method,arg=None):
                             if eidx > 0:
                                 logger.log('check thumbnail {}', result[idx:eidx])
                                 if os.path.exists(result[idx:eidx]):
-                                    logger.log('cache hit ', cachename)
+                                    logger.log('cache hit {}', cachename)
                                     return result.replace('$METHOD$', method).replace('$ARG$', arg)
                 try:
                     with open(cachename, 'r', encoding='utf-8') as f:
@@ -350,13 +350,12 @@ def buildCard(filename,method,arg=None):
                         if res:
                             return res
                 except Exception:
-                    import traceback
-                    traceback.print_exc()
-                    with open(cachename, 'r') as f:
-                        res = readfile(f)
-                        if res:
-                            return res
-            logger.log('cache miss ', cachename)
+                    if logger.isEnabledFor('debug'):
+                        import traceback
+                        traceback.print_exc()
+                    logger.warn('Regenerate thumbnail cache for {}', filename)
+
+            logger.log('cache miss {}', cachename)
 
         result = ""
         finfo = getInfo(filename)
