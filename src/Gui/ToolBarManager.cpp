@@ -280,6 +280,9 @@ ToolBarManager::ToolBarManager()
     else if (defarea == "Right")
         globalArea = Qt::RightToolBarArea;
 
+    hGeneral = App::GetApplication().GetUserParameter().GetGroup(
+            "BaseApp/Preferences/General");
+
     hGlobal = App::GetApplication().GetUserParameter().GetGroup(
             "BaseApp/Workbench/Global/Toolbar");
     getGlobalToolbarNames();
@@ -322,9 +325,7 @@ ToolBarManager::ToolBarManager()
 
     timerResize.setSingleShot(true);
     QObject::connect(&timerResize, &QTimer::timeout, [this]() {
-        auto hGrp = App::GetApplication().GetUserParameter().GetGroup(
-                "BaseApp/Preferences/General");
-        int s = std::max(hGrp->GetInt("ToolbarIconSize"), 16l);
+        int s = toolBarIconSize();
         for (const auto &v : resizingToolBars) {
             if (!v.second) continue;
             auto tb = v.first;
@@ -338,6 +339,11 @@ ToolBarManager::ToolBarManager()
 
 ToolBarManager::~ToolBarManager()
 {
+}
+
+int ToolBarManager::toolBarIconSize() const
+{
+    return std::max(hGeneral->GetInt("ToolbarIconSize", 24l), 16l);
 }
 
 void ToolBarManager::getGlobalToolbarNames()

@@ -756,6 +756,9 @@ void WorkbenchComboBox::populate()
 {
     clear();
     auto actions = group->actions();
+    int s = std::max(16, ToolBarManager::getInstance()->toolBarIconSize()-6);
+    this->setIconSize(ToolBarManager::actionsIconSize(QSize(s, s), actions));
+
     if (ViewParams::getAutoSortWBList()) {
         std::sort(actions.begin(), actions.end(),
             [](const QAction *a, const QAction *b) {
@@ -855,9 +858,9 @@ public:
     }
 
     int toolbarIconSize() {
-        int pixel = hGeneral->GetInt("ToolbarIconSize");
+        int pixel = hGeneral->GetInt("WorkbenchTabIconSize");
         if (pixel <= 0)
-            pixel = 24;
+            pixel = ToolBarManager::getInstance()->toolBarIconSize();
         return pixel;
     }
 
@@ -920,7 +923,7 @@ WorkbenchTabBar::WorkbenchTabBar(WorkbenchGroup* wb, QWidget* parent)
 
     timer.setSingleShot(true);
     connect(&timer, &QTimer::timeout, [this]() {
-        updateWorkbenches();
+        group->workbenchListUpdated();
         setupVisibility();
     });
 
@@ -1002,20 +1005,8 @@ void WorkbenchTabBar::updateWorkbenches()
 {
     auto tab = this->tabBar();
 
-    int s = std::max(16, this->group->_pimpl->toolbarIconSize());
-    QSize iconSize(s, s);
-    // Go through all icons and check the aspect ratio to adjust the tab icon size
-    for (auto action : this->group->actions()) {
-        if (!action->isVisible())
-            continue;
-        auto icon = action->icon();
-        if (icon.isNull())
-            continue;
-        auto size = icon.actualSize(iconSize);
-        if (size.height() < iconSize.height())
-            iconSize.setWidth(static_cast<float>(iconSize.height())/size.height()*size.width());
-    }
-
+    int s = this->group->_pimpl->toolbarIconSize();
+    QSize iconSize = ToolBarManager::actionsIconSize(QSize(s, s), this->group->actions());
     if (this->iconSize() != iconSize)
         this->setIconSize(iconSize);
 
@@ -1220,7 +1211,6 @@ void WorkbenchGroup::addTo(QWidget *w)
     if (w->inherits("QToolBar")) {
         QToolBar* bar = qobject_cast<QToolBar*>(w);
         auto box = new WorkbenchComboBox(this, w);
-        box->setIconSize(QSize(16, 16));
         box->setToolTip(_tooltip);
         box->setStatusTip(_action->statusTip());
         box->setWhatsThis(_action->whatsThis());

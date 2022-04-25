@@ -105,6 +105,8 @@ public:
     void checkToolbarIconSize(QAction *action);
     void checkToolbarIconSize(QToolBar *tb);
 
+    int toolBarIconSize() const;
+
 protected Q_SLOTS:
     void onToggleToolBar(bool);
     void onMovableChanged(bool);
@@ -139,6 +141,7 @@ private:
     ParameterGrp::handle hMainWindow;
     ParameterGrp::handle hGlobal;
     ParameterGrp::handle hStatusBar;
+    ParameterGrp::handle hGeneral;
     boost::signals2::scoped_connection connParam;
     bool restored = false;
     bool migrating = false;
