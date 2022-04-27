@@ -429,7 +429,7 @@ ReportOutput::ReportOutput(QWidget* parent)
     _prefs->Notify("FontSize");
 
 #ifdef FC_DEBUG
-    messageSize = _prefs->GetInt("LogMessageSize",0);
+    messageSize = _prefs->GetInt("LogMessageSize",16*1024);
 #else
     messageSize = _prefs->GetInt("LogMessageSize",2048);
 #endif
