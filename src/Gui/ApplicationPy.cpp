@@ -747,7 +747,7 @@ PyObject* Application::sUpdateGui(PyObject * /*self*/, PyObject *args)
     if (!PyArg_ParseTuple(args, ""))
         return NULL;
 
-    qApp->processEvents();
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
     Py_INCREF(Py_None);
     return Py_None;
