@@ -272,7 +272,7 @@ void Property::hasSetValue(void)
 {
     if (father && _old) {
         if(isSame(*_old)) {
-            FC_LOG("no change of " << getFullName());
+            FC_TRACE("no change of " << getFullName());
             return;
         }
         _old.reset();

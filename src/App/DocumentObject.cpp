@@ -806,7 +806,7 @@ void DocumentObject::onChanged(const Property* prop)
         if(getDocument() && !getDocument()->testStatus(Document::Restoring) && prop->isTouched()) {
             if(++_revision == 0)
                 ++_revision;
-            FC_LOG("revision " << _revision << " " << prop->getFullName());
+            FC_TRACE("revision " << _revision << " " << prop->getFullName());
         }
 
         if(!StatusBits.test(ObjectStatus::Touch)) {
