@@ -68,6 +68,17 @@ void MultiTransform::positionBySupport(void)
     }
 }
 
+void MultiTransform::onChanged(const App::Property *prop)
+{
+    if (prop == &Transformations) {
+        for (auto obj : Transformations.getValues()) {
+            if (auto child = Base::freecad_dynamic_cast<PartDesign::Feature>(obj))
+                child->BaseFeature.setValue(nullptr);
+        }
+    }
+    return Transformed::onChanged(prop);
+}
+
 short MultiTransform::mustExecute() const
 {
     if (Transformations.isTouched())

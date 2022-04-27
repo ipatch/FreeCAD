@@ -59,6 +59,7 @@ public:
 
 protected:
     virtual void positionBySupport(void);
+    void onChanged(const App::Property *);
 };
 
 } //namespace PartDesign
