@@ -8650,6 +8650,9 @@ void SketchObject::onChanged(const App::Property* prop)
             // fully restored
             updateGeometryRefs();
         }
+    } else if (prop == &Placement) {
+        if (ExternalGeometry.getSize() > 0)
+            touch();
     } else if (prop == &ExpressionEngine) {
         auto doc = getDocument();
         if(!isRestoring()
