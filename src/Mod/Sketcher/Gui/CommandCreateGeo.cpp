@@ -6307,7 +6307,7 @@ CmdSketcherExternal::CmdSketcherExternal()
 {
     sAppModule      = "Sketcher";
     sGroup          = QT_TR_NOOP("Sketcher");
-    sMenuText       = QT_TR_NOOP("External geometry");
+    sMenuText       = QT_TR_NOOP("Add external geometry");
     sToolTipText    = QT_TR_NOOP("Create an edge linked to an external geometry");
     sWhatsThis      = "Sketcher_External";
     sStatusTip      = sToolTipText;
@@ -6334,8 +6334,9 @@ CmdSketcherDefining::CmdSketcherDefining()
 {
     sAppModule      = "Sketcher";
     sGroup          = QT_TR_NOOP("Sketcher");
-    sMenuText       = QT_TR_NOOP("Defining geometry");
-    sToolTipText    = QT_TR_NOOP("Create an defining edge linked to an external geometry");
+    sMenuText       = QT_TR_NOOP("Add/toggle defining geometry");
+    sToolTipText    = QT_TR_NOOP("Import an external geometry as defining geometry that can be use for extrusion.\n"
+                                 "Or toggle the defining status of an already imported external geometry.");
     sWhatsThis      = "Sketcher_Defining";
     sStatusTip      = sToolTipText;
     sPixmap         = "Sketcher_Defining";
@@ -6569,7 +6570,7 @@ void CmdSketcherFixExternal::activated(int iMsg)
 
 bool CmdSketcherFixExternal::isActive(void)
 {
-    return true;
+    return getExternalSelection(0)!=0;
 }
 
 

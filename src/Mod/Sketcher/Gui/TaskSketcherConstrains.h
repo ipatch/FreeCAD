@@ -46,6 +46,9 @@ public:
     explicit ConstraintView(QWidget *parent = 0);
     ~ConstraintView();
 
+    static ConstraintView *getInstance();
+    void populateMenu(QMenu &menu);
+
 protected:
     void contextMenuEvent (QContextMenuEvent* event);
 
@@ -77,6 +80,8 @@ public:
 
     /// Observer message from the Selection
     void onSelectionChanged(const Gui::SelectionChanges& msg);
+
+    ViewProviderSketch *getViewProvider() {return sketchView;}
 
 private:
     void slotConstraintsChanged(void);
