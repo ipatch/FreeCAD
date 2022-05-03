@@ -113,8 +113,6 @@ public:
     long MaxOnTopSelections; // Auto generated code. See class document of ViewParams.
     bool MapChildrenPlacement; // Auto generated code. See class document of ViewParams.
     long CornerNaviCube; // Auto generated code. See class document of ViewParams.
-    bool NaviRotateToNearest; // Auto generated code. See class document of ViewParams.
-    long NaviStepByTurn; // Auto generated code. See class document of ViewParams.
     bool DockOverlayAutoView; // Auto generated code. See class document of ViewParams.
     bool DockOverlayExtraState; // Auto generated code. See class document of ViewParams.
     long DockOverlayDelay; // Auto generated code. See class document of ViewParams.
@@ -345,10 +343,6 @@ public:
         funcs["MapChildrenPlacement"] = &ViewParamsP::updateMapChildrenPlacement;
         CornerNaviCube = handle->GetInt("CornerNaviCube", 1);
         funcs["CornerNaviCube"] = &ViewParamsP::updateCornerNaviCube;
-        NaviRotateToNearest = handle->GetBool("NaviRotateToNearest", true);
-        funcs["NaviRotateToNearest"] = &ViewParamsP::updateNaviRotateToNearest;
-        NaviStepByTurn = handle->GetInt("NaviStepByTurn", 8);
-        funcs["NaviStepByTurn"] = &ViewParamsP::updateNaviStepByTurn;
         DockOverlayAutoView = handle->GetBool("DockOverlayAutoView", true);
         funcs["DockOverlayAutoView"] = &ViewParamsP::updateDockOverlayAutoView;
         DockOverlayExtraState = handle->GetBool("DockOverlayExtraState", false);
@@ -829,14 +823,6 @@ public:
             self->CornerNaviCube = v;
             ViewParams::onCornerNaviCubeChanged();
         }
-    }
-    // Auto generated code. See class document of ViewParams.
-    static void updateNaviRotateToNearest(ViewParamsP *self) {
-        self->NaviRotateToNearest = self->handle->GetBool("NaviRotateToNearest", true);
-    }
-    // Auto generated code. See class document of ViewParams.
-    static void updateNaviStepByTurn(ViewParamsP *self) {
-        self->NaviStepByTurn = self->handle->GetInt("NaviStepByTurn", 8);
     }
     // Auto generated code. See class document of ViewParams.
     static void updateDockOverlayAutoView(ViewParamsP *self) {
@@ -2825,62 +2811,6 @@ void ViewParams::setCornerNaviCube(const long &v) {
 // Auto generated code. See class document of ViewParams.
 void ViewParams::removeCornerNaviCube() {
     instance()->handle->RemoveInt("CornerNaviCube");
-}
-
-// Auto generated code. See class document of ViewParams.
-const char *ViewParams::docNaviRotateToNearest() {
-    return QT_TRANSLATE_NOOP("ViewParams",
-"Rotates to nearest possible state when clicking a cube face");
-}
-
-// Auto generated code. See class document of ViewParams.
-const bool & ViewParams::getNaviRotateToNearest() {
-    return instance()->NaviRotateToNearest;
-}
-
-// Auto generated code. See class document of ViewParams.
-const bool & ViewParams::defaultNaviRotateToNearest() {
-    const static bool def = true;
-    return def;
-}
-
-// Auto generated code. See class document of ViewParams.
-void ViewParams::setNaviRotateToNearest(const bool &v) {
-    instance()->handle->SetBool("NaviRotateToNearest",v);
-    instance()->NaviRotateToNearest = v;
-}
-
-// Auto generated code. See class document of ViewParams.
-void ViewParams::removeNaviRotateToNearest() {
-    instance()->handle->RemoveBool("NaviRotateToNearest");
-}
-
-// Auto generated code. See class document of ViewParams.
-const char *ViewParams::docNaviStepByTurn() {
-    return QT_TRANSLATE_NOOP("ViewParams",
-"Number of steps by turn when using arrows (default = 8 : step angle = 360/8 = 45 deg),");
-}
-
-// Auto generated code. See class document of ViewParams.
-const long & ViewParams::getNaviStepByTurn() {
-    return instance()->NaviStepByTurn;
-}
-
-// Auto generated code. See class document of ViewParams.
-const long & ViewParams::defaultNaviStepByTurn() {
-    const static long def = 8;
-    return def;
-}
-
-// Auto generated code. See class document of ViewParams.
-void ViewParams::setNaviStepByTurn(const long &v) {
-    instance()->handle->SetInt("NaviStepByTurn",v);
-    instance()->NaviStepByTurn = v;
-}
-
-// Auto generated code. See class document of ViewParams.
-void ViewParams::removeNaviStepByTurn() {
-    instance()->handle->RemoveInt("NaviStepByTurn");
 }
 
 // Auto generated code. See class document of ViewParams.

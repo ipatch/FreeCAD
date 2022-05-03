@@ -458,19 +458,23 @@ Action::addCheckBox(QMenu *menu,
 
 class MenuFocusEventFilter: public QObject {
 public:
-    MenuFocusEventFilter(QMenu *menu, QAction *action)
+    MenuFocusEventFilter(QMenu *menu, QAction *action, QWidget *focusWidget=nullptr)
         :QObject(menu)
-        ,menu(menu), action(action)
+        ,menu(menu), action(action), focusWidget(focusWidget)
     {}
 
     bool eventFilter(QObject *, QEvent *e) {
-        if (e->type() == QEvent::Enter)
+        if (e->type() == QEvent::Enter) {
             menu->setActiveAction(action);
+            if (focusWidget)
+                focusWidget->setFocus();
+        }
         return false;
     }
 
     QMenu *menu;
     QAction *action;
+    QWidget *focusWidget;
 };
 
 QAction *
@@ -494,7 +498,7 @@ Action::addWidget(QMenu *menu,
     layout->setContentsMargins(4,0,4,0);
     widget->setFocusProxy(w);
     widget->setFocusPolicy(Qt::TabFocus);
-    w->installEventFilter(new MenuFocusEventFilter(menu, wa));
+    w->installEventFilter(new MenuFocusEventFilter(menu, wa, w));
     w->setFocusPolicy(Qt::TabFocus);
     wa->setDefaultWidget(widget);
     wa->setToolTip(tooltip);

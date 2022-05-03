@@ -397,7 +397,8 @@ public:
     //@{
     /// Accessor for parameter SelectionPointScale
     ///
-    /// Muplication factor to increase the size of the selected point.\nIf zero, then use line multiplication factor.
+    /// Muplication factor to increase the size of the selected point.
+    /// If zero, then use line multiplication factor.
     static const double & getSelectionPointScale();
     static const double & defaultSelectionPointScale();
     static void removeSelectionPointScale();
@@ -542,7 +543,8 @@ public:
     //@{
     /// Accessor for parameter RenderProjectedBBox
     ///
-    /// Show projected bounding box that is aligned to axes of\nglobal coordinate space
+    /// Show projected bounding box that is aligned to axes of
+    /// global coordinate space
     static const bool & getRenderProjectedBBox();
     static const bool & defaultRenderProjectedBBox();
     static void removeRenderProjectedBBox();
@@ -582,7 +584,9 @@ public:
     //@{
     /// Accessor for parameter MapChildrenPlacement
     ///
-    /// Map child object into parent's coordinate space when showing on top.\nNote that once activated, this option will also activate option ShowOnTop.\nWARNING! This is an experimental option. Please use with caution.
+    /// Map child object into parent's coordinate space when showing on top.
+    /// Note that once activated, this option will also activate option ShowOnTop.
+    /// WARNING! This is an experimental option. Please use with caution.
     static const bool & getMapChildrenPlacement();
     static const bool & defaultMapChildrenPlacement();
     static void removeMapChildrenPlacement();
@@ -599,28 +603,6 @@ public:
     static void setCornerNaviCube(const long &v);
     static const char *docCornerNaviCube();
     static void onCornerNaviCubeChanged();
-    //@}
-
-    //@{
-    /// Accessor for parameter NaviRotateToNearest
-    ///
-    /// Rotates to nearest possible state when clicking a cube face
-    static const bool & getNaviRotateToNearest();
-    static const bool & defaultNaviRotateToNearest();
-    static void removeNaviRotateToNearest();
-    static void setNaviRotateToNearest(const bool &v);
-    static const char *docNaviRotateToNearest();
-    //@}
-
-    //@{
-    /// Accessor for parameter NaviStepByTurn
-    ///
-    /// Number of steps by turn when using arrows (default = 8 : step angle = 360/8 = 45 deg),
-    static const long & getNaviStepByTurn();
-    static const long & defaultNaviStepByTurn();
-    static void removeNaviStepByTurn();
-    static void setNaviStepByTurn(const long &v);
-    static const char *docNaviStepByTurn();
     //@}
 
     //@{
@@ -677,7 +659,8 @@ public:
     //@{
     /// Accessor for parameter DockOverlayActivateOnHover
     ///
-    /// Show auto hidden dock overlay on mouse over.\nIf disabled, then show on mouse click.
+    /// Show auto hidden dock overlay on mouse over.
+    /// If disabled, then show on mouse click.
     static const bool & getDockOverlayActivateOnHover();
     static const bool & defaultDockOverlayActivateOnHover();
     static void removeDockOverlayActivateOnHover();
@@ -710,7 +693,8 @@ public:
     //@{
     /// Accessor for parameter DockOverlayWheelDelay
     ///
-    /// Delay capturing mouse wheel event for passing through if it is\npreviously handled by other widget.
+    /// Delay capturing mouse wheel event for passing through if it is
+    /// previously handled by other widget.
     static const long & getDockOverlayWheelDelay();
     static const long & defaultDockOverlayWheelDelay();
     static void removeDockOverlayWheelDelay();
@@ -721,7 +705,10 @@ public:
     //@{
     /// Accessor for parameter DockOverlayAlphaRadius
     ///
-    /// If auto mouse click through is enabled, then this radius\ndefines a region of alpha test under the mouse cursor.\nAuto click through is only activated if all pixels within\nthe region are non-opaque.
+    /// If auto mouse click through is enabled, then this radius
+    /// defines a region of alpha test under the mouse cursor.
+    /// Auto click through is only activated if all pixels within
+    /// the region are non-opaque.
     static const long & getDockOverlayAlphaRadius();
     static const long & defaultDockOverlayAlphaRadius();
     static void removeDockOverlayAlphaRadius();
@@ -1093,7 +1080,9 @@ public:
     //@{
     /// Accessor for parameter ShadowShowGround
     ///
-    /// Whether to show auto generated ground face. You can specify you own ground\nobject by changing its view property 'ShadowStyle' to 'Shadowed', meaning\nthat it will only receive but not cast shadow.
+    /// Whether to show auto generated ground face. You can specify you own ground
+    /// object by changing its view property 'ShadowStyle' to 'Shadowed', meaning
+    /// that it will only receive but not cast shadow.
     static const bool & getShadowShowGround();
     static const bool & defaultShadowShowGround();
     static void removeShadowShowGround();
@@ -1115,7 +1104,8 @@ public:
     //@{
     /// Accessor for parameter ShadowGroundScale
     ///
-    /// The auto generated ground face is determined by the scene bounding box\nmultiplied by this scale
+    /// The auto generated ground face is determined by the scene bounding box
+    /// multiplied by this scale
     static const double & getShadowGroundScale();
     static const double & defaultShadowGroundScale();
     static void removeShadowGroundScale();
@@ -1153,7 +1143,8 @@ public:
     //@{
     /// Accessor for parameter ShadowGroundTextureSize
     ///
-    /// Specifies the physcal length of the ground texture image size.\nTexture mappings beyond this size will be wrapped around
+    /// Specifies the physcal length of the ground texture image size.
+    /// Texture mappings beyond this size will be wrapped around
     static const double & getShadowGroundTextureSize();
     static const double & defaultShadowGroundTextureSize();
     static void removeShadowGroundTextureSize();
@@ -1164,7 +1155,9 @@ public:
     //@{
     /// Accessor for parameter ShadowGroundTransparency
     ///
-    /// Specifics the ground transparency. When set to 0, the non-shadowed part\nof the ground will be complete transparent, showing only the shadowed part\nof the ground with some transparency.
+    /// Specifics the ground transparency. When set to 0, the non-shadowed part
+    /// of the ground will be complete transparent, showing only the shadowed part
+    /// of the ground with some transparency.
     static const double & getShadowGroundTransparency();
     static const double & defaultShadowGroundTransparency();
     static void removeShadowGroundTransparency();
@@ -1175,7 +1168,8 @@ public:
     //@{
     /// Accessor for parameter ShadowGroundShading
     ///
-    /// Render ground with shading. If disabled, the ground and the shadow casted\non ground will not change shading when viewing in different angle.
+    /// Render ground with shading. If disabled, the ground and the shadow casted
+    /// on ground will not change shading when viewing in different angle.
     static const bool & getShadowGroundShading();
     static const bool & defaultShadowGroundShading();
     static void removeShadowGroundShading();
@@ -1195,7 +1189,9 @@ public:
     //@{
     /// Accessor for parameter ShadowSmoothBorder
     ///
-    /// Specifies the blur raidus of the shadow edge. Higher number will result in\nslower rendering speed on scene change. Use a lower 'Precision' value to\ncounter the effect.
+    /// Specifies the blur raidus of the shadow edge. Higher number will result in
+    /// slower rendering speed on scene change. Use a lower 'Precision' value to
+    /// counter the effect.
     static const long & getShadowSmoothBorder();
     static const long & defaultShadowSmoothBorder();
     static void removeShadowSmoothBorder();
@@ -1206,7 +1202,8 @@ public:
     //@{
     /// Accessor for parameter ShadowSpreadSize
     ///
-    /// Specifies the spread size for a soft shadow. The resulting spread size is\ndependent on the model scale
+    /// Specifies the spread size for a soft shadow. The resulting spread size is
+    /// dependent on the model scale
     static const long & getShadowSpreadSize();
     static const long & defaultShadowSpreadSize();
     static void removeShadowSpreadSize();
@@ -1217,7 +1214,10 @@ public:
     //@{
     /// Accessor for parameter ShadowSpreadSampleSize
     ///
-    /// Specifies the sample size used for rendering shadow spread. A value 0\ncorresponds to a sampling square of 2x2. And 1 corresponds to 3x3, etc.\nThe bigger the size the slower the rendering speed. You can use a lower\n'Precision' value to counter the effect.
+    /// Specifies the sample size used for rendering shadow spread. A value 0
+    /// corresponds to a sampling square of 2x2. And 1 corresponds to 3x3, etc.
+    /// The bigger the size the slower the rendering speed. You can use a lower
+    /// 'Precision' value to counter the effect.
     static const long & getShadowSpreadSampleSize();
     static const long & defaultShadowSpreadSampleSize();
     static void removeShadowSpreadSampleSize();
@@ -1228,7 +1228,9 @@ public:
     //@{
     /// Accessor for parameter ShadowPrecision
     ///
-    /// Specifies shadow precision. This parameter affects the internal texture\nsize used to hold the casted shadows. You might want a bigger texture if\nyou want a hard shadow but a smaller one for soft shadow.
+    /// Specifies shadow precision. This parameter affects the internal texture
+    /// size used to hold the casted shadows. You might want a bigger texture if
+    /// you want a hard shadow but a smaller one for soft shadow.
     static const double & getShadowPrecision();
     static const double & defaultShadowPrecision();
     static void removeShadowPrecision();
@@ -1239,7 +1241,9 @@ public:
     //@{
     /// Accessor for parameter ShadowEpsilon
     ///
-    /// Epsilon is used to offset the shadow map depth from the model depth.\nShould be set to as low a number as possible without causing flickering\nin the shadows or on non-shadowed objects.
+    /// Epsilon is used to offset the shadow map depth from the model depth.
+    /// Should be set to as low a number as possible without causing flickering
+    /// in the shadows or on non-shadowed objects.
     static const double & getShadowEpsilon();
     static const double & defaultShadowEpsilon();
     static void removeShadowEpsilon();
@@ -1261,7 +1265,9 @@ public:
     //@{
     /// Accessor for parameter ShadowBoundBoxScale
     ///
-    /// Scene bounding box is used to determine the scale of the shadow texture.\nYou can increase the bounding box scale to avoid execessive clipping of\nshadows when viewing up close in certain angle.
+    /// Scene bounding box is used to determine the scale of the shadow texture.
+    /// You can increase the bounding box scale to avoid execessive clipping of
+    /// shadows when viewing up close in certain angle.
     static const double & getShadowBoundBoxScale();
     static const double & defaultShadowBoundBoxScale();
     static void removeShadowBoundBoxScale();
@@ -1272,7 +1278,9 @@ public:
     //@{
     /// Accessor for parameter ShadowMaxDistance
     ///
-    /// Specifics the clipping distance for when rendering shadows.\nYou can increase the bounding box scale to avoid execessive\nclipping of shadows when viewing up close in certain angle.
+    /// Specifics the clipping distance for when rendering shadows.
+    /// You can increase the bounding box scale to avoid execessive
+    /// clipping of shadows when viewing up close in certain angle.
     static const double & getShadowMaxDistance();
     static const double & defaultShadowMaxDistance();
     static void removeShadowMaxDistance();
@@ -1294,7 +1302,8 @@ public:
     //@{
     /// Accessor for parameter ShadowUpdateGround
     ///
-    /// Auto update shadow ground on scene changes. You can manually\nupdate the ground by using the 'Fit view' command
+    /// Auto update shadow ground on scene changes. You can manually
+    /// update the ground by using the 'Fit view' command
     static const bool & getShadowUpdateGround();
     static const bool & defaultShadowUpdateGround();
     static void removeShadowUpdateGround();
@@ -1314,7 +1323,8 @@ public:
     //@{
     /// Accessor for parameter HierarchyAscend
     ///
-    /// Enable selection of upper hierarchy by repeatedly click some already\nselected sub-element.
+    /// Enable selection of upper hierarchy by repeatedly click some already
+    /// selected sub-element.
     static const bool & getHierarchyAscend();
     static const bool & defaultHierarchyAscend();
     static void removeHierarchyAscend();
@@ -1634,7 +1644,8 @@ public:
     //@{
     /// Accessor for parameter SectionFillGroup
     ///
-    /// Render cross section filling of objects with similar materials together.\nIntersecting objects will act as boolean cut operation
+    /// Render cross section filling of objects with similar materials together.
+    /// Intersecting objects will act as boolean cut operation
     static const bool & getSectionFillGroup();
     static const bool & defaultSectionFillGroup();
     static void removeSectionFillGroup();
@@ -1698,7 +1709,8 @@ public:
     //@{
     /// Accessor for parameter SelectionColorDifference
     ///
-    /// Color difference threshold for auto making distinct\nselection highlight color
+    /// Color difference threshold for auto making distinct
+    /// selection highlight color
     static const double & getSelectionColorDifference();
     static const double & defaultSelectionColorDifference();
     static void removeSelectionColorDifference();
@@ -1709,7 +1721,9 @@ public:
     //@{
     /// Accessor for parameter RenderCacheMergeCount
     ///
-    /// Merge draw caches of multiple objects to reduce number of draw\ncalls and improve render performance. Set zero to disable. Only\neffective when using experimental render cache.
+    /// Merge draw caches of multiple objects to reduce number of draw
+    /// calls and improve render performance. Set zero to disable. Only
+    /// effective when using experimental render cache.
     static const long & getRenderCacheMergeCount();
     static const long & defaultRenderCacheMergeCount();
     static void removeRenderCacheMergeCount();
@@ -1764,7 +1778,8 @@ public:
     //@{
     /// Accessor for parameter ForceSolidSingleSideLighting
     ///
-    /// Force single side lighting on solid. This can help visualizing invalid\nsolid shapes with flipped normals.
+    /// Force single side lighting on solid. This can help visualizing invalid
+    /// solid shapes with flipped normals.
     static const bool & getForceSolidSingleSideLighting();
     static const bool & defaultForceSolidSingleSideLighting();
     static void removeForceSolidSingleSideLighting();

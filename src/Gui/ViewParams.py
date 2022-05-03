@@ -86,10 +86,6 @@ Params = [
         "Note that once activated, this option will also activate option ShowOnTop.\n"
         "WARNING! This is an experimental option. Please use with caution."),
     ParamInt('CornerNaviCube', 1, on_change=True),
-    ParamBool('NaviRotateToNearest',  True,
-        "Rotates to nearest possible state when clicking a cube face"),
-    ParamInt('NaviStepByTurn',  8,
-        "Number of steps by turn when using arrows (default = 8 : step angle = 360/8 = 45 deg),"),
     ParamBool('DockOverlayAutoView', True, on_change=True),
     ParamBool('DockOverlayExtraState', False, on_change=True),
     ParamInt('DockOverlayDelay', 200, "Overlay dock (re),layout delay."),
