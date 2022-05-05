@@ -6868,21 +6868,29 @@ Part::Geometry* projectEdgeToLine(const TopoDS_Edge &edge,
     // Align the z axis of the edge plane to the y axis of the projection
     // plane,  so that the extreme bound will be a line in the x axis direction
     // of the projection plane.
-    gp_Trsf trsf;
     double angle = plane.Axis().Direction().Angle(gp_Dir(0, 1, 0));
-    trsf.SetRotation(gp_Ax1(gp_Pnt(), gp_Dir(0, 0, 1)), angle);
-    shape.move(trsf);
+    gp_Trsf trsf;
+    if (fabs(angle) > Precision::Angular()) {
+        trsf.SetRotation(gp_Ax1(gp_Pnt(), gp_Dir(0, 0, 1)), angle);
+        shape.move(trsf);
+    }
+
+    // Make a copy to work around OCC cicular edge transformation bug
+    shape = shape.makECopy();
 
     // Obtain the bounding box and move the extreme points back to its original
     // location
     auto bbox = shape.getBoundBox();
     if (!bbox.IsValid())
         return nullptr;
-    trsf.SetRotation(gp_Ax1(gp_Pnt(), gp_Dir(0, 0, 1)), -angle);
-    gp_Pnt p1(bbox.MinX, 0, 0);
-    p1.Transform(trsf);
-    gp_Pnt p2(bbox.MaxX, 0, 0);
-    p2.Transform(trsf);
+
+    gp_Pnt p1(bbox.MinX, bbox.MinY, 0);
+    gp_Pnt p2(bbox.MaxX, bbox.MaxY, 0);
+    if (fabs(angle) > Precision::Angular()) {
+        trsf.SetRotation(gp_Ax1(gp_Pnt(), gp_Dir(0, 0, 1)), -angle);
+        p1.Transform(trsf);
+        p2.Transform(trsf);
+    }
 
     Base::Vector3d P1(p1.X(), p1.Y(), 0);
     Base::Vector3d P2(p2.X(), p2.Y(), 0);
