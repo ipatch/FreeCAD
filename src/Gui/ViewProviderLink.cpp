@@ -2784,7 +2784,7 @@ void ViewProviderLink::setupContextMenu(QMenu* menu, QObject* receiver, const ch
                 auto sels = dlg.getSelections(true, true);
                 for (auto it=excludes.begin(); it!=excludes.end(); ++it) {
                     auto iter = std::lower_bound(sels.begin(), sels.end(), *it);
-                    if (iter == objs.end() || *iter != *it) {
+                    if (iter == sels.end() || *iter != *it) {
                         ext->setOnChangeCopyObject(*it, false, applyAll);
                     } else
                         sels.erase(iter);
