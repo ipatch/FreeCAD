@@ -21,6 +21,7 @@
  ****************************************************************************/
 
 #include "PreCompiled.h"
+#include <boost/property_map/property_map.hpp>
 
 #ifndef _PreComp_
 # include <boost_bind_bind.hpp>
@@ -603,11 +604,17 @@ void LinkBaseExtension::setOnChangeCopyObject(
     if (external == exclude && !prop)
         return;
 
-    prop = static_cast<PropertyMap*>(
-            obj->addDynamicProperty("App::PropertyMap", "_CopyOnChangeControl"));
     if (!prop) {
-        FC_ERR("Failed to setup copy on change object " << obj->getFullName());
-        return;
+        try {
+            prop = static_cast<PropertyMap*>(
+                    obj->addDynamicProperty("App::PropertyMap", "_CopyOnChangeControl"));
+        } catch (Base::Exception &e) {
+            e.ReportException();
+        }
+        if (!prop) {
+            FC_ERR("Failed to setup copy on change object " << obj->getFullName());
+            return;
+        }
     }
 
     const char *key = applyAll ? "*" : parent->getNameInDocument();
