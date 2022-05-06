@@ -260,6 +260,10 @@ bool Sheet::exportToFile(const std::string &filename, char delimiter, char quote
 
     while (i != usedCells.end()) {
         Property * prop = getProperty(*i);
+        if (!prop) {
+            ++i;
+            continue;
+        }
 
         if (prevRow != -1 && prevRow != i->row()) {
             for (int j = prevRow; j < i->row(); ++j)
