@@ -1233,17 +1233,31 @@ bool NaviCubeShared::drawNaviCube(SoCamera *cam, bool pickMode, int hiliteId, bo
 	else if (hit || !m_AutoHideCube) {
 		for (int pass = 0; pass < 3 ; pass++) {
             for (auto &f : m_Faces) {
-                if (pass != f.m_RenderPass)
+                if (pass != f.m_RenderPass || f.m_TextureId != f.m_PickTextureId)
                     continue;
 
                 QColor& c = (hiliteId == f.m_PickId) && (pass < 2) ? m_HiliteColor : f.m_Color;
                 glColor4f(c.redF(), c.greenF(), c.blueF(),c.alphaF());
                 glBindTexture(GL_TEXTURE_2D, f.m_TextureId);
                 
-                if (f.m_TextureId == f.m_PickTextureId) {
-                    glDrawElements(GL_TRIANGLE_FAN, f.m_VertexCount, GL_UNSIGNED_BYTE, (void*) &m_IndexArray[f.m_FirstVertex]);
+                glDrawElements(GL_TRIANGLE_FAN, f.m_VertexCount, GL_UNSIGNED_BYTE, (void*) &m_IndexArray[f.m_FirstVertex]);
+            }
+        }
+    }
+
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+
+	if (!pickMode && (hit || !m_AutoHideCube)) {
+		for (int pass = 0; pass < 3 ; pass++) {
+            for (auto &f : m_Faces) {
+                if (pass != f.m_RenderPass || f.m_TextureId == f.m_PickTextureId)
                     continue;
-                }
+
+                QColor& c = (hiliteId == f.m_PickId) && (pass < 2) ? m_HiliteColor : f.m_Color;
+                glColor4f(c.redF(), c.greenF(), c.blueF(),c.alphaF());
+                glBindTexture(GL_TEXTURE_2D, f.m_TextureId);
 
                 // We are rendering a text label here. Checks the orientation
                 // and flip the texture to make it more readable.
@@ -1287,7 +1301,7 @@ bool NaviCubeShared::drawNaviCube(SoCamera *cam, bool pickMode, int hiliteId, bo
                 glTexCoord2f(uv*t4[0], uv*t4[1]); glVertex3f(mv4[0], mv4[1], mv4[2]);
                 glEnd();
 			}
-		}
+        }
 
         if (m_BorderWidth >= 1.0f) {
 	        glDisable(GL_DEPTH_TEST);
@@ -1321,9 +1335,6 @@ bool NaviCubeShared::drawNaviCube(SoCamera *cam, bool pickMode, int hiliteId, bo
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
 	}
-
-    glDisableClientState(GL_VERTEX_ARRAY);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
     if (hit || (!m_AutoHideButton && !m_AutoHideCube)) {
         // Draw the rotate buttons
