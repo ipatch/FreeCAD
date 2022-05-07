@@ -486,7 +486,7 @@ bool isFeatureMovable(App::DocumentObject* const feat)
         auto prim = static_cast<PartDesign::ProfileBased*>(feat);
         auto sk = prim->getVerifiedSketch(true);
 
-        if (!isFeatureMovable(sk))
+        if (sk && !isFeatureMovable(sk))
             return false;
 
         if (auto prop = static_cast<App::PropertyLinkList*>(prim->getPropertyByName("Sections"))) {
