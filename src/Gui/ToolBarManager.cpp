@@ -635,8 +635,8 @@ void ToolBarManager::setup(ToolBarItem* toolBarItems)
 
         // setup the toolbar
         setup(item, toolbar);
-        if (toolbar->actions().isEmpty()) {
-            FC_LOG("Empty toolbar " << name.toLatin1().constData());
+        if (toolbar->children().isEmpty()) {
+            FC_LOG("Empty toolbar " << name.toUtf8().constData());
             continue;
         }
 
@@ -779,7 +779,7 @@ void ToolBarManager::restoreState()
         if (!toolbar)
             continue;
         QByteArray toolbarName = toolbar->objectName().toUtf8();
-        if (toolbar->windowTitle().isEmpty() && toolbar->actions().isEmpty()) {
+        if (toolbar->windowTitle().isEmpty() && toolbar->children().isEmpty()) {
             toolbar->toggleViewAction()->setVisible(false);
             setToolBarVisible(toolbar, false);
         }
@@ -865,9 +865,9 @@ std::map<QString, QPointer<QToolBar>> ToolBarManager::toolBars()
             // other that has a title.
 
             QToolBar *a = p, *b = tb;
-            if (a->windowTitle().isEmpty() && a->actions().isEmpty())
+            if (a->windowTitle().isEmpty() && a->children().isEmpty())
                 std::swap(a, b);
-            if (!a->windowTitle().isEmpty() || !a->actions().isEmpty()) {
+            if (!a->windowTitle().isEmpty() || !a->children().isEmpty()) {
                 // replace toolbar and insert it at the same location
                 FC_LOG("replacing " << name.toUtf8().constData() << ' ' << b << " -> " << a);
                 getMainWindow()->insertToolBar(b, a);
@@ -892,7 +892,7 @@ void ToolBarManager::onToggleToolBar(bool visible)
     auto toolbar = qobject_cast<QToolBar*>(sender());
     if (!toolbar)
         return;
-    if (visible && toolbar->windowTitle().isEmpty() && toolbar->actions().isEmpty()) {
+    if (visible && toolbar->windowTitle().isEmpty() && toolbar->children().isEmpty()) {
         setToolBarVisible(toolbar, false);
         return;
     }
