@@ -876,6 +876,8 @@ void PythonConsole::runSource(const QString& line)
     }
     if (lines.size())
         statements.append(lines.join(QLatin1Char('\n')));
+    else if (lines.isEmpty())
+        statements.append(QStringLiteral("\n"));
 
     try {
         for (const auto &s : statements) {
