@@ -308,10 +308,8 @@ QString FileDialog::getSaveFileName (QWidget * parent, const QString & caption, 
         }
     }
     else if (fileMode & QFileDialog::Directory) {
-        return getExistingDirectory(parent, windowTitle, dirName, options | QFileDialog::ShowDirsOnly);
-#if QT_VERSION >= 0x040600
-        file = QDir::fromNativeSeparators(file);
-#endif
+        file = getExistingDirectory(parent, windowTitle, dirName, options | QFileDialog::ShowDirsOnly);
+        return QDir::fromNativeSeparators(file);
     }
     else {
         file = QFileDialog::getSaveFileName(parent, windowTitle, dirName, filter, selectedFilter, options);
@@ -333,9 +331,8 @@ QString FileDialog::getSaveFileName (QWidget * parent, const QString & caption, 
  */
 QString FileDialog::getExistingDirectory( QWidget * parent, const QString & caption, const QString & dir, Options options )
 {
-#if QT_VERSION < 0x040800 && defined(FC_OS_MACOSX)
-    options |= QFileDialog::DontUseNativeDialog;
-#endif
+    if (dontUseNativeDialog())
+        options |= QFileDialog::DontUseNativeDialog;
     QString path = QFileDialog::getExistingDirectory(parent, caption, dir, options);
     // valid path was selected
     if ( !path.isEmpty() ) {
@@ -412,6 +409,7 @@ QString FileDialog::getOpenFileName(QWidget * parent, const QString & caption, c
     }
     else if (fileMode & QFileDialog::Directory) {
         file = getExistingDirectory(parent, windowTitle, dirName, options | QFileDialog::ShowDirsOnly);
+        return QDir::fromNativeSeparators(file);
     }
     else {
         file = QFileDialog::getOpenFileName(parent, windowTitle, dirName, filter, selectedFilter, options);
