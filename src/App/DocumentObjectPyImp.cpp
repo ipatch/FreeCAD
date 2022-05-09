@@ -723,8 +723,10 @@ PyObject*  DocumentObjectPy::normalizeSubName(PyObject *args) {
         SubObjectT sobjT(getDocumentObjectPtr(), subname);
         sobjT.normalize(ops);
         auto obj = sobjT.getObject();
-        if (!obj)
+        if (!obj) {
             PyErr_SetString(PyExc_RuntimeError, "failed to normalize subname path");
+            return nullptr;
+        }
         return Py::new_reference_to(
                 Py::TupleN(Py::asObject(obj->getPyObject()),
                            Py::String(sobjT.getSubName())));
