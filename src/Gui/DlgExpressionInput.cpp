@@ -470,7 +470,8 @@ bool DlgExpressionInput::eventFilter(QObject *obj, QEvent *ev)
         if (!on && !ExprParams::AllowReturn()
                 && ke->key() == Qt::Key_Return
                 && ke->modifiers() == Qt::NoModifier) {
-            accept();
+            if (ui->okBtn->isEnabled())
+                accept();
             return true;
         }
     }
