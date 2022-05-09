@@ -134,6 +134,7 @@
 #include "LinkViewPy.h"
 #include "AxisOriginPy.h"
 #include "CommandPy.h"
+#include "FileDialogPy.h"
 
 #include "Language/Translator.h"
 #include "TaskView/TaskView.h"
@@ -527,6 +528,7 @@ Application::Application(bool GUIenabled)
         Base::Interpreter().addType(&LinkViewPy::Type,module,"LinkView");
         Base::Interpreter().addType(&AxisOriginPy::Type,module,"AxisOrigin");
         Base::Interpreter().addType(&CommandPy::Type,module, "Command");
+        Base::Interpreter().addType(&FileDialogPy::Type,module, "FileDialog");
         Base::Interpreter().addType(&DocumentPy::Type, module, "Document");
         Base::Interpreter().addType(&ViewProviderPy::Type, module, "ViewProvider");
         Base::Interpreter().addType(&ViewProviderDocumentObjectPy::Type, module, "ViewProviderDocumentObject");

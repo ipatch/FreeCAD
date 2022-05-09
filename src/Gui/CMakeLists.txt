@@ -231,6 +231,7 @@ generate_from_xml(LinkViewPy)
 generate_from_xml(ViewProviderLinkPy)
 generate_from_xml(AxisOriginPy)
 generate_from_xml(CommandPy)
+generate_from_xml(FileDialogPy)
 
 generate_from_py(FreeCADGuiInit GuiInitScript.h)
 
@@ -247,6 +248,7 @@ SET(FreeCADGui_XML_SRCS
     ViewProviderLinkPy.xml
     AxisOriginPy.xml
     CommandPy.xml
+    FileDialogPy.xml
 )
 SOURCE_GROUP("XML" FILES ${FreeCADApp_XML_SRCS})
 
@@ -522,6 +524,7 @@ SET(Command_CPP_SRCS
     CommandPyImp.cpp
     ShortcutManager.cpp
     CommandCompleter.cpp
+    FileDialogPyImp.cpp
 )
 SET(Command_SRCS
     ${Command_CPP_SRCS}
