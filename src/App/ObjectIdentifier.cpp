@@ -1620,6 +1620,9 @@ Property *ObjectIdentifier::resolveProperty(const App::DocumentObject *obj,
                                             App::DocumentObject *&sobj,
                                             int &ptype) const 
 {
+    if (!obj)
+        return nullptr;
+
     std::string &subname = _subname.str;
     sobj = nullptr;
 
