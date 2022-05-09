@@ -1554,10 +1554,16 @@ class DocumentExpressionCases(unittest.TestCase):
     self.assertIn(self.Obj1, self.Sheet.OutList)
     # It is by design that if the object identifier references an object without
     # referencing any of its property, it is not counted as a dependency. The
-    # actually dependency, in this case, is the 'Link' property of 'Obj1'. The
-    # logic is that even if 'Obj2' changes, the content of 'Obj1.Link1' does not
-    # change, so 'Sheet' should not be recomputed.
+    # actually dependency, in this case, is the 'Link' property of object 'Test'
+    # (i.e. self.Obj1) . The logic is that even if 'Test001' (self.Obj2)
+    # changes, the content of 'Test.Link' does not change, so 'Sheet' should not
+    # be recomputed.
     self.assertFalse(self.Obj2 in self.Sheet.OutList)
+
+    # Now 'Sheet' contains identifier referencing Test001.Integer, it should
+    # be included as dependency even if it is indirectly referenced.
+    self.Sheet.set('A2', '=A1.Integer')
+    self.assertIn(self.Obj1, self.Sheet.OutList)
 
   def tearDown(self):
     #closing doc
