@@ -1377,12 +1377,13 @@ void Document::clearDocument()
     if(this->d->objectArray.size()) {
         GetApplication().signalDeleteDocument(*this);
         this->d->objectArray.clear();
-        for(auto &v : this->d->objectMap) {
+        decltype(this->d->objectMap) map = std::move(this->d->objectMap);
+        this->d->objectMap.clear();
+        this->d->objectIdMap.clear();
+        for(auto &v : map) {
             v.second->setStatus(ObjectStatus::Destroy, true);
             delete(v.second);
         }
-        this->d->objectMap.clear();
-        this->d->objectIdMap.clear();
         GetApplication().signalNewDocument(*this,false);
     }
 
@@ -1732,10 +1733,14 @@ Document::~Document()
     Console().Log("-Delete Features of %s \n",getName());
 #endif
 
+    d->activeObject = nullptr;
     d->objectArray.clear();
-    for (auto it = d->objectMap.begin(); it != d->objectMap.end(); ++it) {
-        it->second->setStatus(ObjectStatus::Destroy, true);
-        delete(it->second);
+    decltype(d->objectMap) map = std::move(d->objectMap);
+    d->objectMap.clear();
+    d->objectIdMap.clear();
+    for (auto &v : map) {
+        v.second->setStatus(ObjectStatus::Destroy, true);
+        delete(v.second);
     }
 
     // Remark: The API of Py::Object has been changed to set whether the wrapper owns the passed
@@ -4896,18 +4901,21 @@ DocumentObject * Document::getObject(const char *Name) const
 {
     auto pos = d->objectMap.find(Name);
 
-    if (pos != d->objectMap.end())
-        return pos->second;
-    else
-        return 0;
+    if (pos != d->objectMap.end()) {
+        if (pos->second && !pos->second->testStatus(ObjectStatus::Remove))
+            return pos->second;
+    }
+    return nullptr;
 }
 
 DocumentObject * Document::getObjectByID(long id) const
 {
     auto it = d->objectIdMap.find(id);
-    if(it!=d->objectIdMap.end())
-        return it->second;
-    return 0;
+    if(it!=d->objectIdMap.end()) {
+        if (it->second && !it->second->testStatus(ObjectStatus::Remove))
+            return it->second;
+    }
+    return nullptr;
 }
 
 
