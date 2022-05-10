@@ -1554,7 +1554,7 @@ class DocumentExpressionCases(unittest.TestCase):
     self.assertIn(self.Obj1, self.Sheet.OutList)
     # It is by design that if the object identifier references an object without
     # referencing any of its property, it is not counted as a dependency. The
-    # actually dependency, in this case, is the 'Link' property of object 'Test'
+    # only dependency, in this case, is the 'Link' property of object 'Test'
     # (i.e. self.Obj1) . The logic is that even if 'Test001' (self.Obj2)
     # changes, the content of 'Test.Link' does not change, so 'Sheet' should not
     # be recomputed.
