@@ -4901,20 +4901,16 @@ DocumentObject * Document::getObject(const char *Name) const
 {
     auto pos = d->objectMap.find(Name);
 
-    if (pos != d->objectMap.end()) {
-        if (pos->second && !pos->second->testStatus(ObjectStatus::Remove))
-            return pos->second;
-    }
+    if (pos != d->objectMap.end())
+        return pos->second;
     return nullptr;
 }
 
 DocumentObject * Document::getObjectByID(long id) const
 {
     auto it = d->objectIdMap.find(id);
-    if(it!=d->objectIdMap.end()) {
-        if (it->second && !it->second->testStatus(ObjectStatus::Remove))
-            return it->second;
-    }
+    if(it!=d->objectIdMap.end())
+        return it->second;
     return nullptr;
 }
 
