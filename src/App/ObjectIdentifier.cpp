@@ -969,6 +969,8 @@ App::DocumentObject * ObjectIdentifier::getDocumentObject(const App::Document * 
         objectById = doc->getObject(static_cast<const char*>(name));
 
         if (objectById) {
+            if (objectById->testStatus(ObjectStatus::Remove))
+                return nullptr;
             flags.set(ResolveByIdentifier);
             return objectById;
         }
@@ -1155,6 +1157,8 @@ void ObjectIdentifier::resolve(ResolveResults &results) const
                 results.resolvedDocumentName = String(results.resolvedDocument->getName(), false, true);
                 results.resolvedDocumentObjectName = String(owner->getNameInDocument(), false, true);
                 results.resolvedDocumentObject = owner->getDocument()->getObject(owner->getNameInDocument());
+                if (results.resolvedDocumentObject && !results.resolvedDocumentObject->testStatus(ObjectStatus::Remove))
+                    results.resolvedDocumentObject = nullptr;
                 results.propertyIndex = 0;
                 results.getProperty(*this);
             }
@@ -1638,7 +1642,10 @@ Property *ObjectIdentifier::resolveProperty(const App::DocumentObject *obj,
             return nullptr;
         if(s && s[0] == '.')
             ++s;
-        return obj->getSubObject(s);
+        auto sobj = obj->getSubObject(s);
+        if (sobj && sobj->testStatus(ObjectStatus::Remove))
+            sobj = nullptr;
+        return sobj;
     };
 
     App::Property *prop = 0;
@@ -1955,7 +1962,7 @@ void ObjectIdentifier::String::checkImport(const App::DocumentObject *owner,
             str.resize(str.size()-1);
             auto mapped = reader->getName(str.c_str());
             auto obj = owner->getDocument()->getObject(mapped);
-            if (!obj) {
+            if (!obj || obj->testStatus(ObjectStatus::Remove)) {
                 FC_ERR("Cannot find object " << str);
             }
             else {
@@ -2337,7 +2344,7 @@ void ObjectIdentifier::importSubNames(const ObjectIdentifier::SubNameMap &subNam
     auto it = subNameMap.find(std::make_pair(result.resolvedDocumentObject,std::string()));
     if(it!=subNameMap.end()) {
         auto obj = owner->getDocument()->getObject(it->second.c_str());
-        if(!obj) {
+        if(!obj || obj->testStatus(ObjectStatus::Remove)) {
             FC_ERR("Failed to find import object " << it->second << " from "
                     << result.resolvedDocumentObject->getFullName());
             return;
