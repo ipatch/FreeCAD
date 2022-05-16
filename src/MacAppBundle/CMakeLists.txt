@@ -31,7 +31,11 @@ if(HOMEBREW_PREFIX)
     foreach(PTH_FILE ${HOMEBREW_PTH_FILES})
         file(READ ${PTH_FILE} ADDITIONAL_DIR)
 
-	string(STRIP "${ADDITIONAL_DIR}" ADDITIONAL_DIR)
+        string(STRIP "${ADDITIONAL_DIR}" ADDITIONAL_DIR)
+        string(FIND "${ADDITIONAL_DIR}" "${HOMEBREW_PREFIX}/Cellar" POSITION)
+        string(LENGTH "${ADDITIONAL_DIR}" DIR_LENGTH)
+        string(SUBSTRING "${ADDITIONAL_DIR}" ${POSITION} ${DIR_LENGTH}-${POSITION} DIR_TAIL)
+        string(REGEX MATCHALL "^([/A-Za-z0-9_.@-]+)" CLEAR_TAIL ${DIR_TAIL})
         string(REGEX REPLACE "^${HOMEBREW_PREFIX}/Cellar/([A-Za-z0-9_]+).*$" "\\1" LIB_NAME ${ADDITIONAL_DIR})
         string(REGEX REPLACE ".*libexec(.*)/site-packages" "libexec/${LIB_NAME}\\1" NEW_SITE_DIR ${ADDITIONAL_DIR})
 
