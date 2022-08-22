@@ -27,6 +27,9 @@
 #include <QString>
 #include "UnitsSchema.h"
 
+#if !defined(MAC_OS_X_VERSION_10_16) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_16
+#include <cmath>
+#endif
 
 namespace Base {
 
