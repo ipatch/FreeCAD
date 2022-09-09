@@ -111,9 +111,9 @@ install(CODE "execute_process(COMMAND chmod -R a+w ${CMAKE_INSTALL_LIBDIR})")
 
 get_filename_component(APP_PATH ${CMAKE_INSTALL_PREFIX} PATH)
 
-file(GLOB CONFIG_ICU "/usr/local/Cellar/icu4c*/*/lib")
+file(GLOB CONFIG_ICU "${HOMEBREW_PREFIX}/Cellar/icu4c*/*/lib")
 
-file(GLOB CONFIG_NGLIB "/usr/local/Cellar/nglib*/*/Contents/MacOS")
+file(GLOB CONFIG_NGLIB "${HOMEBREW_PREFIX}/Cellar/nglib*/*/Contents/MacOS")
 
 install(CODE 
     "message(STATUS \"Making bundle relocatable...\")
