@@ -115,6 +115,10 @@ file(GLOB CONFIG_ICU "${HOMEBREW_PREFIX}/Cellar/icu4c*/*/lib")
 
 file(GLOB CONFIG_NGLIB "${HOMEBREW_PREFIX}/Cellar/nglib*/*/Contents/MacOS")
 
+file(GLOB CONFIG_MEDFILE "${HOMEBREW_PREFIX}/opt/med-file*/lib")
+
+file(GLOB CONFIG_GCC "${HOMEBREW_PREFIX}/opt/gcc/lib/gcc/12")
+
 install(CODE 
     "message(STATUS \"Making bundle relocatable...\")
     # The top-level CMakeLists.txt should prevent multiple package manager
@@ -122,6 +126,6 @@ install(CODE
     execute_process(
         COMMAND python2.7
         ${CMAKE_SOURCE_DIR}/src/Tools/MakeMacBundleRelocatable.py
-        ${APP_PATH} ${HOMEBREW_PREFIX}${MACPORTS_PREFIX}/lib ${CONFIG_ICU} /usr/local/opt ${CONFIG_NGLIB} ${Qt5Core_DIR}/../../.. ${XCTEST_PATH} ${HOMEBREW_PREFIX}/opt/llvm/lib ${WEBKIT_FRAMEWORK_DIR}
+        ${APP_PATH} ${HOMEBREW_PREFIX}${MACPORTS_PREFIX}/lib ${CONFIG_GCC} ${CONFIG_ICU} ${CONFIG_MEDFILE} ${HOMBREW_PREFIX}/opt ${Qt5Core_DIR}/../../.. ${XCTEST_PATH} ${HOMEBREW_PREFIX}/opt/llvm/lib ${WEBKIT_FRAMEWORK_DIR}
     )"
 )
