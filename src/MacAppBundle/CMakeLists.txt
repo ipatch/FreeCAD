@@ -111,9 +111,13 @@ install(CODE "execute_process(COMMAND chmod -R a+w ${CMAKE_INSTALL_LIBDIR})")
 
 get_filename_component(APP_PATH ${CMAKE_INSTALL_PREFIX} PATH)
 
-file(GLOB CONFIG_ICU "/usr/local/Cellar/icu4c*/*/lib")
+file(GLOB CONFIG_ICU "${HOMEBREW_PREFIX}/opt/icu4c/lib")
 
-file(GLOB CONFIG_NGLIB "/usr/local/Cellar/nglib*/*/Contents/MacOS")
+file(GLOB CONFIG_NGLIB "${HOMEBREW_PREFIX}/nglib*/*/Contents/MacOS")
+
+file(GLOB CONFIG_LLVM "${HOMEBREW_PREFIX}/opt/llvm/lib")
+
+file(GLOB CONFIG_OCC "${HOMEBREW_PREFIX}/opt/opencascade@7.5.3/lib")
 
 install(CODE 
     "message(STATUS \"Making bundle relocatable...\")
@@ -122,6 +126,6 @@ install(CODE
     execute_process(
         COMMAND python2.7
         ${CMAKE_SOURCE_DIR}/src/Tools/MakeMacBundleRelocatable.py
-        ${APP_PATH} ${HOMEBREW_PREFIX}${MACPORTS_PREFIX}/lib ${CONFIG_ICU} /usr/local/opt ${CONFIG_NGLIB} ${Qt5Core_DIR}/../../.. ${XCTEST_PATH} ${HOMEBREW_PREFIX}/opt/llvm/lib ${WEBKIT_FRAMEWORK_DIR}
+        ${APP_PATH} ${HOMEBREW_PREFIX}/lib ${CONFIG_ICU} ${CONFIG_OCC} ${Qt5Core_DIR}/../../.. ${XCTEST_PATH} ${CONFIG_LLVM} ${WEBKIT_FRAMEWORK_DIR}
     )"
 )
