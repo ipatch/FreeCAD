@@ -121,7 +121,7 @@ file(GLOB CONFIG_OCC "${HOMEBREW_PREFIX}/opt/opencascade@7.5.3/lib")
 
 file(GLOB CONFIG_MED "${HOMEBREW_PREFIX}/opt/med-file@4.1.1/lib")
 
-file(GLOB CONFIG_GCC "${HOMEBREW_PREFIX}/opt/gcc/lib/gcc/current/lib")
+file(GLOB CONFIG_GCC "${HOMEBREW_PREFIX}/opt/gcc/lib/gcc/current")
 
 install(CODE 
     "message(STATUS \"Making bundle relocatable...\")
