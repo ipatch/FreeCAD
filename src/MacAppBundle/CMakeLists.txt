@@ -128,6 +128,8 @@ execute_process(
     COMMAND find -L /usr/local/Cellar/nglib -name MacOS
     OUTPUT_VARIABLE CONFIG_NGLIB)
 
+file(GLOB CONFIG_OCC "${HOMEBREW_PREFIX}/opt/opencascade@7.5.3/lib")
+
 install(CODE 
     "message(STATUS \"Making bundle relocatable...\")
     # The top-level CMakeLists.txt should prevent multiple package manager
@@ -135,6 +137,6 @@ install(CODE
     execute_process(
         COMMAND python3
         ${CMAKE_SOURCE_DIR}/src/Tools/MakeMacBundleRelocatable.py
-        ${APP_PATH} ${HOMEBREW_PREFIX}${MACPORTS_PREFIX}/lib ${HOMEBREW_PREFIX}/opt/icu4c/lib ${HOMEBREW_PREFIX}/opt/llvm/lib ${HOMEBREW_PREFIX}/opt/med-file@4.1.1/lib ${HOMEBREW_PREFIX}/opt/gcc/lib/gcc/12 /usr/local/opt ${CONFIG_NGLIB} ${Qt5Core_DIR}/../../.. ${XCTEST_PATH} ${WEBKIT_FRAMEWORK_DIR}
+        ${APP_PATH} ${HOMEBREW_PREFIX}${MACPORTS_PREFIX}/lib ${CONFIG_OCC} ${HOMEBREW_PREFIX}/opt/icu4c/lib ${HOMEBREW_PREFIX}/opt/llvm/lib ${HOMEBREW_PREFIX}/opt/med-file@4.1.1/lib ${HOMEBREW_PREFIX}/opt/gcc/lib/gcc/12 ${CONFIG_NGLIB} ${Qt5Core_DIR}/../../.. ${XCTEST_PATH} ${WEBKIT_FRAMEWORK_DIR}
     )"
 )
