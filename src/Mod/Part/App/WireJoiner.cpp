@@ -52,6 +52,11 @@
 #include <BRepTools_History.hxx>
 #include <ShapeBuild_ReShape.hxx>
 
+// note ipatch, WireJoiner.cpp:199:20: error: use of undeclared identifier 'GeomAdaptor_Curve'
+// note ipatch, freecad-src/src/Mod/Part/App/WireJoiner.cpp:855:16: error: variable has incomplete type 'gp_Pln'
+#include <GeomAdaptor_Curve.hxx>
+#include <gp_Pln.hxx>
+
 #include <unordered_map>
 #include <unordered_set>
 #include <deque>
