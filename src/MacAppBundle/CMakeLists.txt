@@ -119,6 +119,14 @@ file(GLOB CONFIG_LLVM "${HOMEBREW_PREFIX}/opt/llvm/lib/c++")
 
 file(GLOB CONFIG_GCC "${HOMEBREW_PREFIX}/opt/gcc/lib/gcc/current")
 
+# TODO: perform a check of the cmake_prefix_path to check which vtk is added
+# NOTE: ipatch, since vtk@8.2 is keg-only reference Cellar instead of opt
+file(GLOB CONFIG_VTK "${HOMEBREW_PREFIX}/Cellar/vtk@8.2/8.2.0_8/lib")
+
+file(GLOB CONFIG_OCC "${HOMEBREW_PREFIX}/opt/opencascade@7.5.3/lib")
+
+file(GLOB CONFIG_MED "${HOMEBREW_PREFIX}/opt/med-file@4.1.1/lib")
+
 execute_process(
     COMMAND find -L /usr/local/Cellar/nglib -name MacOS
     OUTPUT_VARIABLE CONFIG_NGLIB)
@@ -130,6 +138,6 @@ install(CODE
     execute_process(
         COMMAND python3
         ${CMAKE_SOURCE_DIR}/src/Tools/MakeMacBundleRelocatable.py
-        ${APP_PATH} ${HOMEBREW_PREFIX}${MACPORTS_PREFIX}/lib ${CONFIG_ICU} ${CONFIG_LLVM} ${CONFIG_GCC} /usr/local/opt ${CONFIG_NGLIB} ${Qt5Core_DIR}/../../.. ${XCTEST_PATH} ${WEBKIT_FRAMEWORK_DIR}
+        ${APP_PATH} ${HOMEBREW_PREFIX}${MACPORTS_PREFIX}/lib ${CONFIG_OCC} ${CONFIG_MED} ${CONFIG_VTK} ${CONFIG_ICU} ${CONFIG_LLVM} ${CONFIG_GCC} /usr/local/opt ${CONFIG_NGLIB} ${Qt5Core_DIR}/../../.. ${XCTEST_PATH} ${WEBKIT_FRAMEWORK_DIR}
     )"
 )
