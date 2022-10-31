@@ -138,6 +138,16 @@ install(
     DESTINATION "${CMAKE_INSTALL_PREFIX}/Library/QuickLook/QuicklookFCStd.qlgenerator/Contents/MacOS/"
 )
 
+file(GLOB CONFIG_GCC "${HOMEBREW_PREFIX}/opt/gcc/lib/gcc/current")
+
+file(GLOB CONFIG_LLVM "${HOMEBREW_PREFIX}/opt/llvm/lib/c++")
+
+file(GLOB CONFIG_VTK "${HOMEBREW_PREFIX}/Cellar/vtk@8.2/8.2.0_8/lib")
+
+file(GLOB CONFIG_OCC "${HOMEBREW_PREFIX}/opt/opencascade@7.5.3/lib")
+
+file(GLOB CONFIG_MED "${HOMEBREW_PREFIX}/opt/med-file@4.1.1/lib")
+
 install(CODE
     "message(STATUS \"Making bundle relocatable...\")
     # The top-level CMakeLists.txt should prevent multiple package manager
@@ -145,6 +155,6 @@ install(CODE
     execute_process(
         COMMAND python3
         ${CMAKE_SOURCE_DIR}/src/Tools/MakeMacBundleRelocatable.py
-        ${APP_PATH} ${HOMEBREW_PREFIX}${MACPORTS_PREFIX}/lib ${ICU_PREFIX}/lib/ /usr/local/opt ${CONFIG_NGLIB} ${Qt5Core_DIR}/../../.. ${XCTEST_PATH} ${WEBKIT_FRAMEWORK_DIR}
+        ${APP_PATH} ${HOMEBREW_PREFIX}${MACPORTS_PREFIX}/lib ${ICU_PREFIX}/lib/ ${CONFIG_GCC} ${CONFIG_MED} ${CONFIG_OCC} ${CONFIG_VTK} ${CONFIG_LLVM} /usr/local/opt ${CONFIG_NGLIB} ${Qt5Core_DIR}/../../.. ${XCTEST_PATH} ${WEBKIT_FRAMEWORK_DIR}
     )"
 )
