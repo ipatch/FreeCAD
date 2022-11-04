@@ -119,8 +119,10 @@ file(GLOB CONFIG_LLVM "${HOMEBREW_PREFIX}/opt/llvm/lib/c++")
 
 file(GLOB CONFIG_GCC "${HOMEBREW_PREFIX}/opt/gcc/lib/gcc/current")
 
+file(GLOB CONFIG_MED "${HOMEBREW_PREFIX}/opt/med-file@4.1.1/lib")
+
 execute_process(
-    COMMAND find -L /usr/local/Cellar/nglib -name MacOS
+    COMMAND find -L ${HOMEBREW_PREFIX}/Cellar/nglib -name MacOS
     OUTPUT_VARIABLE CONFIG_NGLIB)
 
 install(CODE 
@@ -130,6 +132,6 @@ install(CODE
     execute_process(
         COMMAND python3
         ${CMAKE_SOURCE_DIR}/src/Tools/MakeMacBundleRelocatable.py
-        ${APP_PATH} ${HOMEBREW_PREFIX}${MACPORTS_PREFIX}/lib ${CONFIG_ICU} ${CONFIG_LLVM} ${CONFIG_GCC} /usr/local/opt ${CONFIG_NGLIB} ${Qt5Core_DIR}/../../.. ${XCTEST_PATH} ${WEBKIT_FRAMEWORK_DIR}
+        ${APP_PATH} ${HOMEBREW_PREFIX}${MACPORTS_PREFIX}/lib ${CONFIG_ICU} ${CONFIG_MED} ${CONFIG_LLVM} ${CONFIG_GCC} /usr/local/opt ${CONFIG_NGLIB} ${Qt5Core_DIR}/../../.. ${XCTEST_PATH} ${WEBKIT_FRAMEWORK_DIR}
     )"
 )
