@@ -1,11 +1,14 @@
 macro(SetupBoost)
 # -------------------------------- Boost --------------------------------
 
+    # Set the path to your Boost installation
+    set(BOOST_ROOT "~/homebrew/opt/boost-python3.11")
+
     set(_boost_TEST_VERSIONS ${Boost_ADDITIONAL_VERSIONS})
 
     set (BOOST_COMPONENTS filesystem program_options regex system thread date_time)
-    find_package(Boost ${BOOST_MIN_VERSION}
-        COMPONENTS ${BOOST_COMPONENTS} REQUIRED)
+    find_package(Boost 1.83.0 REQUIRED COMPONENTS ${BOOST_COMPONENTS}
+        HINTS ${BOOST_ROOT})
 
     if(UNIX AND NOT APPLE)
         # Boost.Thread 1.67+ headers reference pthread_condattr_*
@@ -29,3 +32,4 @@ macro(SetupBoost)
     endif(NOT Boost_FOUND)
 
 endmacro(SetupBoost)
+

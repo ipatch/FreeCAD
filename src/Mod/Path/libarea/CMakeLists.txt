@@ -22,15 +22,20 @@ if(NOT FREECAD_USE_PYBIND11)
     if(NOT FREECAD_LIBPACK_USE OR FREECAD_LIBPACK_CHECKFILE_CLBUNDLER)
         # boost-python >= 1.67 on some platforms has suffix
         set(BOOST_PY_SUFFIX ${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR})
-
-        find_package( Boost COMPONENTS python${BOOST_PY_SUFFIX} )
-        if (NOT Boost_PYTHON${BOOST_PY_SUFFIX}_FOUND)
-            # try just the major version
-            find_package( Boost COMPONENTS python${PYTHON_VERSION_MAJOR} )
-            if (NOT Boost_PYTHON${PYTHON_VERSION_MAJOR}_FOUND)
-                # unversioned
-                find_package( Boost COMPONENTS python REQUIRED)
-            endif()
+        # note: ipatch,
+        if(DEFINED homebrew_prefix)
+          # Set the path to your Boost installation
+          set(BOOST_ROOT "~/homebrew/opt/boost-python3.11")
+        else()
+          find_package( Boost COMPONENTS python${BOOST_PY_SUFFIX} )
+          if (NOT Boost_PYTHON${BOOST_PY_SUFFIX}_FOUND)
+              # try just the major version
+              find_package( Boost COMPONENTS python${PYTHON_VERSION_MAJOR} )
+              if (NOT Boost_PYTHON${PYTHON_VERSION_MAJOR}_FOUND)
+                  # unversioned
+                  find_package( Boost COMPONENTS python REQUIRED)
+              endif()
+          endif()
         endif()
 
         if(Boost_FOUND)

@@ -1,5 +1,19 @@
 macro(SetupPython)
 # -------------------------------- Python --------------------------------
+if (DEFINED homebrew_prefix)
+    message(STATUS "homebrew_prefix is defined: ${homebrew_prefix}")
+    # Adjust paths based on homebrew_prefix
+    set(PYTHON_EXECUTABLE "${homebrew_prefix}/opt/python@3.11/bin/python3.11")
+    set(PYTHON_LIBRARIES "${homebrew_prefix}/Frameworks/Python.framework/Versions/3.11/lib/libpython3.11.dylib")
+    set(PYTHON_INCLUDE_DIRS "${homebrew_prefix}/Frameworks/Python.framework/Headers")
+    set(PYTHON_LIBRARY_DIRS "${homebrew_prefix}/Frameworks/Python.framework/Versions/3.11/lib")
+
+    # note: ipatch, quits the entire cmake process
+    # return()
+
+  else()
+
+message(STATUS "ipatch we should not BE HERE!!!")
 
     find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 
@@ -18,4 +32,5 @@ macro(SetupPython)
          message(FATAL_ERROR "To build FreeCAD you need at least Python 3.8\n")
     endif()
 
+  endif()
 endmacro(SetupPython)

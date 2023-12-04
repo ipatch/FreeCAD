@@ -6,6 +6,30 @@ macro(SetupShibokenAndPyside)
         find_package(PySide REQUIRED HINTS "${PYTHON_LIBRARY_DIR}/cmake")
     endif(DEFINED MACPORTS_PREFIX)
 
+    if(DEFINED homebrew_prefix)
+      # find_package(Shiboken REQUIRED HINTS "${PYTHON_LIBRARY_DIR}/cmake")
+      # find_package(PySide REQUIRED HINTS "${PYTHON_LIBRARY_DIR}/cmake")
+      set(Shiboken_DIR "${homebrew_prefix}/opt/shiboken2@5.15.11")
+      set(Shiboken_INCLUDE_DIR "${homebrew_prefix}/opt/shiboken2@5.15.11/include/shiboken2")
+      set(Shiboken_LIBRARY "${homebrew_prefix}/opt/shiboken2@5.15.11/lib")
+
+      set(PYTHON_MODULE_PATH "~/homebrew/opt/shiboken2@5.15.11/lib/python3.11/site-packages")
+
+      # Extend PYTHONPATH to include the directory with the Python module
+      set(ENV{PYTHONPATH} "${PYTHON_MODULE_PATH}")
+
+      # set(Shiboken_FOUND TRUE)
+
+      set(PySide_INCLUDE_DIR "${homebrew_prefix}/opt/pyside2@5.15.11/include/PySide2")
+
+      # set(Shiboken2_DIR "${homebrew_prefix}/opt/shiboken2@5.15.11/")
+      # find_package(Shiboken2 REQUIRED HINTS "${Shiboken2_DIR}")
+
+      message(STATUS "Shiboken_INCLUDE_DIR: ${Shiboken_INCLUDE_DIR}")
+      message(STATUS "Shiboken_LIBRARY: ${Shiboken_LIBRARY}")
+
+    endif(DEFINED homebrew_prefix)
+
     if(FREECAD_QT_MAJOR_VERSION EQUAL 5)
         set(SHIBOKEN_MAJOR_VERSION 2)
         set(PYSIDE_MAJOR_VERSION 2)
@@ -19,7 +43,10 @@ macro(SetupShibokenAndPyside)
     # CMake to fail to create Makefiles for a debug build.
     # So as a workaround we save and restore the value after checking for Shiboken2.
     set (SAVE_BUILD_TYPE ${CMAKE_BUILD_TYPE})
-    find_package(Shiboken${SHIBOKEN_MAJOR_VERSION} QUIET)
+    if(DEFINED homebrew_prefix)
+    else()
+      find_package(Shiboken${SHIBOKEN_MAJOR_VERSION} QUIET)
+    endif(DEFINED homebrew_prefix)
     set (CMAKE_BUILD_TYPE ${SAVE_BUILD_TYPE})
     if (Shiboken${SHIBOKEN_MAJOR_VERSION}_FOUND)
         # Shiboken config file was found but it may use the wrong Python version
