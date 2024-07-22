@@ -42,6 +42,9 @@
 #include <map>
 #include <QPen>
 
+// NOTE: ipatch, fix build err macos
+#include <vector>
+
 namespace TechDraw {
 
 class TechDrawExport LineGenerator {
