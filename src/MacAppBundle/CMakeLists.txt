@@ -38,10 +38,26 @@ ${CMAKE_COMMAND} -E copy_directory ${PYTHON_DIR} ${CMAKE_INSTALL_LIBDIR}/${PYTHO
 )")
 
 if(HOMEBREW_PREFIX)
+
+  # Print the value of PYTHON_DIR
+  message(STATUS "--ipatch:------------------------------------")
+  message(STATUS "PYTHON_DIR is set to: ${PYTHON_DIR}")
+  # output: -- PYTHON_DIR is set to: /Users/chris/homebrew/Frameworks/Python.framework/Versions/Current/lib/python3.12
+  # NOTE: ipatch, the above dir is non existent as py3.13 (jan 12 205) is the default, ie. `brew info python`
+  message(STATUS "--ipatch:------------------------------------")
+
     #Homebrew installs python dependencies to a site dir in prefix/libexec
     #and installs a .pth file containing its path to the HOMEBREW_PREFIX site dir.
 
-    file(GLOB HOMEBREW_PTH_FILES "${PYTHON_DIR}/site-packages/homebrew*.pth")
+    set(FC_BUNDLE_PY312_DIR "${HOMEBREW_PREFIX}/opt/fc_bundle_py312/lib/python3.12/site-packages")
+    file(GLOB HOMEBREW_PTH_FILES 
+      "${PYTHON_DIR}/site-packages/homebrew*.pth"
+      "${FC_BUNDLE_PY312_DIR}/*.pth")
+
+    message(STATUS "--ipatch:------------------------------------")
+    message(STATUS "HOMEBREW_PTH_FILES is set to: ${HOMEBREW_PTH_FILES}")
+    # NOTE: iaptch, no pth files are detected due to non existent dir
+    message(STATUS "--ipatch:------------------------------------")
 
     foreach(PTH_FILE ${HOMEBREW_PTH_FILES})
         file(READ ${PTH_FILE} ADDITIONAL_DIR)
@@ -108,9 +124,11 @@ file(GLOB CONFIG_LLVM "${HOMEBREW_PREFIX}/opt/llvm/lib/c++")
 
 file(GLOB CONFIG_GCC "${HOMEBREW_PREFIX}/opt/gcc/lib/gcc/current")
 
+file(GLOB CONFIG_PYSIDE "${HOMEBREW_PREFIX}/opt/pyside2@5.15.15_py312/lib")
+
 execute_process(
-    COMMAND find -L /usr/local/Cellar/nglib -name MacOS
-    OUTPUT_VARIABLE CONFIG_NGLIB)
+  COMMAND find -L "${HOMEBREW_PREFIX}/opt/nglib" -name MacOS
+  OUTPUT_VARIABLE CONFIG_NGLIB)
 
 install(CODE
     "message(STATUS \"Making bundle relocatable...\")
@@ -119,7 +137,7 @@ install(CODE
     execute_process(
         COMMAND python3
         ${CMAKE_SOURCE_DIR}/src/Tools/MakeMacBundleRelocatable.py
-        ${APP_PATH} ${HOMEBREW_PREFIX}${MACPORTS_PREFIX}/lib ${CONFIG_ICU} ${CONFIG_LLVM} ${CONFIG_GCC} /usr/local/opt ${CONFIG_NGLIB} ${Qt5Core_DIR}/../../.. ${XCTEST_PATH}
+        ${APP_PATH} ${HOMEBREW_PREFIX}${MACPORTS_PREFIX}/lib ${CONFIG_ICU} ${CONFIG_LLVM} ${CONFIG_GCC} ${CONFIG_NGLIB} ${Qt5Core_DIR}/../../.. ${XCTEST_PATH} ${CONFIG_PYSIDE}
     )"
 )
 
