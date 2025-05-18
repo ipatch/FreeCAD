@@ -139,6 +139,7 @@ if(OCC_FOUND)
     TKPrim
     TKHLR
     TKFeat
+    TKExpress
   )
   set(OCC_OCAF_LIBRARIES
     TKBin
