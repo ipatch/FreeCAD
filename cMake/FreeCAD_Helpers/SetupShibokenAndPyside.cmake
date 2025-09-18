@@ -109,7 +109,7 @@ macro(SetupShibokenAndPyside)
         DIRECTORY
             ${CMAKE_BINARY_DIR}/Ext/PySide
         DESTINATION
-            MacOS
+            Ext
         )
     else()
         install(
