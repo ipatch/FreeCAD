@@ -33,15 +33,20 @@ else()
     set(PYTHON_DIR ${PYTHON_DIR}/${PYTHON_DIR_BASENAME})
 endif()
 
+message(" PYTHON_DIR is ${PYTHON_DIR} --------------------ipatch--")
+
 install(CODE "execute_process(COMMAND
 ${CMAKE_COMMAND} -E copy_directory ${PYTHON_DIR} ${CMAKE_INSTALL_LIBDIR}/${PYTHON_DIR_BASENAME}
 )")
 
 if(HOMEBREW_PREFIX)
-    #Homebrew installs python dependencies to a site dir in prefix/libexec
-    #and installs a .pth file containing its path to the HOMEBREW_PREFIX site dir.
 
-    file(GLOB HOMEBREW_PTH_FILES "${PYTHON_DIR}/site-packages/homebrew*.pth")
+    # NOTE: ipatch, original line
+    # file(GLOB HOMEBREW_PTH_FILES "${PYTHON_DIR}/site-packages/homebrew*.pth")
+
+    file(GLOB HOMEBREW_PTH_FILES "${PYTHON_DIR}/site-packages/freecad*.pth")
+
+    message(STATUS "HOMEBREW_PTH_FILES are ${HOMEBREW_PTH_FILES} -----------------------ipatch--")
 
     foreach(PTH_FILE ${HOMEBREW_PTH_FILES})
         file(READ ${PTH_FILE} ADDITIONAL_DIR)
@@ -69,9 +74,9 @@ endif()
 
 set(QT_PLUGINS_DIR "${Qt5Core_DIR}/../../../plugins")
 execute_process(COMMAND "xcode-select" "--print-path"
-    OUTPUT_VARIABLE XCODE_PATH
-    ERROR_QUIET
-    )
+  OUTPUT_VARIABLE XCODE_PATH
+  ERROR_QUIET
+)
 string(STRIP ${XCODE_PATH} XCODE_PATH)
 
 set(XCTEST_PATH "${XCODE_PATH}/Platforms/MacOSX.platform/Developer/Library/Frameworks/XCTest.framework/Versions/Current")
@@ -102,16 +107,6 @@ install(CODE "execute_process(COMMAND chmod -R a+w ${CMAKE_INSTALL_LIBDIR})")
 
 get_filename_component(APP_PATH ${CMAKE_INSTALL_PREFIX} PATH)
 
-file(GLOB CONFIG_ICU "${HOMEBREW_PREFIX}/opt/icu4c/lib")
-
-file(GLOB CONFIG_LLVM "${HOMEBREW_PREFIX}/opt/llvm/lib/c++")
-
-file(GLOB CONFIG_GCC "${HOMEBREW_PREFIX}/opt/gcc/lib/gcc/current")
-
-execute_process(
-    COMMAND find -L /usr/local/Cellar/nglib -name MacOS
-    OUTPUT_VARIABLE CONFIG_NGLIB)
-
 install(CODE
     "message(STATUS \"Making bundle relocatable...\")
     # The top-level CMakeLists.txt should prevent multiple package manager
@@ -119,7 +114,12 @@ install(CODE
     execute_process(
         COMMAND python3
         ${CMAKE_SOURCE_DIR}/src/Tools/MakeMacBundleRelocatable.py
-        ${APP_PATH} ${HOMEBREW_PREFIX}${MACPORTS_PREFIX}/lib ${CONFIG_ICU} ${CONFIG_LLVM} ${CONFIG_GCC} /usr/local/opt ${CONFIG_NGLIB} ${Qt5Core_DIR}/../../.. ${XCTEST_PATH}
+        ${APP_PATH}
+        ${HOMEBREW_PREFIX}${MACPORTS_PREFIX}/lib
+        ${HOMEBREW_PREFIX}/opt
+        ${HOMEBREW_PREFIX}/opt/*/lib
+        ${Qt5Core_DIR}/../../..
+        ${XCTEST_PATH}
     )"
 )
 
