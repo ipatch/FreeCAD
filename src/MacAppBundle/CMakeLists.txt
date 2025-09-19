@@ -42,35 +42,118 @@ ${CMAKE_COMMAND} -E copy_directory ${PYTHON_DIR} ${CMAKE_INSTALL_LIBDIR}/${PYTHO
 
 if(HOMEBREW_PREFIX)
 
+  set(MACOS_BUNDLE_CONTENTS_DIR "Contents")
+  set(MACOS_BUNDLE_RESOURCES_DIR "${MACOS_BUNDLE_CONTENTS_DIR}/Resources")
+  set(MACOS_BUNDLE_EXECUTABLES_DIR "${MACOS_BUNDLE_CONTENTS_DIR}/MacOS")
+  set(MACOS_BUNDLE_FRAMEWORKS_DIR "${MACOS_BUNDLE_CONTENTS_DIR}/Frameworks")
+  set(MACOS_BUNDLE_LIB_DIR "${MACOS_BUNDLE_CONTENTS_DIR}/lib")
+
   message(" PYTHON_DIR is ${PYTHON_DIR} --------------------ipatch--")
+
   # NOTE: ipatch, original line
   # file(GLOB HOMEBREW_PTH_FILES "${PYTHON_DIR}/site-packages/homebrew*.pth")
-
   file(GLOB HOMEBREW_PTH_FILES "${PYTHON_DIR}/site-packages/freecad*.pth")
 
   message(STATUS "HOMEBREW_PTH_FILES are ${HOMEBREW_PTH_FILES} -----------------------ipatch--")
 
+  # process each .pth file found
   foreach(PTH_FILE ${HOMEBREW_PTH_FILES})
-    file(READ ${PTH_FILE} ADDITIONAL_DIR)
+    # orig
+    # file(READ ${PTH_FILE} ADDITIONAL_DIR)
+    # read the .pth file into a single string
+    file(READ ${PTH_FILE} FILE_CONTENT)
 
-    string(STRIP "${ADDITIONAL_DIR}" ADDITIONAL_DIR)
-    string(FIND "${ADDITIONAL_DIR}" "${HOMEBREW_PREFIX}/Cellar" POSITION)
-    string(LENGTH "${ADDITIONAL_DIR}" DIR_LENGTH)
-    string(SUBSTRING "${ADDITIONAL_DIR}" ${POSITION} ${DIR_LENGTH}-${POSITION} DIR_TAIL)
-    string(REGEX MATCHALL "^([/A-Za-z0-9_.@-]+)" CLEAR_TAIL ${DIR_TAIL})
-    string(REGEX REPLACE "^${HOMEBREW_PREFIX}/Cellar/([A-Za-z0-9_]+).*$" "\\1" LIB_NAME ${CLEAR_TAIL})
-    string(REGEX REPLACE ".*libexec(.*)/site-packages" "libexec/${LIB_NAME}\\1" NEW_SITE_DIR ${CLEAR_TAIL})
+    # split the content by newlines into a list of lines
+    string(REPLACE "\n" ";" LINES "${FILE_CONTENT}")
 
-    install(DIRECTORY ${CLEAR_TAIL} DESTINATION ${CMAKE_INSTALL_PREFIX}/${NEW_SITE_DIR})
+    # This variable will accumulate the new content for the rewritten .pth file.
+    set(NEW_PTH_CONTENT "")
 
-    #update the paths of the .pth files copied into the bundle
-    get_filename_component(PTH_FILENAME ${PTH_FILE} NAME)
-    install(CODE
-      "file(WRITE
-      ${CMAKE_INSTALL_LIBDIR}/${PYTHON_DIR_BASENAME}/site-packages/${PTH_FILENAME}
-      \"../../../${NEW_SITE_DIR}/site-packages\"
-      )"
+    # Process each line from the .pth file.
+    foreach(LINE ${LINES_LIST})
+      # Remove leading/trailing whitespace.
+      string(STRIP "${LINE}" CLEAN_LINE)
+
+      # skip empty lines or comments.
+      if(CLEAN_LINE MATCHES "^#|^$")
+        continue()
+      endif()
+
+      # Extract the path string from the `site.addsitedir()` function call.
+      string(REGEX MATCH "'.*'" PATH_STRING "${CLEAN_LINE}")
+
+      if(PATH_STRING)
+        # Remove the single quotes to get a clean path.
+        string(REPLACE "'" "" ADDITIONAL_DIR "${PATH_STRING}")
+
+        # Check if the path matches the Homebrew Cellar format.
+        if(ADDITIONAL_DIR MATCHES "${HOMEBREW_PREFIX}/Cellar")
+
+          # We want to extract the part of the path starting with the package name.
+          # e.g., "coin3d@4.0.3_py312/..."
+          # string(REGEX MATCH "[^/]+/.+" RELATIVE_TAIL "${ADDITIONAL_DIR}")
+          string(REGEX MATCH "Cellar/[^/]+/[^/]+/.+" RELATIVE_PART "${ADDITIONAL_DIR}")
+
+          # We need to clean this up and make it a valid path inside the bundle.
+          string(REPLACE "Cellar/" "" RELATIVE_INSTALL_PATH "${RELATIVE_PART}")
+          message(STATUS "RELATIVE_INSTALL_PATH is ${RELATIVE_INSTALL_PATH} -------------ipatch--")
+
+          # Construct the full, absolute destination path for the `install` command.
+          set(ABSOLUTE_INSTALL_DESTINATION "${CMAKE_INSTALL_PREFIX}/${MACOS_BUNDLE_LIB_DIR}/python3.12/${RELATIVE_INSTALL_PATH}")
+
+          message(STATUS "ABSOLUTE_INSTALL_DESTINATION is ${ABSOLUTE_INSTALL_DESTINATION} -------------ipatch--")
+
+          # string(FIND "${ADDITIONAL_DIR}" "${HOMEBREW_PREFIX}/Cellar" POSITION)
+          # string(LENGTH "${ADDITIONAL_DIR}" DIR_LENGTH)
+          # string(SUBSTRING "${ADDITIONAL_DIR}" ${POSITION} ${DIR_LENGTH}-${POSITION} DIR_TAIL)
+          # string(REGEX MATCHALL "^([/A-Za-z0-9_.@-]+)" CLEAR_TAIL ${DIR_TAIL})
+          # string(REGEX REPLACE "^${HOMEBREW_PREFIX}/Cellar/([A-Za-z0-9_]+).*$" "\\1" LIB_NAME ${CLEAR_TAIL})
+          # string(REGEX REPLACE ".*libexec(.*)/site-packages" "libexec/${LIB_NAME}\\1" NEW_SITE_DIR ${CLEAR_TAIL})
+
+          # install(DIRECTORY ${CLEAR_TAIL} DESTINATION ${CMAKE_INSTALL_PREFIX}/${NEW_SITE_DIR})
+          # Now, perform the installation of the directory.
+          # install(DIRECTORY "${ADDITIONAL_DIR}" DESTINATION "${DEST_SITE_DIR}")
+          # install(DIRECTORY "${ADDITIONAL_DIR}" DESTINATION "${DESTINATION_PATH}")
+          # Now, perform the installation of the directory.
+          install(DIRECTORY "${ADDITIONAL_DIR}" DESTINATION "${ABSOLUTE_INSTALL_DESTINATION}")
+
+          # Print a status message for clarity.
+          message(STATUS "Installed directory: ${ADDITIONAL_DIR}")
+          message(STATUS "  Destination: ${ABSOLUTE_INSTALL_DESTINATION}")
+
+          # Get the path that will be written to the new .pth file.
+          # This path must be relative to the `site-packages` directory.
+          string(REPLACE "/site-packages" "" RELATIVE_PTH_PATH "${RELATIVE_INSTALL_PATH}")
+          string(APPEND NEW_PTH_CONTENT "../../../${RELATIVE_PTH_PATH}/site-packages\n")
+        endif()
+      endif()
+    endforeach(LINE)
+
+    # This block handles updating the paths of the .pth files *after* the directories have been processed.
+    # This part should be outside the inner loop but inside the outer loop.
+    get_filename_component(PTH_FILENAME "${PTH_FILE}" NAME)
+
+    # Define the full path to the .pth file that will be created inside the bundle.
+    set(TARGET_PTH_PATH "${CMAKE_INSTALL_PREFIX}/${MACOS_BUNDLE_LIB_DIR}/python3.12/site-packages/${PTH_FILENAME}")
+
+    # Define the content that will be written to the .pth file.
+    # set(PTH_CONTENT "../../../${NEW_SITE_DIR}/site-packages")
+
+    # Print a status message to show the paths involved.
+    message(STATUS "Rewriting .pth file: ${PTH_FILENAME}")
+    message(STATUS "  Destination: ${TARGET_PTH_PATH}")
+    message(STATUS "  New content: ${PTH_CONTENT}")
+
+     install(CODE
+      "file(WRITE \"${TARGET_PTH_PATH}\" \"${NEW_PTH_CONTENT}\")"
     )
+
+    # install(CODE
+    #   "file(WRITE
+    #   ${CMAKE_INSTALL_LIBDIR}/${PYTHON_DIR_BASENAME}/site-packages/${PTH_FILENAME}
+    #   \"../../../${NEW_SITE_DIR}/site-packages\"
+    #   )"
+    # )
   endforeach(PTH_FILE)
 endif()
 
