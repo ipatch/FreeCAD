@@ -26,7 +26,7 @@ set(PYTHON_DIR_BASENAME python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
 
 if(PYTHON_LIBRARY MATCHES "(.*Python\\.framework).*")
     #framework
-    set(PYTHON_DIR ${CMAKE_MATCH_1}/Versions/Current/lib/${PYTHON_DIR_BASENAME})
+    set(PYTHON_DIR ${CMAKE_MATCH_1}/Versions/${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/lib/${PYTHON_DIR_BASENAME})
 else()
     #unix
     get_filename_component(PYTHON_DIR ${PYTHON_LIBRARY} PATH)
@@ -34,6 +34,7 @@ else()
 endif()
 
 message(" PYTHON_DIR is ${PYTHON_DIR} --------------------ipatch--")
+message(" PYTHON_DIR_BASENAME is ${PYTHON_DIR_BASENAME} --------------------ipatch--")
 
 install(CODE "execute_process(COMMAND
 ${CMAKE_COMMAND} -E copy_directory ${PYTHON_DIR} ${CMAKE_INSTALL_LIBDIR}/${PYTHON_DIR_BASENAME}
@@ -41,35 +42,36 @@ ${CMAKE_COMMAND} -E copy_directory ${PYTHON_DIR} ${CMAKE_INSTALL_LIBDIR}/${PYTHO
 
 if(HOMEBREW_PREFIX)
 
-    # NOTE: ipatch, original line
-    # file(GLOB HOMEBREW_PTH_FILES "${PYTHON_DIR}/site-packages/homebrew*.pth")
+  message(" PYTHON_DIR is ${PYTHON_DIR} --------------------ipatch--")
+  # NOTE: ipatch, original line
+  # file(GLOB HOMEBREW_PTH_FILES "${PYTHON_DIR}/site-packages/homebrew*.pth")
 
-    file(GLOB HOMEBREW_PTH_FILES "${PYTHON_DIR}/site-packages/freecad*.pth")
+  file(GLOB HOMEBREW_PTH_FILES "${PYTHON_DIR}/site-packages/freecad*.pth")
 
-    message(STATUS "HOMEBREW_PTH_FILES are ${HOMEBREW_PTH_FILES} -----------------------ipatch--")
+  message(STATUS "HOMEBREW_PTH_FILES are ${HOMEBREW_PTH_FILES} -----------------------ipatch--")
 
-    foreach(PTH_FILE ${HOMEBREW_PTH_FILES})
-        file(READ ${PTH_FILE} ADDITIONAL_DIR)
+  foreach(PTH_FILE ${HOMEBREW_PTH_FILES})
+    file(READ ${PTH_FILE} ADDITIONAL_DIR)
 
-        string(STRIP "${ADDITIONAL_DIR}" ADDITIONAL_DIR)
-        string(FIND "${ADDITIONAL_DIR}" "${HOMEBREW_PREFIX}/Cellar" POSITION)
-        string(LENGTH "${ADDITIONAL_DIR}" DIR_LENGTH)
-        string(SUBSTRING "${ADDITIONAL_DIR}" ${POSITION} ${DIR_LENGTH}-${POSITION} DIR_TAIL)
-        string(REGEX MATCHALL "^([/A-Za-z0-9_.@-]+)" CLEAR_TAIL ${DIR_TAIL})
-        string(REGEX REPLACE "^${HOMEBREW_PREFIX}/Cellar/([A-Za-z0-9_]+).*$" "\\1" LIB_NAME ${CLEAR_TAIL})
-        string(REGEX REPLACE ".*libexec(.*)/site-packages" "libexec/${LIB_NAME}\\1" NEW_SITE_DIR ${CLEAR_TAIL})
+    string(STRIP "${ADDITIONAL_DIR}" ADDITIONAL_DIR)
+    string(FIND "${ADDITIONAL_DIR}" "${HOMEBREW_PREFIX}/Cellar" POSITION)
+    string(LENGTH "${ADDITIONAL_DIR}" DIR_LENGTH)
+    string(SUBSTRING "${ADDITIONAL_DIR}" ${POSITION} ${DIR_LENGTH}-${POSITION} DIR_TAIL)
+    string(REGEX MATCHALL "^([/A-Za-z0-9_.@-]+)" CLEAR_TAIL ${DIR_TAIL})
+    string(REGEX REPLACE "^${HOMEBREW_PREFIX}/Cellar/([A-Za-z0-9_]+).*$" "\\1" LIB_NAME ${CLEAR_TAIL})
+    string(REGEX REPLACE ".*libexec(.*)/site-packages" "libexec/${LIB_NAME}\\1" NEW_SITE_DIR ${CLEAR_TAIL})
 
-        install(DIRECTORY ${CLEAR_TAIL} DESTINATION ${CMAKE_INSTALL_PREFIX}/${NEW_SITE_DIR})
+    install(DIRECTORY ${CLEAR_TAIL} DESTINATION ${CMAKE_INSTALL_PREFIX}/${NEW_SITE_DIR})
 
-        #update the paths of the .pth files copied into the bundle
-        get_filename_component(PTH_FILENAME ${PTH_FILE} NAME)
-        install(CODE
-            "file(WRITE
-            ${CMAKE_INSTALL_LIBDIR}/${PYTHON_DIR_BASENAME}/site-packages/${PTH_FILENAME}
-            \"../../../${NEW_SITE_DIR}/site-packages\"
-            )"
-            )
-    endforeach(PTH_FILE)
+    #update the paths of the .pth files copied into the bundle
+    get_filename_component(PTH_FILENAME ${PTH_FILE} NAME)
+    install(CODE
+      "file(WRITE
+      ${CMAKE_INSTALL_LIBDIR}/${PYTHON_DIR_BASENAME}/site-packages/${PTH_FILENAME}
+      \"../../../${NEW_SITE_DIR}/site-packages\"
+      )"
+    )
+  endforeach(PTH_FILE)
 endif()
 
 set(QT_PLUGINS_DIR "${Qt5Core_DIR}/../../../plugins")
@@ -83,7 +85,6 @@ set(XCTEST_PATH "${XCODE_PATH}/Platforms/MacOSX.platform/Developer/Library/Frame
 
 # add qt assistant to bundle
 install(PROGRAMS "${Qt5Core_DIR}/../../../libexec/Assistant.app/Contents/MacOS/Assistant" DESTINATION ${CMAKE_INSTALL_PREFIX}/MacOS)
-
 
 # Ensure the actual plugin files are installed instead of symlinks.
 file(GLOB _subdirs RELATIVE "${QT_PLUGINS_DIR}" "${QT_PLUGINS_DIR}/*")
@@ -108,19 +109,19 @@ install(CODE "execute_process(COMMAND chmod -R a+w ${CMAKE_INSTALL_LIBDIR})")
 get_filename_component(APP_PATH ${CMAKE_INSTALL_PREFIX} PATH)
 
 install(CODE
-    "message(STATUS \"Making bundle relocatable...\")
-    # The top-level CMakeLists.txt should prevent multiple package manager
-    # prefixes from being set, so the lib path will resolve correctly...
-    execute_process(
-        COMMAND python3
-        ${CMAKE_SOURCE_DIR}/src/Tools/MakeMacBundleRelocatable.py
-        ${APP_PATH}
-        ${HOMEBREW_PREFIX}${MACPORTS_PREFIX}/lib
-        ${HOMEBREW_PREFIX}/opt
-        ${HOMEBREW_PREFIX}/opt/*/lib
-        ${Qt5Core_DIR}/../../..
-        ${XCTEST_PATH}
+  "message(STATUS \"Making bundle relocatable...\")
+  # The top-level CMakeLists.txt should prevent multiple package manager
+  # prefixes from being set, so the lib path will resolve correctly...
+  execute_process(
+    COMMAND python3
+    ${CMAKE_SOURCE_DIR}/src/Tools/MakeMacBundleRelocatable.py
+    ${APP_PATH}
+    ${HOMEBREW_PREFIX}${MACPORTS_PREFIX}/lib
+    ${HOMEBREW_PREFIX}/opt
+    ${HOMEBREW_PREFIX}/opt/*/lib
+    ${Qt5Core_DIR}/../../..
+    ${XCTEST_PATH}
     )"
-)
+  )
 
 endif(FREECAD_CREATE_MAC_APP)
