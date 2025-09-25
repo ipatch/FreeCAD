@@ -40,7 +40,11 @@
 #include <pcl/common/io.h>
 #include <pcl/features/normal_3d.h>
 #include <pcl/pcl_config.h>
-#include <pcl/point_traits.h>
+#if __has_include(<pcl/point_struct_traits.h>)
+#include <pcl/point_struct_traits.h>
+#else
+#include <pcl/type_traits.h>
+#endif
 #include <pcl/point_types.h>
 #include <pcl/surface/ear_clipping.h>
 #include <pcl/surface/gp3.h>
