@@ -25,6 +25,9 @@ systemPaths = [
 # that libraries found there aren't meant to be bundled.
 warnPaths = ["/Library/Frameworks/"]
 
+# dynamically get homebrew prefix ie. `brew --prefix`
+brew_prefix = check_output(["brew", "--prefix"], text=True).strip()
+
 
 class LibraryNotFound(Exception):
     pass
@@ -322,7 +325,7 @@ def build_deps_graph(graph, bundle_path, dirs_filter=None, search_paths=[]):
         s_paths.insert(0, root)
 
         # Automatically add Homebrew Cellar lib directories to search paths
-        homebrew_cellar = "/usr/local/Cellar"
+        homebrew_cellar = os.path.join(brew_prefix, "Cellar")
         if os.path.exists(homebrew_cellar):
             for cellar_dir in os.listdir(homebrew_cellar):
                 cellar_path = os.path.join(homebrew_cellar, cellar_dir)
@@ -499,7 +502,7 @@ def main():
     # add additional search paths if required
     # TODO: ipatch, do not hard code `/usr/local`
     additional_search_paths = [
-            "/usr/local/lib/gcc/current/"
+            os.path.join(brew_prefix, "lib", "gcc", "current")
             ]
 
     # combine the initial + additional search paths
