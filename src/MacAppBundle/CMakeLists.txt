@@ -50,8 +50,7 @@ if(HOMEBREW_PREFIX)
 
   message(" PYTHON_DIR is ${PYTHON_DIR} --------------------ipatch--")
 
-  # TODO: ipatch, the file below was manually copied by me, instead reference the freecad*.pth installed by fc_bundle
-  file(GLOB HOMEBREW_PTH_FILES "${PYTHON_DIR}/site-packages/freecad*.pth")
+  file(GLOB HOMEBREW_PTH_FILES "${HOMEBREW_PREFIX}/lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages/freecad*.pth")
 
   message(STATUS "HOMEBREW_PTH_FILES are ${HOMEBREW_PTH_FILES} -----------------------ipatch--")
 
@@ -86,7 +85,7 @@ if(HOMEBREW_PREFIX)
         continue()
       endif()
 
-      # Check if we extracted a valid path
+      # check if extracted path is valid
       if(ADDITIONAL_DIR AND EXISTS "${ADDITIONAL_DIR}")
         message(STATUS "Processing directory: ${ADDITIONAL_DIR}")
 
@@ -95,7 +94,7 @@ if(HOMEBREW_PREFIX)
 
           # Get the package name from the path for organizing in site-packages
           # This handles paths like: /usr/local/Cellar/coin3d@4.0.3_py312/4.0.3_1/lib/python3.12/site-packages/
-          # We need to extract "coin3d@4.0.3_py312" from the path
+          # need to extract "coin3d@4.0.3_py312" from the path
           string(REGEX MATCH "/Cellar/([^/]+)/" PACKAGE_MATCH "${ADDITIONAL_DIR}")
           if(PACKAGE_MATCH)
             string(REGEX REPLACE "/Cellar/([^/]+)/" "\\1" PACKAGE_NAME "${PACKAGE_MATCH}")
