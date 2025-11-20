@@ -4733,6 +4733,15 @@ void DocumentItem::populateItem(DocumentObjectItem* item, bool refresh, bool del
 
         // This algo will be recursively applied to newly created child items
         // through slotNewObject -> populateItem
+        
+        // debug: log when we're about to create a child item
+        Base::Console().warning("debug: populateItem for %s, processing child %s (index %d)\n",
+                item->object()->getObject()->getNameInDocument(), 
+                child->getNameInDocument(), 
+                i);
+        // typo
+        // item->object()>getObject()->getNameInDocument(), child->getNameInDocument(), i):
+        // Base::Console().warning("foobar");
 
         auto it = ObjectMap.find(child);
         if (it == ObjectMap.end() || it->second->items.empty()) {
@@ -4748,17 +4757,25 @@ void DocumentItem::populateItem(DocumentObjectItem* item, bool refresh, bool del
             }
             else {
                 updated = true;
+                Base::Console().warning(" -> created new item (branch A)\n");
             }
             continue;
         }
 
         if (!item->myData->removeChildrenFromRoot || !it->second->rootItem) {
+            Base::Console().warning(" -> branch b: removeChildrenFromRoot=%d, rootItem=%s, items.size=%zu\n",
+                    item->myData->removeChildrenFromRoot,
+                    it->second->rootItem ? "not null" : "null", 
+                    it->second->items.size());
+
             DocumentObjectItem* childItem = *it->second->items.begin();
             if (!createNewItem(*childItem->object(), item, i, it->second)) {
                 --i;
+                Base::Console().warning(" -> createNewItem FAILED\n");
             }
             else {
                 updated = true;
+                Base::Console().warning(" -> created item from existing (branch b)\n");
             }
         }
         else {
@@ -5499,7 +5516,11 @@ void DocumentItem::updateItemSelection(DocumentObjectItem* item)
     }
     if (!selected) {
         item->mySubs.clear();
+        // debug: log what we're trying to add
+        Base::Console().warning("debug: try to add selection: doc=%s, obj=%s, subname=%s\n",
+                docname, objname, subname.c_str());
         if (!Gui::Selection().addSelection(docname, objname, subname.c_str())) {
+            Base::Console().warning(" -> addSelection FAILED!\n");
             // Safely re-access the item
             DocumentObjectItem* item2 = findItem(vobj->getObject(), subname);
             if (item2) {
@@ -5842,6 +5863,12 @@ void DocumentItem::selectAllInstances(const ViewProviderDocumentObject& vpd)
         return;
     }
 
+    // debug: log how many items exist before population
+    auto itDebug = ObjectMap.find(pObject);
+    if (itDebug != ObjectMap.end()) {
+        Base::Console().warning("DEBUG: box has %zu items before populateParents\n", itDebug->second->items.size());
+    }
+
     bool lock = getTree()->blockSelection(true);
 
     // We are trying to select all items corresponding to a given view
@@ -5865,6 +5892,19 @@ void DocumentItem::selectAllInstances(const ViewProviderDocumentObject& vpd)
     // need to populate the oldest parent first
     populateParents(&vpd, parentMap);
 
+    // debug: log how many items exist after population
+    itDebug = ObjectMap.find(pObject);
+    if (itDebug != ObjectMap.end()) {
+        Base::Console().warning("DEBUG: box has %zu items after populateParents\n", itDebug->second->items.size());
+        int idx = 0;
+        for (auto item : itDebug->second->items) {
+            Base::Console().warning(" Item %d: parent = %s\n", idx++,
+                    item->parent() ? (item->parent()->type() == TreeWidget::ObjectType ? static_cast<DocumentObjectItem*>(item->parent())->object()->getObject()->getNameInDocument() : "DocumentItem") : "nullptr");
+        }
+        // typo
+        // item->parent() ? (item-parent()->type() == TreeWidget::ObjectType ? static_cast<DocumentObjectItem*>(item->parent())->object()->getObject()->getNameInDocument() : "DocumentItem") : "nullptr");
+    }
+
     DocumentObjectItem* first = nullptr;
     FOREACH_ITEM(item, vpd);
     if (showItem(item, true) && !first) {
@@ -5876,6 +5916,23 @@ void DocumentItem::selectAllInstances(const ViewProviderDocumentObject& vpd)
     if (first) {
         treeWidget()->scrollToItem(first);
         updateSelection();
+    }
+    // debug: check how many items are actually selected
+    itDebug = ObjectMap.find(pObject);
+    if (itDebug != ObjectMap.end()) {
+        int selectedCount = 0;
+        for (auto item : itDebug->second->items) {
+            if (item->isSelected()) {
+                selectedCount++;
+                Base::Console().warning("  Selected: %s under %s\n",
+                        item->object()->getObject()->getNameInDocument(),
+                        item->parent() && item->parent()->type() == TreeWidget::ObjectType ?
+                        static_cast<DocumentObjectItem*>(item->parent())->object()->getObject()->getNameInDocument() :
+                        "DocumentItem");
+            }
+        }
+        Base::Console().warning("DEBUG: %d out of %d Box items are selected after updateSelection\n", 
+                selectedCount, (int)itDebug->second->items.size());
     }
 }
 
@@ -5891,9 +5948,19 @@ void DocumentItem::setShowHidden(bool show)
 
 bool DocumentItem::showItem(DocumentObjectItem* item, bool select, bool force)
 {
+    // debug: log which item is being shown
+
+    Base::Console().warning("debug: showItem called for %s under parent %s, select=%d\n",
+            item->object()->getObject()->getNameInDocument(),
+            item->parent() ? (item->parent()->type() == TreeWidget::ObjectType ?
+                static_cast<DocumentObjectItem*>(item->parent())->object()->getObject()->getNameInDocument() :
+                "DocumentItem") : "nullptr",
+            select);
+
     auto parent = item->parent();
     if (item->isHidden()) {
         if (!force) {
+            Base::Console().warning(" -> failed: item is hidden\n");
             return false;
         }
         item->setHidden(false);
@@ -5901,6 +5968,7 @@ bool DocumentItem::showItem(DocumentObjectItem* item, bool select, bool force)
 
     if (parent->type() == TreeWidget::ObjectType) {
         if (!showItem(static_cast<DocumentObjectItem*>(parent), false)) {
+            Base::Console().warning(" -> failed: parent showItem returned false\n");
             return false;
         }
         auto pitem = static_cast<DocumentObjectItem*>(parent);
@@ -5916,9 +5984,16 @@ bool DocumentItem::showItem(DocumentObjectItem* item, bool select, bool force)
     }
 
     if (select) {
+        // debug: verify setSelected is called
+        Base::Console().warning(" -> calling setSelected(true) for %s\n",
+                item->object()->getObject()->getNameInDocument());
+        item->setSelected(true);
+        Base::Console().warning(" -> setSelected returned, isSelected=%d\n",
+                item->isSelected());
         item->setSelected(true);
         item->setCheckState(true);
     }
+    Base::Console().warning(" -> success\n");
     return true;
 }
 
@@ -6539,20 +6614,36 @@ int DocumentObjectItem::getSubName(std::ostringstream& str, App::DocumentObject*
         int group = parent->isGroup();
         if (group == NotGroup) {
             if (ret != PartGroup) {
-                // Handle this situation,
-                //
-                // LinkGroup
-                //    |--PartExtrude
-                //           |--Sketch
-                //
-                // This function traverse from top down, so, when seeing a
-                // non-group object 'PartExtrude', its following children should
-                // not be grouped, so must reset any previous parents here.
-                topParent = nullptr;
-                str.str("");  // reset the current subname
-                return NotGroup;
+                // check if the parent explicitly claims this child,
+                // if so, we should include the parent in the subname path
+                auto children = parent->object()->claimChildren();
+                bool parentClaimsThis = false;
+                for (auto child : children) {
+                    if (child == object()->getObject()) {
+                        parentClaimsThis = true;
+                        break;
+                    }
+                }
+
+                if (!parentClaimsThis) {
+                    // Handle this situation,
+                    //
+                    // LinkGroup
+                    //    |--PartExtrude
+                    //           |--Sketch
+                    //
+                    // This function traverse from top down, so, when seeing a
+                    // non-group object 'PartExtrude', its following children should
+                    // not be grouped, so must reset any previous parents here.
+                    topParent = nullptr;
+                    str.str("");  // reset the current subname
+                    return NotGroup;
+                }
+                // if parent claims this child, treat it like a PartGroup
+                group = PartGroup;
+            } else {
+                group = PartGroup;
             }
-            group = PartGroup;
         }
         ret = group;
     }
