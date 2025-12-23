@@ -1193,15 +1193,10 @@ void ElementMap::addChildElements(long masterTag, const std::vector<MappedChildE
         // do child mapping only if the child element count >= 5
         const int threshold {5};
 
-        bool wouldSkipWithNewLogic = (child.tag == 0 && child.count >= threshold && child.elementMap);
+        // skip encoding only when masterTag=0, child.tag=0, and count is exactly at threshold
+        bool skipEncoding = (masterTag == 0 && child.tag == 0 && child.count == threshold && child.elementMap);
 
-        if (wouldSkipWithNewLogic) {
-            Base::Console().warning("NEW LOGIC WOULD SKIP: masterTag=%ld, child.tag=%ld, count=%d, indexedName=%s%d\n", masterTag, child.tag, child.count, child.indexedName.getType(), child.indexedName.getIndex());
-        }
-        if (child.count >= threshold || !child.elementMap) {
-            Base::Console().warning("ENCODING: masterTag=%ld, child.tag=%ld, count=%d, hasElementMap=%d, indexedName=%s%d\n",
-                    masterTag, child.tag, child.count, (child.elementMap ? 1 : 0),
-                    child.indexedName.getType(), child.indexedName.getIndex());
+        if ((child.count >= threshold && !skipEncoding) || !child.elementMap) {
             encodeElementName(child.indexedName[0],
                               tmp,
                               ss,
