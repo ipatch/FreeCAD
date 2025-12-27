@@ -251,27 +251,34 @@ std::map<std::string, std::map<std::string, Base::Color>> ExportOCAF2::collectSh
 
     for (const auto* key : keys) {
         for (auto& v : getShapeColors(obj, key)) {
-            const char* subname = v.first.c_str();
+            // const char* subname = v.first.c_str();
+            std::string subname = v.first;
+
             if (name) {
-                if (!boost::starts_with(v.first, childName)) {
+                // if (!boost::starts_with(v.first, childName)) {
+                if(!boost::starts_with(subname, childName)) {
                     continue;
                 }
-                subname += childName.size();
+                // subname += childName.size();
+                subname = subname.substr(childName.size());
             }
-            const char* dot = strchr(subname, '.');
-            if (!dot) {
+            // const char* dot = strchr(subname, '.');
+            auto dotPos = subname.rfind('.');
+            // if (!dot) {
+            if (dotPos == std::string::npos) {
                 colors[""].emplace(subname, v.second);
             }
             else {
-                ++dot;
-                colors[std::string(subname, dot - subname)].emplace(dot, v.second);
+                // ++dot;
+                // colors[std::string(subname, dot - subname)].emplace(dot, v.second);
+                std::string component = subname.substr(0, dotPos + 1);
+                std::string element = subname.substr(dotPos + 1);
+                colors[component].emplace(element, v.second);
             }
         }
     }
-
     return colors;
 }
-
 
 // NOTE: ipatch original NOT refractored setupObject function
 void ExportOCAF2::setupObject(
