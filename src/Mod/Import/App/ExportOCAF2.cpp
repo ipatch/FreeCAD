@@ -63,7 +63,12 @@ using namespace Import;
 
 ExportOCAFOptions::ExportOCAFOptions()
 {
-    defaultColor.setPackedValue(0xCCCCCC00);
+    // light gray default color (RGB: 204, 204, 204)
+    constexpr float gray = 204.0F / 255.0F;  // ~0.8
+    defaultColor.r = gray;
+    defaultColor.g = gray;
+    defaultColor.b = gray;
+    defaultColor.a = 1.0F;
     defaultColor.a = 1;
 }
 
