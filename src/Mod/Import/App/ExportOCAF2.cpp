@@ -280,6 +280,69 @@ std::map<std::string, std::map<std::string, Base::Color>> ExportOCAF2::collectSh
     return colors;
 }
 
+
+// TODO: scaffold out applyColorToSubShape()
+
+
+
+void ExportOCAF2::applyColorsToLabel(
+    TDF_Label label,
+    App::DocumentObject* obj,
+    const Part::TopoShape& shape,
+    const std::map<std::string, std::map<std::string, Base::Color>>& colors
+)
+{
+    bool warned = false;
+
+    for (const auto& componentColors : colors) {
+        TDF_Label nodeLabel = label;
+
+        // find the component label if this for a subcomponent
+        if (!componentColors.first.empty()) {
+            TDF_LabelSequence labels;
+            if (aShapeTool->IsComponent(label)) {
+                labels.Append(label);
+            }
+            nodeLabel = findComponent(componentColors.first.c_str(), label, labels);
+            if (nodeLabel.IsNull()) {
+                FC_WARN("failed to find component " << componentColors.first);
+                continue;
+            }
+        }
+
+        // apply each color entry
+        for(const auto& colorEntry : componentColors.second) {
+            const std::string& elementName = colorEntry.first;
+            const Base::Color& color = colorEntry.second;
+
+            // handle visibility marker
+            if(elementName == App::DocumentObject::hiddenMarker()) {
+                aColorTool->SetVisibility(nodeLabel, Standard_False);
+                continue;
+            }
+
+            // handle whole face/edge colors
+            if(elementName == "Face" || elementName == "Edge") {
+                auto colorType = elementName[0] == 'F' ? XCAFDoc_ColorSurf : XCAFDoc_ColorCurv;
+                aColorTool->SetColor(nodeLabel, Tools::convertColor(color), colorType);
+                continue;
+            }
+
+            // warn about occt limitations for element color override
+            if(!warned && (nodeLabel != label || aShapeTool->IsComponent(label))) {
+                warned = true;
+                FC_WARN(
+                    "Current OCCT does not support element color override, for object "
+                    << obj->getFullName()
+                );
+            }
+
+            // apply color to specfic subshape
+            applyColorToSubShape(nodeLabel, shape, elementName, color);
+        }
+    }
+}
+
 // NOTE: ipatch original NOT refractored setupObject function
 void ExportOCAF2::setupObject(
     TDF_Label label,
@@ -291,6 +354,7 @@ void ExportOCAF2::setupObject(
 )
 {
     setName(label, obj, name);
+
     if (aShapeTool->IsComponent(label)) {
         auto& names = myNames[label];
         // The subname reference may contain several possible namings.
