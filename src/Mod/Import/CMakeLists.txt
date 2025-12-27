@@ -3,7 +3,7 @@
 add_subdirectory(App)
 if(BUILD_GUI)
     add_subdirectory(Gui)
-endif(BUILD_GUI)
+endif()
 
 #IF (BUILD_GUI)
 #    PYSIDE_WRAP_RC(Import_QRC_SRCS Resources/Import.qrc)
@@ -21,7 +21,7 @@ endif(BUILD_GUI)
 #        Import_rc.py)
 #ENDIF (BUILD_GUI)
 
-SET(DXF_Plate
+set(DXF_Plate
     DxfPlate/blocks10.rub
     DxfPlate/blocks112.rub
     DxfPlate/blocks114.rub
@@ -68,7 +68,7 @@ fc_target_copy_resource(ImportScripts
     ${DXF_Plate}
 )
 
-INSTALL(
+install(
     FILES
         ${Import_Scripts}
         #${Import_QRC_SRCS}
@@ -76,7 +76,7 @@ INSTALL(
         Mod/Import
 )
 
-INSTALL(
+install(
     DIRECTORY
         DxfPlate
     DESTINATION
