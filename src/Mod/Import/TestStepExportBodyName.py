@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
 # **************************************************************************
-#   Copyright (c) 2024 FreeCAD contributors                               *
+#   Copyright (c) 2025 FreeCAD contributors                                *
 #                                                                          *
 #   This file is part of FreeCAD.                                          *
 #                                                                          *
@@ -335,6 +335,6 @@ class TestStepExportBodyName(unittest.TestCase):
                 os.remove(step_file)
 
 
-# For running with: FreeCAD --run-test TestStepExportBodyName
+# For running with: ./path/to/FreeCAD --run-test TestStepExportBodyName
 if __name__ == "__main__":
     unittest.main()
