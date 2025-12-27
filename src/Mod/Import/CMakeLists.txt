@@ -47,9 +47,10 @@ set(Import_Scripts
 )
 
 if(BUILD_GUI)
-    list (APPEND Import_Scripts InitGui.py)
-    list (APPEND Import_Scripts TestImportGui.py)
-endif(BUILD_GUI)
+    list(APPEND Import_Scripts InitGui.py)
+    list(APPEND Import_Scripts TestImportGui.py)
+    list(APPEND Import_Scripts TestStepExportBodyName.py)
+endif()
 
 add_custom_target(ImportScripts ALL
     SOURCES ${Import_Scripts} ${DXF_Plate}
