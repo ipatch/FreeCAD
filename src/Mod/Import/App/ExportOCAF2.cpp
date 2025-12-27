@@ -68,7 +68,7 @@ ExportOCAFOptions::ExportOCAFOptions()
 }
 
 ExportOCAF2::ExportOCAF2(Handle(TDocStd_Document) h, GetShapeColorsFunc func)
-    : pDoc(h)
+    : pDoc(std::move(h))
     , getShapeColors(std::move(func))
 {
     aShapeTool = XCAFDoc_DocumentTool::ShapeTool(pDoc->Main());
