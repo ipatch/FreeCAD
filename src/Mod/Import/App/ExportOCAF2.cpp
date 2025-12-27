@@ -395,7 +395,7 @@ TDF_Label ExportOCAF2::exportObject(
     const char* name
 )
 {
-    App::DocumentObject* obj;
+    App::DocumentObject* obj = nullptr;
     auto shape = Part::Feature::getTopoShape(
         parentObj,
         (sub ? Part::ShapeOption::NoFlag : Part::ShapeOption::Transform),
