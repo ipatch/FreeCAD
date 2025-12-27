@@ -98,17 +98,39 @@ private:
         bool force = false
     );
 
-    // helper methods for setupObject (reduce cognitize complexity)
-    void registerComponentNames(
-            TDF_Label label,
-            App::DocumentObject* obj,
-            const std::string& prefix,
-            const char* name
-            );
-
     void setName(TDF_Label label, App::DocumentObject* obj, const char* name = nullptr);
 
     TDF_Label findComponent(const char* subname, TDF_Label label, TDF_LabelSequence& labels);
+
+    // helper methods for setupObject (reduce cognitize complexity)
+    void registerComponentNames(
+        TDF_Label label,
+        App::DocumentObject* obj,
+        const std::string& prefix,
+        const char* name
+    );
+
+    // collect face/edge colors from the shape color getter function
+    std::map<std::string, std::map<std::string, Base::Color>> collectShapeColors(
+        App::DocumentObject* obj,
+        const char* name
+    );
+
+    // apply color to a specific subshape element
+    void applyColorToSubShape(
+        TDF_Label nodeLabel,
+        const Part::TopoShape& shape,
+        const std::string& subShapeName,
+        const Base::Color& color
+    );
+
+    // apply collected colors to an OCAF label and its subshapes
+    void applyColorsToLabel(
+        TDF_Label label,
+        App::DocumentObject* obj,
+        const Part::TopoShape& shape,
+        const std::map<std::string, std::map<std::string, Base::Color>>& colors
+    );
 
 private:
     // data members
@@ -127,7 +149,8 @@ private:
     GetShapeColorsFunc getShapeColors;
 
     ExportOCAFOptions options;
-};
+
+};  // class ImportExport
 
 }  // namespace Import
 

@@ -206,6 +206,74 @@ TDF_Label ExportOCAF2::findComponent(const char* subname, TDF_Label label, TDF_L
     return {};
 }
 
+void ExportOCAF2::registerComponentNames(
+    TDF_Label label,
+    App::DocumentObject* obj,
+    const std::string& prefix,
+    const char* name
+)
+{
+    if (!aShapeTool->IsComponent(label)) {
+        return;
+    }
+
+    auto& names = myNames[label];
+
+    if (!name) {
+        // simple object internal name
+        names.push_back(prefix + obj->getNameInDocument() + ".");
+    }
+    else {
+        names.push_back(prefix + name + ".");
+
+        names.push_back(prefix + obj->getNameInDocument() + "_i" + name + ".");
+    }
+    // finally, the subname reference allows one to use the label for naming
+    // with preceding '$'
+    names.push_back(prefix + "$" + obj->Label.getValue() + ".");
+}
+
+std::map<std::string, std::map<std::string, Base::Color>> ExportOCAF2::collectShapeColors(
+    App::DocumentObject* obj,
+    const char* name
+)
+{
+    std::map<std::string, std::map<std::string, Base::Color>> colors;
+
+    static std::string marker(App::DocumentObject::hiddenMarker() + "*");
+    static std::array<const char*, 3> keys = {"Face*", "Edge*", marker.c_str()};
+
+    std::string childName;
+    if (name) {
+        childName = name;
+        childName += '.';
+    }
+
+    for (const auto* key : keys) {
+        for (auto& v : getShapeColors(obj, key)) {
+            const char* subname = v.first.c_str();
+            if (name) {
+                if (!boost::starts_with(v.first, childName)) {
+                    continue;
+                }
+                subname += childName.size();
+            }
+            const char* dot = strchr(subname, '.');
+            if (!dot) {
+                colors[""].emplace(subname, v.second);
+            }
+            else {
+                ++dot;
+                colors[std::string(subname, dot - subname)].emplace(dot, v.second);
+            }
+        }
+    }
+
+    return colors;
+}
+
+
+// NOTE: ipatch original NOT refractored setupObject function
 void ExportOCAF2::setupObject(
     TDF_Label label,
     App::DocumentObject* obj,
