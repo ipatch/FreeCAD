@@ -41,6 +41,7 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
+#include <utility>
 
 #include <App/Application.h>
 #include <App/Document.h>
@@ -68,7 +69,7 @@ ExportOCAFOptions::ExportOCAFOptions()
 
 ExportOCAF2::ExportOCAF2(Handle(TDocStd_Document) h, GetShapeColorsFunc func)
     : pDoc(h)
-    , getShapeColors(func)
+    , getShapeColors(std::move(func))
 {
     aShapeTool = XCAFDoc_DocumentTool::ShapeTool(pDoc->Main());
     aColorTool = XCAFDoc_DocumentTool::ColorTool(pDoc->Main());
