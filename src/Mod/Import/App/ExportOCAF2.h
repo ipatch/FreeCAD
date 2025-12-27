@@ -98,10 +98,20 @@ private:
         bool force = false
     );
 
+    // helper methods for setupObject (reduce cognitize complexity)
+    void registerComponentNames(
+            TDF_Label label,
+            App::DocumentObject* obj,
+            const std::string& prefix,
+            const char* name
+            );
+
     void setName(TDF_Label label, App::DocumentObject* obj, const char* name = nullptr);
+
     TDF_Label findComponent(const char* subname, TDF_Label label, TDF_LabelSequence& labels);
 
 private:
+    // data members
     Handle(TDocStd_Document) pDoc;
     Handle(XCAFDoc_ShapeTool) aShapeTool;
     Handle(XCAFDoc_ColorTool) aColorTool;
