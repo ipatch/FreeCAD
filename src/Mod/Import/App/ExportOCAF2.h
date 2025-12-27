@@ -88,6 +88,7 @@ private:
         TDF_Label parent,
         const char* name = nullptr
     );
+
     void setupObject(
         TDF_Label label,
         App::DocumentObject* obj,
@@ -96,6 +97,7 @@ private:
         const char* name = nullptr,
         bool force = false
     );
+
     void setName(TDF_Label label, App::DocumentObject* obj, const char* name = nullptr);
     TDF_Label findComponent(const char* subname, TDF_Label label, TDF_LabelSequence& labels);
 
