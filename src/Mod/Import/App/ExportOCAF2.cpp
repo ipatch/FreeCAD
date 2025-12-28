@@ -256,7 +256,7 @@ std::map<std::string, std::map<std::string, Base::Color>> ExportOCAF2::collectSh
 
             if (name) {
                 // if (!boost::starts_with(v.first, childName)) {
-                if(!boost::starts_with(subname, childName)) {
+                if (!boost::starts_with(subname, childName)) {
                     continue;
                 }
                 // subname += childName.size();
@@ -280,9 +280,40 @@ std::map<std::string, std::map<std::string, Base::Color>> ExportOCAF2::collectSh
     return colors;
 }
 
+void ExportOCAF2::applyColorToSubShape(
+    TDF_Label nodeLabel,
+    const Part::TopoShape& shape,
+    const std::string& subShapeName,
+    const Base::Color& color
+)
+{
+    auto colorType = subShapeName[0] == 'F' ? XCAFDoc_ColorSurf : XCAFDoc_ColorCurv;
 
-// TODO: scaffold out applyColorToSubShape()
+    auto subShape = shape.getSubShape(subShapeName.c_str(), true);
+    if (subShape.IsNull()) {
+        FC_WARN("failed to get subshape " << subShapeName);
+        return;
+    }
 
+    // the following code is copied from OCCT 7.3 and is a work around
+    // a bug in previous versions
+    Handle(XCAFDoc_ShapeMapTool) A;
+    if (!nodeLabel.FindAttribute(XCAFDoc_ShapeMapTool::GetID(), A)) {
+        TopoDS_Shape aShape = aShapeTool->GetShape(nodeLabel);
+        if (!aShape.IsNull()) {
+            A = XCAFDoc_ShapeMapTool::Set(nodeLabel);
+            A->SetShape(aShape);
+        }
+    }
+
+    TDF_Label subLabel = aShapeTool->AddSubShape(nodeLabel, subShape);
+    if (subLabel.IsNull()) {
+        FC_WARN("failed to add subshape " << subShapeName);
+        return;
+    }
+
+    aColorTool->SetColor(subLabel, Tools::convertColor(color), colorType);
+}
 
 
 void ExportOCAF2::applyColorsToLabel(
@@ -311,25 +342,25 @@ void ExportOCAF2::applyColorsToLabel(
         }
 
         // apply each color entry
-        for(const auto& colorEntry : componentColors.second) {
+        for (const auto& colorEntry : componentColors.second) {
             const std::string& elementName = colorEntry.first;
             const Base::Color& color = colorEntry.second;
 
             // handle visibility marker
-            if(elementName == App::DocumentObject::hiddenMarker()) {
+            if (elementName == App::DocumentObject::hiddenMarker()) {
                 aColorTool->SetVisibility(nodeLabel, Standard_False);
                 continue;
             }
 
             // handle whole face/edge colors
-            if(elementName == "Face" || elementName == "Edge") {
+            if (elementName == "Face" || elementName == "Edge") {
                 auto colorType = elementName[0] == 'F' ? XCAFDoc_ColorSurf : XCAFDoc_ColorCurv;
                 aColorTool->SetColor(nodeLabel, Tools::convertColor(color), colorType);
                 continue;
             }
 
             // warn about occt limitations for element color override
-            if(!warned && (nodeLabel != label || aShapeTool->IsComponent(label))) {
+            if (!warned && (nodeLabel != label || aShapeTool->IsComponent(label))) {
                 warned = true;
                 FC_WARN(
                     "Current OCCT does not support element color override, for object "
@@ -343,7 +374,6 @@ void ExportOCAF2::applyColorsToLabel(
     }
 }
 
-// NOTE: ipatch original NOT refractored setupObject function
 void ExportOCAF2::setupObject(
     TDF_Label label,
     App::DocumentObject* obj,
@@ -353,139 +383,170 @@ void ExportOCAF2::setupObject(
     bool force
 )
 {
+    // step 1: set the name on the OCAF label
     setName(label, obj, name);
 
-    if (aShapeTool->IsComponent(label)) {
-        auto& names = myNames[label];
-        // The subname reference may contain several possible namings.
-        if (!name) {
-            // simple object internal name
-            names.push_back(prefix + obj->getNameInDocument() + ".");
-        }
-        else {
-            // name is not NULL in case this is a collapsed link array element.
-            // Collapsed means that the element is not an actual object, and
-            // 'obj' here is actually the parent. The given 'name' is in fact
-            // the element index
-            names.push_back(prefix + name + ".");
-            // In case the subname reference is created when the link array is
-            // previously expanded, the element object will be named as the
-            // parent object internal name + '_i<index>'
-            names.push_back(prefix + obj->getNameInDocument() + "_i" + name + ".");
-        }
-        // Finally, the subname reference allows one to use the label for naming
-        // with preceding '$'
-        names.push_back(prefix + "$" + obj->Label.getValue() + ".");
-    }
+    // step 2: register component names for SHUO lookups
+    registerComponentNames(label, obj, prefix, name);
 
-    if (!getShapeColors || (!force && !mySetups.emplace(obj, name ? name : "").second)) {
+    // step 3: apply colors if applicable
+    if (!getShapeColors) {
         return;
     }
 
-    std::map<std::string, std::map<std::string, Base::Color>> colors;
-    static std::string marker(App::DocumentObject::hiddenMarker() + "*");
-    static std::array<const char*, 3> keys = {"Face*", "Edge*", marker.c_str()};
-    std::string childName;
-    if (name) {
-        childName = name;
-        childName += '.';
-    }
-    for (auto key : keys) {
-        for (auto& v : getShapeColors(obj, key)) {
-            const char* subname = v.first.c_str();
-            if (name) {
-                if (!boost::starts_with(v.first, childName)) {
-                    continue;
-                }
-                subname += childName.size();
-            }
-            const char* dot = strrchr(subname, '.');
-            if (!dot) {
-                colors[""].emplace(subname, v.second);
-            }
-            else {
-                ++dot;
-                colors[std::string(subname, dot - subname)].emplace(dot, v.second);
-            }
-        }
+    if (!force && !mySetups.emplace(obj, name ? name : "").second) {
+        return;  // already processed this object
     }
 
-    bool warned = false;
 
-    for (auto& v : colors) {
-        TDF_Label nodeLabel = label;
-        if (!v.first.empty()) {
-            TDF_LabelSequence labels;
-            if (aShapeTool->IsComponent(label)) {
-                labels.Append(label);
-            }
-            nodeLabel = findComponent(v.first.c_str(), label, labels);
-            if (nodeLabel.IsNull()) {
-                FC_WARN("Failed to find component " << v.first);
-                continue;
-            }
-        }
-        for (auto& vv : v.second) {
-            if (vv.first == App::DocumentObject::hiddenMarker()) {
-                aColorTool->SetVisibility(nodeLabel, Standard_False);
-                continue;
-            }
-            const Base::Color& c = vv.second;
-            Quantity_ColorRGBA color = Tools::convertColor(c);
-            auto colorType = vv.first[0] == 'F' ? XCAFDoc_ColorSurf : XCAFDoc_ColorCurv;
-            if (vv.first == "Face" || vv.first == "Edge") {
-                aColorTool->SetColor(nodeLabel, color, colorType);
-                continue;
-            }
-
-            if (nodeLabel != label || aShapeTool->IsComponent(label)) {
-                // OCCT 7 seems to only support "Recommended practices for
-                // model styling and organization" version 1.2
-                // (https://www.cax-if.org/documents/rec_prac_styling_org_v12.pdf).
-                // The SHUO described in section 5.3 does not mention the
-                // capability of overriding context-depdendent element color,
-                // only whole shape color. Newer version of the same document
-                // (https://www.cax-if.org/documents/rec_prac_styling_org_v15.pdf)
-                // does support this, in section 5.1.
-                //
-                // The above observation is confirmed by further inspection of
-                // OCCT code, XCAFDoc_ShapeTool.cxx and STEPCAFControl_Writer.cxx.
-                if (!warned) {
-                    warned = true;
-                    FC_WARN(
-                        "Current OCCT does not support element color override, for object "
-                        << obj->getFullName()
-                    );
-                }
-                // continue;
-            }
-
-            auto subShape = shape.getSubShape(vv.first.c_str(), true);
-            if (subShape.IsNull()) {
-                FC_WARN("Failed to get subshape " << vv.first);
-                continue;
-            }
-
-            // The following code is copied from OCCT 7.3 and is a work around
-            // a bug in previous versions
-            Handle(XCAFDoc_ShapeMapTool) A;
-            if (!nodeLabel.FindAttribute(XCAFDoc_ShapeMapTool::GetID(), A)) {
-                TopoDS_Shape aShape = aShapeTool->GetShape(nodeLabel);
-                if (!aShape.IsNull()) {
-                    A = XCAFDoc_ShapeMapTool::Set(nodeLabel);
-                    A->SetShape(aShape);
-                }
-            }
-
-            TDF_Label subLabel = aShapeTool->AddSubShape(nodeLabel, subShape);
-            if (subLabel.IsNull()) {
-                FC_WARN("Failed to add subshape " << vv.first);
-                continue;
-            }
-            aColorTool->SetColor(subLabel, color, colorType);
-        }
-    }
+    auto colors = collectShapeColors(obj, name);
+    applyColorsToLabel(label, obj, shape, colors);
 }
+
+
+// NOTE: ipatch original NOT refractored setupObject function
+// void ExportOCAF2::setupObject(
+//     TDF_Label label,
+//     App::DocumentObject* obj,
+//     const Part::TopoShape& shape,
+//     const std::string& prefix,
+//     const char* name,
+//     bool force
+// )
+// {
+//     setName(label, obj, name);
+
+//     if (aShapeTool->IsComponent(label)) {
+//         auto& names = myNames[label];
+//         // The subname reference may contain several possible namings.
+//         if (!name) {
+//             // simple object internal name
+//             names.push_back(prefix + obj->getNameInDocument() + ".");
+//         }
+//         else {
+//             // name is not NULL in case this is a collapsed link array element.
+//             // Collapsed means that the element is not an actual object, and
+//             // 'obj' here is actually the parent. The given 'name' is in fact
+//             // the element index
+//             names.push_back(prefix + name + ".");
+//             // In case the subname reference is created when the link array is
+//             // previously expanded, the element object will be named as the
+//             // parent object internal name + '_i<index>'
+//             names.push_back(prefix + obj->getNameInDocument() + "_i" + name + ".");
+//         }
+//         // Finally, the subname reference allows one to use the label for naming
+//         // with preceding '$'
+//         names.push_back(prefix + "$" + obj->Label.getValue() + ".");
+//     }
+
+//     if (!getShapeColors || (!force && !mySetups.emplace(obj, name ? name : "").second)) {
+//         return;
+//     }
+
+//     std::map<std::string, std::map<std::string, Base::Color>> colors;
+//     static std::string marker(App::DocumentObject::hiddenMarker() + "*");
+//     static std::array<const char*, 3> keys = {"Face*", "Edge*", marker.c_str()};
+//     std::string childName;
+//     if (name) {
+//         childName = name;
+//         childName += '.';
+//     }
+//     for (auto key : keys) {
+//         for (auto& v : getShapeColors(obj, key)) {
+//             const char* subname = v.first.c_str();
+//             if (name) {
+//                 if (!boost::starts_with(v.first, childName)) {
+//                     continue;
+//                 }
+//                 subname += childName.size();
+//             }
+//             const char* dot = strrchr(subname, '.');
+//             if (!dot) {
+//                 colors[""].emplace(subname, v.second);
+//             }
+//             else {
+//                 ++dot;
+//                 colors[std::string(subname, dot - subname)].emplace(dot, v.second);
+//             }
+//         }
+//     }
+
+//     bool warned = false;
+
+//     for (auto& v : colors) {
+//         TDF_Label nodeLabel = label;
+//         if (!v.first.empty()) {
+//             TDF_LabelSequence labels;
+//             if (aShapeTool->IsComponent(label)) {
+//                 labels.Append(label);
+//             }
+//             nodeLabel = findComponent(v.first.c_str(), label, labels);
+//             if (nodeLabel.IsNull()) {
+//                 FC_WARN("Failed to find component " << v.first);
+//                 continue;
+//             }
+//         }
+//         for (auto& vv : v.second) {
+//             if (vv.first == App::DocumentObject::hiddenMarker()) {
+//                 aColorTool->SetVisibility(nodeLabel, Standard_False);
+//                 continue;
+//             }
+//             const Base::Color& c = vv.second;
+//             Quantity_ColorRGBA color = Tools::convertColor(c);
+//             auto colorType = vv.first[0] == 'F' ? XCAFDoc_ColorSurf : XCAFDoc_ColorCurv;
+//             if (vv.first == "Face" || vv.first == "Edge") {
+//                 aColorTool->SetColor(nodeLabel, color, colorType);
+//                 continue;
+//             }
+
+//             if (nodeLabel != label || aShapeTool->IsComponent(label)) {
+//                 // OCCT 7 seems to only support "Recommended practices for
+//                 // model styling and organization" version 1.2
+//                 // (https://www.cax-if.org/documents/rec_prac_styling_org_v12.pdf).
+//                 // The SHUO described in section 5.3 does not mention the
+//                 // capability of overriding context-depdendent element color,
+//                 // only whole shape color. Newer version of the same document
+//                 // (https://www.cax-if.org/documents/rec_prac_styling_org_v15.pdf)
+//                 // does support this, in section 5.1.
+//                 //
+//                 // The above observation is confirmed by further inspection of
+//                 // OCCT code, XCAFDoc_ShapeTool.cxx and STEPCAFControl_Writer.cxx.
+//                 if (!warned) {
+//                     warned = true;
+//                     FC_WARN(
+//                         "Current OCCT does not support element color override, for object "
+//                         << obj->getFullName()
+//                     );
+//                 }
+//                 // continue;
+//             }
+
+//             auto subShape = shape.getSubShape(vv.first.c_str(), true);
+//             if (subShape.IsNull()) {
+//                 FC_WARN("Failed to get subshape " << vv.first);
+//                 continue;
+//             }
+
+//             // The following code is copied from OCCT 7.3 and is a work around
+//             // a bug in previous versions
+//             Handle(XCAFDoc_ShapeMapTool) A;
+//             if (!nodeLabel.FindAttribute(XCAFDoc_ShapeMapTool::GetID(), A)) {
+//                 TopoDS_Shape aShape = aShapeTool->GetShape(nodeLabel);
+//                 if (!aShape.IsNull()) {
+//                     A = XCAFDoc_ShapeMapTool::Set(nodeLabel);
+//                     A->SetShape(aShape);
+//                 }
+//             }
+
+//             TDF_Label subLabel = aShapeTool->AddSubShape(nodeLabel, subShape);
+//             if (subLabel.IsNull()) {
+//                 FC_WARN("Failed to add subshape " << vv.first);
+//                 continue;
+//             }
+//             aColorTool->SetColor(subLabel, color, colorType);
+//         }
+//     }
+// }
 
 void ExportOCAF2::exportObjects(std::vector<App::DocumentObject*>& objs, const char* name)
 {
