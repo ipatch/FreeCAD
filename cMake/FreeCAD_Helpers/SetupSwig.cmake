@@ -8,100 +8,129 @@ unset(SWIG_DIR CACHE)
 unset(SWIG_VERSION CACHE)
 unset(SWIG_FOUND CACHE)
 
-find_package(SWIG)
+if(BUILD_SKETCHER)
+    # SWIG is required for sketcher WB (use QUIET to provide custom error message)
+    find_package(SWIG QUIET)
 
-if(NOT SWIG_FOUND)
-    message("-----------------------------------------------------\n"
-        "SWIG not found, will not build SWIG binding for pivy.\n"
-        "-----------------------------------------------------\n")
-endif()
+    if(NOT SWIG_FOUND)
+        message(FATAL_ERROR
+                "-----------------------------------------------------\n"
+                "SWIG not found, swig & pivy required for sketcher WB.\n"
+                "-----------------------------------------------------\n")
+        # do not continue with check if swig not found
+        return()
+    endif()
 
-# check SWIG version compatibility with pivy
-message(STATUS "Checking SWIG version compatibility with pivy...")
+    # check swig/pivy runtime compatibility
+    message(STATUS "checking SWIG/Pivy runtime compatibility...")
 
-# determine which SWIG runtime version FreeCAD is using
-if(SWIG_VERSION VERSION_GREATER_EQUAL "4.4.0")
-    set(FREECAD_SWIG_RUNTIME "4.4+")
-elseif(SWIG_VERSION VERSION_GREATER_EQUAL "4.0.0")
-    set(FREECAD_SWIG_RUNTIME "4.0-4.3")
-else()
-    set(FREECAD_SWIG_RUNTIME "PRE_4.0")
-endif()
+    # get SWIG's runtime version using -external-runtime flag
+    execute_process(
+        COMMAND ${SWIG_EXECUTABLE} -python -external-runtime "${CMAKE_BINARY_DIR}/swig_runtime_check.h"
+        ERROR_QUIET
+    )
 
-# Check which SWIG runtime version pivy was built with
-execute_process(
-    COMMAND ${Python3_EXECUTABLE} -c
-    "import sys
+    if(EXISTS "${CMAKE_BINARY_DIR}/swig_runtime_check.h")
+        file(STRINGS "${CMAKE_BINARY_DIR}/swig_runtime_check.h"
+            SWIG_RUNTIME_VERSION_LINE
+            REGEX "^#define SWIG_RUNTIME_VERSION")
+
+        if(SWIG_RUNTIME_VERSION_LINE)
+            # extract the version number (it's in quotes: "5")
+            string(REGEX MATCH "\"([0-9]+)\"" _ "${SWIG_RUNTIME_VERSION_LINE}")
+            set(SWIG_RUNTIME_VERSION "${CMAKE_MATCH_1}")
+        endif()
+
+        file(REMOVE "${CMAKE_BINARY_DIR}/swig_runtime_check.h")
+    endif()
+
+    # extract pivy's SWIG runtime version from the compiled module
+    # NOTE: python code can not be indented
+    set(PYTHON_CHECK_PIVY_RUNTIME [=[
+import sys
+import os
 
 try:
-    import pivy.coin
-except ImportError as e:
+    import pivy
+    pivy_dir = os.path.dirname(pivy.__file__)
+    pivy_path = None
+
+    # look for _coin module with any extension (.so on unix, .pyd on windows)
+    for f in os.listdir(pivy_dir):
+        if f.startswith('_coin') and (f.endswith('.so') or f.endswith('.pyd')):
+            pivy_path = os.path.join(pivy_dir, f)
+            break
+
+    if pivy_path and os.path.exists(pivy_path):
+        if sys.platform == 'win32':
+            # windows: read binary file directly (no `strings` command)
+            with open(pivy_path, 'rb') as f:
+                content = f.read().decode('latin-1', errors='ignore')
+        else:
+            # unix: use `strings` command
+            import subprocess
+            result = subprocess.run(['strings', pivy_path],
+                    capture_output=True, text=True, check=True)
+            content = result.stdout
+
+        for line in content.split('\n'):
+            line = line.strip()
+            if line.startswith('swig_runtime_data') and len(line) > 17:
+                suffix = line[17:]
+                if suffix.isdigit():
+                    print(suffix)
+                    break
+except ImportError:
     print('ERROR_IMPORT')
-    sys.exit(1)
+except Exception:
+    pass
+]=])
 
-# Check which SWIG runtime module pivy loaded
-runtime_modules = [m for m in sys.modules if m.startswith('swig_runtime_data')]
+    execute_process(
+        COMMAND ${Python3_EXECUTABLE} -c "${PYTHON_CHECK_PIVY_RUNTIME}"
+        OUTPUT_VARIABLE PIVY_RUNTIME_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
+        TIMEOUT 10
+    )
 
-if not runtime_modules:
-    print('UNKNOWN')
-    sys.exit(0)
-
-runtime_name = runtime_modules[0]
-version = runtime_name.replace('swig_runtime_data', '')
-
-# Map runtime version to SWIG version range
-if version == '5':
-    print('4.4+')
-elif version == '4':
-    print('4.0-4.3')
-else:
-    print('PRE_4.0')
-"
-    OUTPUT_VARIABLE PIVY_SWIG_RUNTIME
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    ERROR_VARIABLE PIVY_SWIG_CHECK_ERROR
-    RESULT_VARIABLE PIVY_SWIG_CHECK_RESULT
-    TIMEOUT 10
-)
-
-# Handle errors
-if(PIVY_SWIG_CHECK_RESULT)
-    if(PIVY_SWIG_RUNTIME STREQUAL "ERROR_IMPORT")
+    # Handle errors and compare versions
+    if(PIVY_RUNTIME_VERSION STREQUAL "ERROR_IMPORT")
         message(WARNING
             "Could not import pivy to check SWIG compatibility.\n"
-            "Error: ${PIVY_SWIG_CHECK_ERROR}\n"
             "Proceeding without SWIG version check."
         )
+    elseif(SWIG_RUNTIME_VERSION AND PIVY_RUNTIME_VERSION)
+        if(NOT SWIG_RUNTIME_VERSION STREQUAL PIVY_RUNTIME_VERSION)
+            message(FATAL_ERROR
+" --------------------------------------------------------
+ SWIG / PIVY RUNTIME VERSION MISMATCH DETECTED!
+ 
+ SWIG runtime version: ${SWIG_RUNTIME_VERSION}
+ Pivy runtime version: ${PIVY_RUNTIME_VERSION}
+  
+ These must match for compatibility.
+ This will cause runtime errors: 'No SWIG wrapped library loaded'
+  
+ swig v4.4.x is not compatible with pivy built with swig v4.3.x and below
+  
+ FIX: Install a SWIG version that uses runtime ${PIVY_RUNTIME_VERSION}, ie. swig v4.4.x
+ or rebuild Pivy with your current SWIG ${SWIG_VERSION}.
+--------------------------------------------------------"
+            )
+        else()
+            message(STATUS "SWIG/Pivy runtime compatibility: PASSED (version ${SWIG_RUNTIME_VERSION})")
+            message(STATUS "  SWIG: ${SWIG_VERSION}")
+        endif()
     else()
-        message(WARNING
-            "Failed to check pivy SWIG version.\n"
-            "Proceeding without SWIG version check."
-        )
+        if(NOT SWIG_RUNTIME_VERSION)
+            message(WARNING "Could not determine SWIG runtime version")
+        endif()
+        if(NOT PIVY_RUNTIME_VERSION)
+            message(WARNING "Could not determine Pivy runtime version")
+        endif()
+        message(WARNING "Proceeding without SWIG/Pivy compatibility check.")
     endif()
-    return()
-endif()
-
-# Check for compatibility
-if(PIVY_SWIG_RUNTIME STREQUAL "UNKNOWN")
-    message(WARNING
-        "Could not determine SWIG runtime version used by pivy.\n"
-        "Proceeding without SWIG version check."
-    )
-elseif(NOT PIVY_SWIG_RUNTIME STREQUAL FREECAD_SWIG_RUNTIME)
-    message(FATAL_ERROR
-        "--------------------------------------------------------\n"
-        "SWIG / PIVY VERSION MISMATCH DETECTED!\n"
-        "--------------------------------------------------------\n"
-        "FreeCAD is being built with SWIG: ${SWIG_VERSION} (${FREECAD_SWIG_RUNTIME})\n"
-        "But Pivy was built with SWIG: ${PIVY_SWIG_RUNTIME}\n"
-        "This will cause runtime warnings/errors: 'No SWIG wrapped library loaded'\n"
-        "Solution: make sure SWIG binary: ${SWIG_VERSION} is the same version as ${PIVY_SWIG_RUNTIME}\n"
-        "--------------------------------------------------------\n"
-    )
-else()
-    message(STATUS "SWIG compatibility check: PASSED")
-    message(STATUS "  FreeCAD: SWIG ${SWIG_VERSION} (${FREECAD_SWIG_RUNTIME})")
-    message(STATUS "  Pivy:    ${PIVY_SWIG_RUNTIME}")
 endif()
 
 endmacro()
