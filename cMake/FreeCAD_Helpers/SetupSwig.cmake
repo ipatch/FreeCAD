@@ -49,40 +49,53 @@ if(BUILD_SKETCHER)
     set(PYTHON_CHECK_PIVY_RUNTIME [=[
 import sys
 import os
+import re
 
 try:
     import pivy
     pivy_dir = os.path.dirname(pivy.__file__)
+    print(f'DEBUG:pivy_dir={pivy_dir}', file=sys.stderr)
+    print(f'DEBUG:files={os.listdir(pivy_dir)}', file=sys.stderr)
+    
     pivy_path = None
 
-    # look for _coin module with any extension (.so on unix, .pyd on windows)
+    # Look for _coin module with any extension (.so on Unix, .pyd on Windows)
     for f in os.listdir(pivy_dir):
+        print(f'DEBUG:checking={f}', file=sys.stderr)
         if f.startswith('_coin') and (f.endswith('.so') or f.endswith('.pyd')):
             pivy_path = os.path.join(pivy_dir, f)
             break
+
+    print(f'DEBUG:pivy_path={pivy_path}', file=sys.stderr)
 
     if pivy_path and os.path.exists(pivy_path):
         with open(pivy_path, 'rb') as f:
             content = f.read().decode('latin-1', errors='ignore')
         
+        print(f'DEBUG:content_len={len(content)}', file=sys.stderr)
+        
         # Use regex to find swig_runtime_data followed by a number
         match = re.search(r'swig_runtime_data(\d+)', content)
+        print(f'DEBUG:match={match}', file=sys.stderr)
         if match:
             print(match.group(1))
 
-    except ImportError:
+except ImportError as e:
+    print(f'DEBUG:import_error={e}', file=sys.stderr)
     print('ERROR_IMPORT')
-except Exception:
-    pass
+except Exception as e:
+    print(f'DEBUG:exception={e}', file=sys.stderr)
 ]=])
 
-    execute_process(
-        COMMAND ${Python3_EXECUTABLE} -c "${PYTHON_CHECK_PIVY_RUNTIME}"
-        OUTPUT_VARIABLE PIVY_RUNTIME_VERSION
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        ERROR_QUIET
-        TIMEOUT 10
-    )
+execute_process(
+    COMMAND ${Python3_EXECUTABLE} -c "${PYTHON_CHECK_PIVY_RUNTIME}"
+    OUTPUT_VARIABLE PIVY_RUNTIME_VERSION
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_VARIABLE PIVY_DEBUG_OUTPUT
+    TIMEOUT 10
+)
+
+message(STATUS "Pivy debug output: ${PIVY_DEBUG_OUTPUT}")
 
     # Handle errors and compare versions
     if(PIVY_RUNTIME_VERSION STREQUAL "ERROR_IMPORT")
