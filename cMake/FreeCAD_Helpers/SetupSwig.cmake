@@ -30,6 +30,7 @@ if(BUILD_SKETCHER)
         ERROR_QUIET
     )
 
+
     message(STATUS "SWIG external-runtime result: ${SWIG_EXTERNAL_RUNTIME_RESULT}")
     message(STATUS "SWIG external-runtime error: ${SWIG_EXTERNAL_RUNTIME_ERROR}")
     message(STATUS "Looking for: ${CMAKE_BINARY_DIR}/swig_runtime_check.h")
