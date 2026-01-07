@@ -62,25 +62,15 @@ try:
             break
 
     if pivy_path and os.path.exists(pivy_path):
-        if sys.platform == 'win32':
-            # windows: read binary file directly (no `strings` command)
-            with open(pivy_path, 'rb') as f:
-                content = f.read().decode('latin-1', errors='ignore')
-        else:
-            # unix: use `strings` command
-            import subprocess
-            result = subprocess.run(['strings', pivy_path],
-                    capture_output=True, text=True, check=True)
-            content = result.stdout
+        with open(pivy_path, 'rb') as f:
+            content = f.read().decode('latin-1', errors='ignore')
+        
+        # Use regex to find swig_runtime_data followed by a number
+        match = re.search(r'swig_runtime_data(\d+)', content)
+        if match:
+            print(match.group(1))
 
-        for line in content.split('\n'):
-            line = line.strip()
-            if line.startswith('swig_runtime_data') and len(line) > 17:
-                suffix = line[17:]
-                if suffix.isdigit():
-                    print(suffix)
-                    break
-except ImportError:
+    except ImportError:
     print('ERROR_IMPORT')
 except Exception:
     pass
