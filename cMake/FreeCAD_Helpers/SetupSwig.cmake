@@ -30,18 +30,28 @@ if(BUILD_SKETCHER)
         ERROR_QUIET
     )
 
+    message(STATUS "SWIG external-runtime result: ${SWIG_EXTERNAL_RUNTIME_RESULT}")
+    message(STATUS "SWIG external-runtime error: ${SWIG_EXTERNAL_RUNTIME_ERROR}")
+    message(STATUS "Looking for: ${CMAKE_BINARY_DIR}/swig_runtime_check.h")
+    message(STATUS "File exists: ${EXISTS ${CMAKE_BINARY_DIR}/swig_runtime_check.h}")
+
     if(EXISTS "${CMAKE_BINARY_DIR}/swig_runtime_check.h")
         file(STRINGS "${CMAKE_BINARY_DIR}/swig_runtime_check.h"
             SWIG_RUNTIME_VERSION_LINE
             REGEX "^#define SWIG_RUNTIME_VERSION")
 
+        message(STATUS "SWIG_RUNTIME_VERSION_LINE: ${SWIG_RUNTIME_VERSION_LINE}")
+
         if(SWIG_RUNTIME_VERSION_LINE)
             # extract the version number (it's in quotes: "5")
             string(REGEX MATCH "\"([0-9]+)\"" _ "${SWIG_RUNTIME_VERSION_LINE}")
             set(SWIG_RUNTIME_VERSION "${CMAKE_MATCH_1}")
+            message(STATUS "Extracted SWIG_RUNTIME_VERSION: ${SWIG_RUNTIME_VERSION}")
         endif()
 
         file(REMOVE "${CMAKE_BINARY_DIR}/swig_runtime_check.h")
+    else()
+        message(STATUS "swig_runtime_check.h not found!")
     endif()
 
     # extract pivy's SWIG runtime version from the compiled module
@@ -125,9 +135,9 @@ message(STATUS "Pivy debug output: ${PIVY_DEBUG_OUTPUT}")
             )
         else()
             message(STATUS "SWIG/Pivy runtime compatibility: PASSED")
-            message(STATUS "swig runtime version: ${SWIG_RUNTIME_VERSION}")
-            message(STATUS "pivy runtime version: ${PIVY_RUNTIME_VERSION}")
-            message(STATUS "swig binary version being used to build freecad: ${SWIG_VERSION}")
+            message(STATUS "swig runtime API version: ${SWIG_RUNTIME_VERSION}")
+            message(STATUS "pivy runtime API version: ${PIVY_RUNTIME_VERSION}")
+            message(STATUS "swig binary version building freecad: ${SWIG_VERSION}")
         endif()
     else()
         if(NOT SWIG_RUNTIME_VERSION)
