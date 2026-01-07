@@ -107,6 +107,7 @@ message(STATUS "Pivy debug output: ${PIVY_DEBUG_OUTPUT}")
         if(NOT SWIG_RUNTIME_VERSION STREQUAL PIVY_RUNTIME_VERSION)
             message(FATAL_ERROR
 " --------------------------------------------------------
+ 
  SWIG / PIVY RUNTIME VERSION MISMATCH DETECTED!
  
  SWIG runtime version: ${SWIG_RUNTIME_VERSION}
@@ -115,15 +116,18 @@ message(STATUS "Pivy debug output: ${PIVY_DEBUG_OUTPUT}")
  These must match for compatibility.
  This will cause runtime errors: 'No SWIG wrapped library loaded'
   
- swig v4.4.x is not compatible with pivy built with swig v4.3.x and below
+ swig v4.4.x is not compatible with pivy built with swig <=4.3.x
   
- FIX: Install a SWIG version that uses runtime ${PIVY_RUNTIME_VERSION}, ie. swig v4.4.x
+ FIX: Install a SWIG version that uses runtime ${PIVY_RUNTIME_VERSION}
  or rebuild Pivy with your current SWIG ${SWIG_VERSION}.
+ 
 --------------------------------------------------------"
             )
         else()
-            message(STATUS "SWIG/Pivy runtime compatibility: PASSED (version ${SWIG_RUNTIME_VERSION})")
-            message(STATUS "  SWIG: ${SWIG_VERSION}")
+            message(STATUS "SWIG/Pivy runtime compatibility: PASSED")
+            message(STATUS "swig runtime version: ${SWIG_RUNTIME_VERSION}")
+            message(STATUS "pivy runtime version: ${PIVY_RUNTIME_VERSION}")
+            message(STATUS "swig binary version being used to build freecad: ${SWIG_VERSION}")
         endif()
     else()
         if(NOT SWIG_RUNTIME_VERSION)
