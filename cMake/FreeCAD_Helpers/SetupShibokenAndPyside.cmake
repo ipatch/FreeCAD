@@ -30,7 +30,7 @@ macro(SetupShibokenAndPyside)
         set(SHIBOKEN_PATTERN .cpython-${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR})
 
         file(GLOB SHIBOKEN_CONFIG "${Shiboken${SHIBOKEN_MAJOR_VERSION}_DIR}/Shiboken${SHIBOKEN_MAJOR_VERSION}Config${SHIBOKEN_PATTERN}*.cmake")
-        if (SHIBOKEN_CONFIG)
+        if(SHIBOKEN_CONFIG)
             get_filename_component(SHIBOKEN_CONFIG_SUFFIX ${SHIBOKEN_CONFIG} NAME)
             string(SUBSTRING ${SHIBOKEN_CONFIG_SUFFIX} 15 -1 SHIBOKEN_CONFIG_SUFFIX)
             string(REPLACE ".cmake" "" PYTHON_CONFIG_SUFFIX ${SHIBOKEN_CONFIG_SUFFIX})
@@ -185,12 +185,12 @@ macro(PYSIDE_WRAP_RC outfiles)
   foreach(it ${ARGN})
     get_filename_component(outfile ${it} NAME_WE)
     get_filename_component(infile ${it} ABSOLUTE)
-    set(OUTFILE "${cmake_cuRRENT_BINARY_DIR}/${outfile}_rc.py")
+    set(outfile "${CMAKE_CURRENT_BINARY_DIR}/${outfile}_rc.py")
     #ADD_CUSTOM_TARGET(${it} ALL
     #  DEPENDS ${outfile}
     #)
     if(WIN32 OR APPLE)
-        add_custom_command(outpUT ${outfile}
+        add_custom_command(OUTPUT ${outfile}
           COMMAND ${PYSIDE_RCC_EXECUTABLE} ${RCCOPTIONS} ${infile} -o ${outfile}
           MAIN_DEPENDENCY ${infile}
         )
@@ -198,7 +198,7 @@ macro(PYSIDE_WRAP_RC outfiles)
         # Especially on Open Build Service we don't want changing date like
         # pyside-rcc generates in comments at beginning, which is why
         # we follow the tool command with in-place sed.
-        add_custom_command(outpUT "${outfile}"
+        add_custom_command(OUTPUT "${outfile}"
           COMMAND "${PYSIDE_RCC_EXECUTABLE}" ${RCCOPTIONS} "${infile}" ${PY_ATTRIBUTE} -o "${outfile}"
           # The line below sometimes catches unwanted lines too - but there is no date in the file
           # anymore with Qt5 RCC, so commenting it out for now...
