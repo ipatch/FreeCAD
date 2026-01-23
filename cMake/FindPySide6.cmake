@@ -14,7 +14,7 @@ if(NOT PySide6_INCLUDE_DIRS AND TARGET PySide6::pyside6)
 endif()
 
 # Also provide the old-style variables so we don't have to update everything yet
-if (PySide6_FOUND)
+if(PySide6_FOUND)
     set(PYSIDE_INCLUDE_DIR ${PySide6_INCLUDE_DIRS})
     set(PYSIDE_LIBRARY ${PySide6_LIBRARIES})
     set(PYSIDE_FOUND TRUE)
