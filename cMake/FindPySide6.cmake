@@ -14,38 +14,37 @@ if(NOT PySide6_FOUND)
 endif()
 
 if(PySide6_FOUND)
-    # Verify the PySide6 Python imports matches the Qt version CMake found
-    if(Python3_EXECUTABLE AND Qt6_VERSION)
-        execute_process(
-            COMMAND "${Python3_EXECUTABLE}" "-c"
-            "from PySide6.QtCore import qVersion; print(qVersion())"
-            RESULT_VARIABLE _PYSIDE6_QT_RESULT
-            OUTPUT_VARIABLE _PYSIDE6_QT_VERSION
-            ERROR_QUIET
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-        )
+    # verify PySide6 version matches Qt6 version (major.minor)
+    if(PySide6_VERSION AND Qt6_VERSION)
+        string(REGEX MATCH "^([0-9]+)\\.([0-9]+)" _qt6_major_minor "${Qt6_VERSION}")
+        string(REGEX MATCH "^([0-9]+)\\.([0-9]+)" _pyside6_major_minor "${PySide6_VERSION}")
 
-        if(_PYSIDE6_QT_RESULT EQUAL 0)
-            string(REGEX MATCH "^([0-9]+)\\.([0-9]+)" _qt6_major_minor "${Qt6_VERSION}")
-            string(REGEX MATCH "^([0-9]+)\\.([0-9]+)" _pyside6_qt_major_minor "${_PYSIDE6_QT_VERSION}")
+        message(STATUS "Qt version: ${Qt6_VERSION}")
+        message(STATUS "PySide version: ${PySide6_VERSION}")
 
-            if(NOT _qt6_major_minor STREQUAL _pyside6_qt_major_minor)
-                message(FATAL_ERROR
-                "Qt/PySide6 version mismatch!\n"
-                "  CMake found Qt: ${Qt6_VERSION}\n"
-                "  PySide6 (Python) built against Qt: ${_PYSIDE6_QT_VERSION}\n"
-                "Major.minor versions must match to avoid runtime errors.\n"
-                "Ensure CMAKE_PREFIX_PATH points to matching Qt and PySide6 installations."
-                )
-            endif()
-
-            message(STATUS "PySide6 Qt version check passed (${_PYSIDE6_QT_VERSION})")
+        if(NOT _qt6_major_minor STREQUAL _pyside6_major_minor)
+            message(FATAL_ERROR
+" --------------------------------------------------------
+ Qt/PySide version mismatch!
+ cmake found Qt: ${Qt6_VERSION}
+ cmake found PySide: ${PySide6_VERSION}
+ major.minor versions of Qt and PySide must match to avoid errors.
+ Ensure CMAKE_PREFIX_PATH points to matching Qt and PySide6 installations.
+ --------------------------------------------------------"
+            )
         endif()
+
+        message(STATUS "PySide/Qt version check passed (${_pyside6_major_minor})")
     endif()
 
     if(NOT PySide6_INCLUDE_DIRS AND TARGET PySide6::pyside6)
         get_property(PySide6_INCLUDE_DIRS TARGET PySide6::pyside6 PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
     endif()
+
+    find_package_handle_standard_args(PySide6
+        REQUIRED_VARS PySide6_INCLUDE_DIRS
+        VERSION_VAR PySide6_VERSION
+    )
 
     # Also provide the old-style variables so we don't have to update everything yet
     set(PYSIDE_INCLUDE_DIR ${PySide6_INCLUDE_DIRS})
