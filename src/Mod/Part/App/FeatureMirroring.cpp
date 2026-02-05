@@ -309,12 +309,63 @@ App::DocumentObjectExecReturn* Mirroring::execute()
     Base::Vector3d norm = Normal.getValue();
 
     try {
+        Base::Console().warning("----DEBUG mirror execute----\n");
+
+        // get shape without transform
+        auto shape = Feature::getTopoShape(link, ShapeOption::ResolveLink);
+
+        // get shape with transform
+        // auto shape = Feature::getTopoShape(link, ShapeOption::ResolveLink | ShapeOption::Transform);
+
+
+        Base::Console().warning("shape boundbox before mirror: [%.2f, %.2f, %.2f] to [%.2f, %.2f, %.2f]\n",
+                                shape.getBoundBox().MinX, shape.getBoundBox().MinY, shape.getBoundBox().MinZ,
+                                shape.getBoundBox().MaxX, shape.getBoundBox().MaxY, shape.getBoundBox().MaxZ);
+
+
+        // manually apply placement via setPlacement() before mirroring
+        if (link->isDerivedFrom(App::GeoFeature::getClassTypeId())) {
+            App::GeoFeature* geo = static_cast<App::GeoFeature*>(link);
+            Base::Placement placement = geo->Placement.getValue();
+
+            Base::Console().warning("source placement: Pos=(%.2f, %.2f, %.2f)\n",
+                                    placement.getPosition().x,
+                                    placement.getPosition().y,
+                                    placement.getPosition().z);
+
+            if (!placement.isIdentity()) {
+                // Convert Placement to gp_Trsf
+                gp_Trsf trsf;
+                Base::Matrix4D mat = placement.toMatrix();
+                trsf.SetValues(
+                    mat[0][0], mat[0][1], mat[0][2], mat[0][3],
+                    mat[1][0], mat[1][1], mat[1][2], mat[1][3],
+                    mat[2][0], mat[2][1], mat[2][2], mat[2][3]
+                );
+
+                // actually transform the geometry (copy=true to create new shape)
+                BRepBuilderAPI_Transform mkTrf(shape.getShape(), trsf, Standard_True);
+                shape = TopoShape(mkTrf.Shape());
+
+                Base::Console().warning("shape boundbox (after transform): [%.2f, %.2f, %.2f] to [%.2f, %.2f, %.2f]\n",
+                    shape.getBoundBox().MinX, shape.getBoundBox().MinY, shape.getBoundBox().MinZ,
+                    shape.getBoundBox().MaxX, shape.getBoundBox().MaxY, shape.getBoundBox().MaxZ);
+            }
+        }
+
         gp_Ax2 ax2(gp_Pnt(base.x, base.y, base.z), gp_Dir(norm.x, norm.y, norm.z));
-        auto shape = Feature::getTopoShape(link, ShapeOption::ResolveLink | ShapeOption::Transform);
+
         if (shape.isNull()) {
             Standard_Failure::Raise("Cannot mirror empty shape");
         }
-        this->Shape.setValue(TopoShape(0).makeElementMirror(shape, ax2));
+
+        auto mirrored = TopoShape(0).makeElementMirror(shape, ax2);
+
+        Base::Console().warning("mirrored boundbox: [%.2f, %.2f, %.2f] to [%.2f, %.2f, %.2f]\n",
+                                mirrored.getBoundBox().MinX, mirrored.getBoundBox().MinY, mirrored.getBoundBox().MinZ,
+                                mirrored.getBoundBox().MaxX, mirrored.getBoundBox().MaxY, mirrored.getBoundBox().MaxZ);
+
+        this->Shape.setValue(mirrored);
         copyMaterial(link);
 
         return Part::Feature::execute();
