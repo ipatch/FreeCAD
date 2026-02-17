@@ -183,9 +183,18 @@ bool FileDialog::hasSuffix(const QString& ext) const
 
 void FileDialog::accept()
 {
+    fprintf(stderr, ">>> FileDialog::accept() ENTERED\n");
+    fflush(stderr);
     // When saving to a file make sure that the entered filename ends with the selected
     // file filter
     if (acceptMode() == QFileDialog::AcceptSave) {
+        auto fileNameEdit = this->findChild<QLineEdit*>(QStringLiteral("fileNameEdit"));
+        if (fileNameEdit) {
+            fprintf(stderr, ">>> fileNameEdit text: %s\n", fileNameEdit->text().toUtf8().constData());
+            fflush(stderr);
+        }
+        fprintf(stderr, ">>> selectedFiles: %s\n", selectedFiles().join(", ").toUtf8().constData());
+        fflush(stderr);
         QStringList files = selectedFiles();
         if (!files.isEmpty()) {
             QString ext = this->defaultSuffix();
@@ -235,6 +244,9 @@ QString FileDialog::getSaveFileName(
     Options options
 )
 {
+
+    fprintf(stderr, ">>> FileDialog::getSaveFileName() ENTERED\n");
+    fflush(stderr);
     ActionDisabler actionDisabler {};
 
     QString dirName = dir;
@@ -287,6 +299,10 @@ QString FileDialog::getSaveFileName(
     // and append it before showing the file dialog.
     QString file;
     if (DialogOptions::dontUseNativeFileDialog()) {
+
+        fprintf(stderr, ">>> taking NON-NATIVE branch\n");
+        fflush(stderr);
+
         QList<QUrl> urls = fetchSidebarUrls();
 
         options |= QFileDialog::DontUseNativeDialog;
@@ -310,14 +326,44 @@ QString FileDialog::getSaveFileName(
         dlg.onSelectedFilter(dlg.selectedNameFilter());
         dlg.setOption(QFileDialog::HideNameFilterDetails, false);
         dlg.setOption(QFileDialog::DontConfirmOverwrite, false);
-        if (dlg.exec() == QDialog::Accepted) {
+
+
+        // debug: check if accept is called
+        QObject::connect(&dlg, &QDialog::accepted, []() {
+            fprintf(stderr, ">>> QDialog::accepted signal fired\n");
+            fflush(stderr);
+        });
+
+        // if (dlg.exec() == QDialog::Accepted) {
+
+            auto result = dlg.exec();
+            fprintf(stderr, ">>> dlg.exec() returned: %d (Accepted=%d, Rejected=%d)\n", 
+                    result, (int)QDialog::Accepted, (int)QDialog::Rejected);
+            fflush(stderr);
+            if (result == QDialog::Accepted) {
+            
             if (selectedFilter) {
                 *selectedFilter = dlg.selectedNameFilter();
             }
-            file = dlg.selectedFiles().constFirst();
+            // isssue: #27350 read from the line edit rather than selectedFiles()
+            // because qt's selectedFiles() can return the wrong name after a
+            // file has been renamed in the list view.
+            auto fileNameEdit = dlg.findChild<QLineEdit*>(QStringLiteral("fileNameEdit"));
+            if (fileNameEdit && !fileNameEdit->text().trimmed().isEmpty()) {
+                QString enteredName = fileNameEdit->text().trimmed();
+                QFileInfo fileInfo(enteredName);
+                file = fileInfo.isAbsolute() ? enteredName : dlg.directory().absoluteFilePath(enteredName);
+            }
+            else {
+                file = dlg.selectedFiles().constFirst();
+            }
         }
     }
     else {
+
+        fprintf(stderr, ">>> taking NATIVE branch\n");
+        fflush(stderr);
+
         file = QFileDialog::getSaveFileName(parent, windowTitle, dirName, filter, selectedFilter, options);
         file = QDir::fromNativeSeparators(file);
     }
