@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 # SPDX-FileNotice: Part of the FreeCAD project.
 
-#---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #    Copyright (c) 2026 Chris Jones github.com/ipatch                      *
 #                                                                          *
 #    This file is part of the FreeCAD CAx development system.              *
@@ -22,7 +22,7 @@
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307   *
 #    USA                                                                   *
 #                                                                          *
-#---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 
 """Tests for SuppressibleExtension persistence (issue #24587).
 
@@ -47,6 +47,7 @@ import Sketcher
 import TestSketcherApp
 
 from PySide import QtGui
+
 
 class TestSuppressed(unittest.TestCase):
     def setUp(self):
@@ -217,6 +218,7 @@ class TestSuppressed(unittest.TestCase):
 
         os.remove(filepath)
         os.rmdir(tmpdir)
+
 
 def _findTreeWidget():
     """Find the main tree widget (QTreeWidget) in the FreeCAD GUI."""

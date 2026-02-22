@@ -40,6 +40,7 @@ from PartDesignTests.TestMaterial import TestMaterial
 from PartDesignTests.TestActiveObject import TestActiveObject
 from PartDesignTests.TestSuppressed import TestSuppressedStrikethrough
 
+
 # timer runs this class in order to access modal dialog
 class CallableCheckWorkflow:
     def __init__(self, test):
@@ -441,5 +442,3 @@ class TestDatumPlane(unittest.TestCase):
         )
 
         self.assertEqual(packed_color, color)
-
-
