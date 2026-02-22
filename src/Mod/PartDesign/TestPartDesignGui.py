@@ -38,7 +38,7 @@ from PySide.QtGui import QApplication
 
 from PartDesignTests.TestMaterial import TestMaterial
 from PartDesignTests.TestActiveObject import TestActiveObject
-
+from PartDesignTests.TestSuppressed import TestSuppressedStrikethrough
 
 # timer runs this class in order to access modal dialog
 class CallableCheckWorkflow:
@@ -441,3 +441,5 @@ class TestDatumPlane(unittest.TestCase):
         )
 
         self.assertEqual(packed_color, color)
+
+
