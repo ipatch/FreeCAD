@@ -38,7 +38,9 @@ def checkForBlindHole(baseshape, selectedFace):
     return bottomface
 
 
-def isDrillableCylinder(obj, candidate, tooldiameter=None, vector=App.Vector(0, 0, 1)):
+def isDrillableCylinder(
+    obj, candidate, tooldiameter=None, vector=App.Vector(0, 0, 1), allowPartial=False
+):
     """
     checks if a candidate cylindrical face is drillable
     """
@@ -63,7 +65,7 @@ def isDrillableCylinder(obj, candidate, tooldiameter=None, vector=App.Vector(0, 
     if not isinstance(candidate.Surface, Part.Cylinder):
         raise TypeError("expected a cylinder")
 
-    if len(candidate.Edges) != 3:
+    if not (len(candidate.Edges) == 3 or allowPartial):
         raise TypeError("cylinder does not have 3 edges.  Not supported yet")
 
     if obj.isInside(candidate.BoundBox.Center, Path.Geom.Tolerance, False):
@@ -217,7 +219,7 @@ def isDrillable(obj, candidate, tooldiameter=None, vector=App.Vector(0, 0, 1), a
     try:
         if candidate.ShapeType == "Face":
             if isinstance(candidate.Surface, Part.Cylinder):
-                return isDrillableCylinder(obj, candidate, tooldiameter, vector)
+                return isDrillableCylinder(obj, candidate, tooldiameter, vector, allowPartial)
             else:
                 return isDrillableFace(obj, candidate, tooldiameter, vector)
         if candidate.ShapeType == "Edge":
