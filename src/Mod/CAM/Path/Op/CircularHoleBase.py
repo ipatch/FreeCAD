@@ -121,8 +121,8 @@ class ObjectOp(PathOp.ObjectOp):
 
         return 0
 
-    def holePosition(self, obj, base, sub):
-        """holePosition(obj, base, sub) ... returns a Vector for the position defined by the given features.
+    def holePosition(self, base, sub):
+        """holePosition(base, sub) ... returns a Vector for the position defined by the given features.
         Note that the value for Z is set to 0."""
 
         try:
@@ -177,7 +177,7 @@ class ObjectOp(PathOp.ObjectOp):
             for sub in subs:
                 Path.Log.debug("processing {} in {}".format(sub, base.Name))
                 if self.isHoleEnabled(obj, base, sub):
-                    pos = self.holePosition(obj, base, sub)
+                    pos = self.holePosition(base, sub)
                     if pos:
                         holes.append(
                             {
