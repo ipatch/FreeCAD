@@ -309,38 +309,72 @@ App::DocumentObjectExecReturn* Mirroring::execute()
     Base::Vector3d norm = Normal.getValue();
 
     try {
+        Base::Console().warning("--- debug mirror execute---\n");
+        Base::Console().warning(
+            "source object: %s (TypeId: %s)\n",
+            link->getNameInDocument(),
+            link->getTypeId().getName()
+        );
+
         // get shape without transform
         auto shape = Feature::getTopoShape(link, ShapeOption::ResolveLink);
 
+        Base::Console().warning(
+            "shape boundbox (local, no transform): [%.2f, %.2f, %.2f] to [%.2f, %.2f, %.2f]\n",
+            shape.getBoundBox().MinX,
+            shape.getBoundBox().MinY,
+            shape.getBoundBox().MinZ,
+            shape.getBoundBox().MaxX,
+            shape.getBoundBox().MaxY,
+            shape.getBoundBox().MaxZ
+        );
+
         // manually apply placement via setPlacement() before mirroring
         if (link->isDerivedFrom(App::GeoFeature::getClassTypeId())) {
-            App::GeoFeature* geo = static_cast<App::GeoFeature*>(link);
+            auto* geo = static_cast<App::GeoFeature*>(link);
             Base::Placement placement = geo->Placement.getValue();
 
-            if (!placement.isIdentity()) {
-                // Convert Placement to gp_Trsf
-                gp_Trsf trsf;
-                Base::Matrix4D mat = placement.toMatrix();
-                trsf.SetValues(
-                    mat[0][0],
-                    mat[0][1],
-                    mat[0][2],
-                    mat[0][3],
-                    mat[1][0],
-                    mat[1][1],
-                    mat[1][2],
-                    mat[1][3],
-                    mat[2][0],
-                    mat[2][1],
-                    mat[2][2],
-                    mat[2][3]
-                );
+            Base::Console().warning(
+                "geofeature placement: Pos=(%.2f, %.2f, %.2f), isIdentity=%d\n",
+                placement.getPosition().x,
+                placement.getPosition().y,
+                placement.getPosition().z,
+                placement.isIdentity()
+            );
 
-                // actually transform the geometry (copy=true to create new shape)
+            if (!placement.isIdentity()) {
+                gp_Trsf trsf;
+
+                TopoShape::convertTogpTrsf(placement.toMatrix(), trsf);
+
                 BRepBuilderAPI_Transform mkTrf(shape.getShape(), trsf, Standard_True);
                 shape = TopoShape(mkTrf.Shape());
+
+                Base::Console().warning(
+                    "shape boundbox (after placement applied): [%.2f, %.2f, %.2f] to [%.2f, %.2f "
+                    "%.2f]\n",
+                    shape.getBoundBox().MinX,
+                    shape.getBoundBox().MinY,
+                    shape.getBoundBox().MinZ,
+                    shape.getBoundBox().MaxX,
+                    shape.getBoundBox().MaxY,
+                    shape.getBoundBox().MaxZ
+                );
             }
         }
+        else {
+            Base::Console().warning("source is not a geofeature - placement not applied\n");
+        }
+
+        Base::Console().warning(
+            "mirror place: Base(%.2f, %.2f, %.2f), Normal=(%.2f, %.2f %.2f)\n",
+            base.x,
+            base.y,
+            base.z,
+            norm.x,
+            norm.y,
+            norm.z
+        );
 
         gp_Ax2 ax2(gp_Pnt(base.x, base.y, base.z), gp_Dir(norm.x, norm.y, norm.z));
 
@@ -349,6 +383,16 @@ App::DocumentObjectExecReturn* Mirroring::execute()
         }
 
         auto mirrored = TopoShape(0).makeElementMirror(shape, ax2);
+
+        Base::Console().warning(
+            "mirrored boundbox: [%.2f, %.2f, %.2f] to [%.2f, %.2f, %.2f]\n",
+            mirrored.getBoundBox().MinX,
+            mirrored.getBoundBox().MinY,
+            mirrored.getBoundBox().MinZ,
+            mirrored.getBoundBox().MaxX,
+            mirrored.getBoundBox().MaxY,
+            mirrored.getBoundBox().MaxZ
+        );
 
         this->Shape.setValue(mirrored);
         copyMaterial(link);
