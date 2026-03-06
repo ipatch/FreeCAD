@@ -329,26 +329,31 @@ App::DocumentObjectExecReturn* Mirroring::execute()
             shape.getBoundBox().MaxZ
         );
 
-        // manually apply placement via setPlacement() before mirroring
-        if (link->isDerivedFrom(App::GeoFeature::getClassTypeId())) {
-            auto* geo = static_cast<App::GeoFeature*>(link);
-            Base::Placement placement = geo->Placement.getValue();
-
-            Base::Console().warning(
-                "geofeature placement: Pos=(%.2f, %.2f, %.2f), isIdentity=%d\n",
-                placement.getPosition().x,
-                placement.getPosition().y,
-                placement.getPosition().z,
-                placement.isIdentity()
-            );
+        auto propPlacement = dynamic_cast<App::PropertyPlacement*>(
+            link->getPropertyByName("Placement")
+        );
+        if (propPlacement) {
+            Base::Placement placement = propPlacement->getValue();
 
             if (!placement.isIdentity()) {
                 gp_Trsf trsf;
-
                 TopoShape::convertTogpTrsf(placement.toMatrix(), trsf);
 
                 BRepBuilderAPI_Transform mkTrf(shape.getShape(), trsf, Standard_True);
                 shape = TopoShape(mkTrf.Shape());
+
+                // manually apply placement via setPlacement() before mirroring
+                // if (link->isDerivedFrom(App::GeoFeature::getClassTypeId())) {
+                //     auto* geo = static_cast<App::GeoFeature*>(link);
+                //     Base::Placement placement = geo->Placement.getValue();
+
+                //     Base::Console().warning(
+                //         "geofeature placement: Pos=(%.2f, %.2f, %.2f), isIdentity=%d\n",
+                //         placement.getPosition().x,
+                //         placement.getPosition().y,
+                //         placement.getPosition().z,
+                //         placement.isIdentity()
+                //     );
 
                 Base::Console().warning(
                     "shape boundbox (after placement applied): [%.2f, %.2f, %.2f] to [%.2f, %.2f "
