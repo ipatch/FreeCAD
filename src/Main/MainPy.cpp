@@ -40,6 +40,7 @@
 #include <cstdio>
 #include <iostream>
 #include <QByteArray>
+#include <QString>
 
 // FreeCAD Base header
 #include <Base/ConsoleObserver.h>
@@ -60,7 +61,7 @@ BOOL APIENTRY DllMain(HANDLE hModule, DWORD ul_reason_for_call, LPVOID /*lpReser
             // which does the rest.
             char szFileName[MAX_PATH];
             GetModuleFileNameA((HMODULE)hModule, szFileName, MAX_PATH - 1);
-            App::Application::Config()["AppHomePath"] = szFileName;
+            App::Application::Config()["AppHomePath"] = QString::fromUtf8(szFileName);
         } break;
         default:
             break;
