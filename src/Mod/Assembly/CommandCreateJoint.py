@@ -500,7 +500,7 @@ class CommandToggleGrounded:
 
                 # Create groundedJoint.
                 createGroundedJoint(moving_part)
-        Gui.ActiveDocument.commitCommand()
+        App.ActiveDocument.commitTransaction()
 
 
 if App.GuiUp:
