@@ -29,6 +29,16 @@
 #include <QIcon>
 #include <fastsignals/signal.h>
 #include <boost/intrusive_ptr.hpp>
+#include <Inventor/misc/SoBase.h>
+
+inline void intrusive_ptr_add_ref(SoBase* obj)
+{
+    obj->ref();
+}
+inline void intrusive_ptr_release(SoBase* obj)
+{
+    obj->unref();
+}
 
 #include <App/Material.h>
 #include <App/TransactionalObject.h>
