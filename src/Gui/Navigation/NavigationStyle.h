@@ -211,6 +211,11 @@ public:
         return ClarifySelectionMode::Default;
     }
 
+    void resetButtonState()
+    {
+        button1down = button2down = button3down = false;
+    }
+
     void setOrbitStyle(OrbitStyle style);
     OrbitStyle getOrbitStyle() const;
 
