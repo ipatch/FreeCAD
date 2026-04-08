@@ -92,6 +92,7 @@ TaskTransform::TaskTransform(
     , ui(new Ui_TaskTransformDialog)
 {
     blockSelection(true);
+    clearDocumentScope(); // allow cross-document selection for links
 
     dragger->addStartCallback(dragStartCallback, this);
     dragger->addMotionCallback(dragMotionCallback, this);
@@ -468,6 +469,12 @@ Base::Rotation::EulerSequence TaskTransform::eulerSequence() const
 
 void TaskTransform::onSelectionChanged(const SelectionChanges& msg)
 {
+    Base::Console().warning("TaskTransform::onSelectionChanged: type=%d, doc=%s, obj=%s, sub=%s, hasOriginal=%d\n",
+        (int)msg.Type, msg.pDocName ? msg.pDocName : "null",
+        msg.pObjectName ? msg.pObjectName : "null",
+        msg.pSubName ? msg.pSubName : "null",
+        msg.pOriginalMsg ? 1 : 0);
+
     const auto isSupportedMessage = msg.Type == SelectionChanges::AddSelection
         || msg.Type == SelectionChanges::SetPreselect;
 
@@ -490,12 +497,28 @@ void TaskTransform::onSelectionChanged(const SelectionChanges& msg)
     auto orgDoc = Application::Instance->getDocument(msg.pOriginalMsg->pDocName);
     auto orgObj = orgDoc->getDocument()->getObject(msg.pOriginalMsg->pObjectName);
 
+    Base::Console().warning("  doc=%s, obj=%p, orgDoc=%s, orgObj=%p, orgObjName=%s, orgSub=%s\n",
+        msg.pDocName, (void*)obj,
+        msg.pOriginalMsg->pDocName, (void*)orgObj,
+        msg.pOriginalMsg->pObjectName ? msg.pOriginalMsg->pObjectName : "null",
+        msg.pOriginalMsg->pSubName ? msg.pOriginalMsg->pSubName : "null");
+
+    try {
     auto globalPlacement = App::GeoFeature::getGlobalPlacement(obj, orgObj, msg.pOriginalMsg->pSubName);
+    Base::Console().warning("  globalPlacement OK\n");
     auto localPlacement = App::GeoFeature::getPlacementFromProp(obj, "Placement");
+    Base::Console().warning("  localPlacement OK\n");
     auto rootPlacement = App::GeoFeature::getGlobalPlacement(vp->getObject());
+    Base::Console().warning("  rootPlacement OK\n");
     auto attachedPlacement = subObjectPlacementProvider->calculate(msg.Object, localPlacement);
+    Base::Console().warning("  attachedPlacement OK\n");
+    Base::Console().warning("  selectionMode=%d\n", (int)selectionMode);
 
     auto selectedObjectPlacement = rootPlacement.inverse() * globalPlacement * attachedPlacement;
+    Base::Console().warning("  selectedObjectPlacement: pos=(%f, %f, %f)\n",
+        selectedObjectPlacement.getPosition().x,
+        selectedObjectPlacement.getPosition().y,
+        selectedObjectPlacement.getPosition().z);
 
     auto label = QStringLiteral("%1#%2.%3")
                      .arg(
@@ -534,6 +557,11 @@ void TaskTransform::onSelectionChanged(const SelectionChanges& msg)
         default:
             // no-op
             break;
+    }
+    } catch (std::exception& e) {
+        Base::Console().warning("  EXCEPTION: %s\n", e.what());
+    } catch (...) {
+        Base::Console().warning("  UNKNOWN EXCEPTION\n");
     }
 }
 

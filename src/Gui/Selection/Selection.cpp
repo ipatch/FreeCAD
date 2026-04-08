@@ -130,6 +130,10 @@ void SelectionObserver::attachSelection()
 void SelectionObserver::_onSelectionChanged(const SelectionChanges& msg)
 {
     try {
+        Base::Console().warning("_onSelectionChanged: blocked=%d, scope=%s, msgDoc=%s\n",
+            (int)blockedSelection,
+            documentScopeName.c_str(),
+            msg.pDocName ? msg.pDocName : "null");
         if (blockedSelection
             || (!documentScopeName.empty() && msg.pDocName && documentScopeName != msg.pDocName)) {
             return;
@@ -826,6 +830,20 @@ int SelectionSingleton::setPreselect(
     }
     auto context = getSelectionContext(pDocName);
 
+    // fall back to active document's gate for cross-document links
+    // see github issue https://github.com/FreeCAD/FreeCAD/issues/28703
+    if (context.info && !context.info->gate) {
+        auto activeContext = getSelectionContext(nullptr);
+        if (activeContext.info && activeContext.info->gate) {
+            context = activeContext;
+        }
+    }
+
+    Base::Console().warning("setPreselect: pDocName=%s, context.docName=%s, gate=%p\n",
+        pDocName ? pDocName : "null",
+        context.docName.c_str(),
+        (void*)context.info->gate);
+
     if (context.info->gate && signal != SelectionChanges::MsgSource::Internal) {
         App::ElementNamePair elementName;
         auto pObject = pDoc->getObject(pObjectName);
@@ -1180,7 +1198,27 @@ bool SelectionSingleton::addSelection(
     bool clearPreselect
 )
 {
+    Base::Console().warning("addSelection ENTRY: pDocName=%s, pObjectName=%s, pSubName=%s\n",
+        pDocName ? pDocName : "null",
+        pObjectName ? pObjectName : "null",
+        pSubName ? pSubName : "null");
+
     auto context = getSelectionContext(pDocName);
+    // fall back to active document's gate for cross-document links
+    // see github issue https://github.com/FreeCAD/FreeCAD/issues/28703
+    if (context.info && !context.info->gate) {
+        auto activeContext = getSelectionContext(nullptr);
+        if (activeContext.info && activeContext.info->gate) {
+            context = activeContext;
+        }
+    }
+
+    Base::Console().warning("setPreselect: pDocName=%s, context.docName=%s, gate=%p\n",
+        pDocName ? pDocName : "null",
+        context.docName.c_str(),
+        (void*)context.info->gate);
+
+
     if (!context.info) {
         return false;
     }
@@ -1205,6 +1243,14 @@ bool SelectionSingleton::addSelection(
 
     SelectionDescription temp;
     int ret = checkSelection(pDocName, pObjectName, pSubName, ResolveMode::NoResolve, temp);
+    Base::Console().warning("addSelection: checkSelection ret=%d, pDocName=%s, pObjectName=%s, pSubName=%s\n",
+        ret, pDocName ? pDocName : "null",
+        pObjectName ? pObjectName : "null",
+        pSubName ? pSubName : "null");
+    if (ret != 0) {
+        return false;
+    }
+
     if (ret != 0) {
         return false;
     }

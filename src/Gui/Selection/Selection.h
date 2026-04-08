@@ -253,6 +253,8 @@ public:
     void attachSelection();
     /** Detaches from the selection. */
     void detachSelection();
+    /** Clears the document scope filter, allowing cross-document selection events. */
+    void clearDocumentScope() { documentScopeName.clear(); }
 
 private:
     virtual void onSelectionChanged(const SelectionChanges& msg) = 0;
