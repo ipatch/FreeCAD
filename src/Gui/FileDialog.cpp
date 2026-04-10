@@ -321,7 +321,6 @@ struct FilterSpec
         }
 
         QString formatted(name);
-        formatted += QLatin1Char(' ');
 
         // Deduplicate the extensions which usually come in both *.ext & *.EXT variants.
         // Keeps the first case encountered for a given extension set.
@@ -349,6 +348,7 @@ struct FilterSpec
         }
 
         if (dedupExtensions.size() <= MaxFiltersLength) {
+            formatted += QLatin1Char(' ');
             formatted += QLatin1Char('(');
             formatted += dedupExtensions;
             formatted += QLatin1Char(')');
@@ -891,8 +891,17 @@ QStringList FileDialog::getOpenFileNames(
             dlg.selectNameFilter(filterSpecList[selectedFilterIndex].toQtFilter(showExtensions));
         }
         if (dlg.exec() == QDialog::Accepted) {
-            if (selectedFilter) {
-                *selectedFilter = filters[qtFilterList.indexOf(dlg.selectedNameFilter())];
+            auto idx = qtFilterList.indexOf(dlg.selectedNameFilter());
+            if (selectedFilter && idx >= 0) {
+                *selectedFilter = filters[idx];
+            }
+            else if (idx < 0) {
+                Base::Console().warning("FileDialog: selectedNameFilter='%s'\n",
+                    dlg.selectedNameFilter().toUtf8().constData());
+                for (int i = 0; i < qtFilterList.size(); i++) {
+                    Base::Console().warning("FileDialog: qtFilterList[%d]='%s'\n",
+                        i, qtFilterList[i].toUtf8().constData());
+                }
             }
             files = dlg.selectedFiles();
         }
