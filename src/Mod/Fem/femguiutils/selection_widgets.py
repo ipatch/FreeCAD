@@ -625,7 +625,11 @@ class FemSelectionObserver:
 
     def addSelection(self, docName, objName, sub, pos):
         selected_object = FreeCAD.getDocument(docName).getObject(objName)  # get the obj objName
-        if FreeCADGui.editDocument().getInEdit().Object.Document != selected_object.Document:
+        edit_doc = FreeCADGui.editDocument()
+        in_edit = edit_doc.getInEdit() if edit_doc else None
+        if in_edit is None or not hasattr(in_edit, "Object"):
+            return
+        if in_edit.Object.Document != selected_object.Document:
             QtGui.QMessageBox.critical(
                 None, "Selection error", "External object selection is not supported"
             )
