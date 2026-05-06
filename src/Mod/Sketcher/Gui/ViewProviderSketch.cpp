@@ -3600,6 +3600,12 @@ void ViewProviderSketch::setupContextMenu(QMenu* menu, QObject* receiver, const 
 
 bool ViewProviderSketch::setEdit(int ModNum)
 {
+    Base::Console().message("setEdit CALLED ModNum=%d doc=%s editDoc-ptr=%p\n",
+                        ModNum,
+                        getObject()->getDocument()->getName(),
+                        (void*)Gui::Application::Instance->editDocument(
+                            [this](Gui::Document* d) { return d->getEditViewProvider() == this; }));
+
     if (ModNum != ViewProviderSketch::Default) {
         return PartGui::ViewProvider2DObject::setEdit(ModNum);
     }

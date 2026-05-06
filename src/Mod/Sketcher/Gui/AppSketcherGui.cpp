@@ -67,6 +67,10 @@ public:
     Module()
         : Py::ExtensionModule<Module>("SketcherGui")
     {
+        add_varargs_method("isInEditMode",
+                           &Module::isInEditMode,
+                           "isInEditMode() -> bool\n\n"
+                           "Return True if the Sketcher workbench is currently in edit mode.");
         initialize("This module is the SketcherGui module.");  // register with Python
     }
 
@@ -74,6 +78,13 @@ public:
     {}
 
 private:
+    Py::Object isInEditMode(const Py::Tuple& args)
+    {
+        if (!PyArg_ParseTuple(args.ptr(), "")) {
+            throw Py::Exception();
+        }
+        return Py::Boolean(Workbench::isInEditMode());
+    }
 };
 
 PyObject* initModule()

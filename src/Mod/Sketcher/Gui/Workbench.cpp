@@ -52,6 +52,8 @@ using namespace SketcherGui;
 /// @namespace SketcherGui @class Workbench
 TYPESYSTEM_SOURCE(SketcherGui::Workbench, Gui::StdWorkbench)
 
+bool Workbench::inEditMode = false;
+
 Workbench::Workbench()
 {}
 
@@ -222,6 +224,8 @@ void Workbench::enterEditMode()
         nonEditModeToolbarNames(),
         Gui::ToolBarManager::State::ForceHidden
     );
+
+    inEditMode = true;
 }
 
 void Workbench::leaveEditMode()
@@ -250,6 +254,13 @@ void Workbench::leaveEditMode()
         nonEditModeToolbarNames(),
         Gui::ToolBarManager::State::RestoreDefault
     );
+
+    inEditMode = false;
+}
+
+bool Workbench::isInEditMode()
+{
+    return inEditMode;
 }
 
 namespace SketcherGui

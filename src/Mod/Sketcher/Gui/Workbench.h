@@ -47,6 +47,10 @@ public:
 
     static void enterEditMode();
     static void leaveEditMode();
+    static bool isInEditMode();
+
+private:
+    static bool inEditMode;
 
 protected:
     Gui::MenuItem* setupMenuBar() const override;
