@@ -206,6 +206,7 @@ void Workbench::activated()
 
 void Workbench::enterEditMode()
 {
+    Base::Console().message("Workbench::enterEditMode ENTRY\n");
     /* Ensure the state left by the non-edit mode toolbars is saved (in case of changing to edit
      * mode) without changing workbench
      */
@@ -226,6 +227,8 @@ void Workbench::enterEditMode()
 
 void Workbench::leaveEditMode()
 {
+    Base::Console().message("Workbench::leaveEditMode ENTRY\n");
+
     /* Ensure the state left by the edit mode toolbars is saved (in case of changing to edit mode)
      * without changing workbench.
      *

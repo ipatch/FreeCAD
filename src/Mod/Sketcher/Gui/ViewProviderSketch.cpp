@@ -3600,6 +3600,9 @@ void ViewProviderSketch::setupContextMenu(QMenu* menu, QObject* receiver, const 
 
 bool ViewProviderSketch::setEdit(int ModNum)
 {
+    Base::Console().message("ViewProviderSketch::setEdit ENTRY (ModNum=%d) doc=%s\n",
+            ModNum,
+            getObject()->getDocument()->getName());
     if (ModNum != ViewProviderSketch::Default) {
         return PartGui::ViewProvider2DObject::setEdit(ModNum);
     }
@@ -3781,10 +3784,15 @@ bool ViewProviderSketch::setEdit(int ModNum)
     // intercept del key press from main app
     listener = std::make_unique<ShortcutListener>(this);
 
+    Base::Console().message(
+        "setEdit: editDoc=%p editDoc->isActive()=%s -> %s\n",
+        (void*)editDoc,
+        editDoc ? (editDoc->isActive() ? "true" : "false") : "n/a",
+        (editDoc && editDoc->isActive()) ? "ENTERING setupActiveAndInEdit" : "SKIPPING setupActiveAndInEdit");
+
+
     Gui::getMainWindow()->installEventFilter(listener.get());
-    if (editDoc && editDoc->isActive()) {
-        setupActiveAndInEdit();
-    }
+    setupActiveAndInEdit();
 
     return true;
 }
@@ -3957,6 +3965,10 @@ void ViewProviderSketch::UpdateSolverInformation()
 
 void ViewProviderSketch::unsetEdit(int ModNum)
 {
+    Base::Console().message("ViewProviderSketch::unsetEdit ENTRY (ModNum=%d) doc=%s\n",
+                            ModNum,
+                            getObject()->getDocument()->getName());
+
     if (ModNum != ViewProviderSketch::Default) {
         return PartGui::ViewProvider2DObject::unsetEdit(ModNum);
     }
@@ -4036,7 +4048,7 @@ void ViewProviderSketch::unsetEdit(int ModNum)
 
 void ViewProviderSketch::setEditViewer(Gui::View3DInventorViewer* viewer, int ModNum)
 {
-    if (ModNum != ViewProviderSketch::Default) {
+        if (ModNum != ViewProviderSketch::Default) {
         return PartGui::ViewProvider2DObject::setEditViewer(viewer, ModNum);
     }
 
