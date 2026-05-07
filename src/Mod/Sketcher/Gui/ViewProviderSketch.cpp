@@ -3600,9 +3600,11 @@ void ViewProviderSketch::setupContextMenu(QMenu* menu, QObject* receiver, const 
 
 bool ViewProviderSketch::setEdit(int ModNum)
 {
+#ifdef FC_DEBUG
     Base::Console().message("ViewProviderSketch::setEdit ENTRY (ModNum=%d) doc=%s\n",
             ModNum,
             getObject()->getDocument()->getName());
+#endif
     if (ModNum != ViewProviderSketch::Default) {
         return PartGui::ViewProvider2DObject::setEdit(ModNum);
     }
@@ -3784,11 +3786,13 @@ bool ViewProviderSketch::setEdit(int ModNum)
     // intercept del key press from main app
     listener = std::make_unique<ShortcutListener>(this);
 
+#ifdef FC_DEBUG
     Base::Console().message(
         "setEdit: editDoc=%p editDoc->isActive()=%s -> %s\n",
         (void*)editDoc,
         editDoc ? (editDoc->isActive() ? "true" : "false") : "n/a",
         (editDoc && editDoc->isActive()) ? "ENTERING setupActiveAndInEdit" : "SKIPPING setupActiveAndInEdit");
+#endif
 
 
     Gui::getMainWindow()->installEventFilter(listener.get());
@@ -3814,16 +3818,23 @@ void ViewProviderSketch::setupActiveAndInEdit()
 }
 void ViewProviderSketch::unsetupActiveAndInEdit()
 {
-    if (listener) {
-        Gui::getMainWindow()->removeEventFilter(listener.get());
-        listener.reset();
+    if (!listener) {
+        return; // already torn down see: github issue #29738 so avoid duplicate teardowns
     }
-    detachSelection();
+    Gui::getMainWindow()->removeEventFilter(listener.get());
+    listener.reset();
 
+    detachSelection();
     Workbench::leaveEditMode();
 }
 void ViewProviderSketch::setActive(bool active)
 {
+#ifdef FC_DEBUG
+    Base::Console().message("ViewProviderSketch::setActive(%s) doc=%s inEdit=%s\n",
+                            active ? "true" : "false",
+                            getObject()->getDocument()->getName(),
+                            isInEditMode() ? "true" : "false");
+#endif
     bool inEdit = isInEditMode();
     if (active && inEdit) {
         setupActiveAndInEdit();
@@ -3965,9 +3976,11 @@ void ViewProviderSketch::UpdateSolverInformation()
 
 void ViewProviderSketch::unsetEdit(int ModNum)
 {
+#ifdef FC_DEBUG
     Base::Console().message("ViewProviderSketch::unsetEdit ENTRY (ModNum=%d) doc=%s\n",
                             ModNum,
                             getObject()->getDocument()->getName());
+#endif
 
     if (ModNum != ViewProviderSketch::Default) {
         return PartGui::ViewProvider2DObject::unsetEdit(ModNum);
