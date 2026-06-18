@@ -446,6 +446,16 @@ void DlgExpressionInput::setDiscarded()
     reject();
 }
 
+void DlgExpressionInput::keyPressEvent(QKeyEvent* event)
+{
+    if (event->key() == Qt::Key_Escape) {
+        reject();           // Close the dialog
+        event->accept();    // Consume the event to prevent propagation to parent
+        return;
+    }
+    QDialog::keyPressEvent(event);  // Handle other keys normally
+}
+
 void DlgExpressionInput::mouseReleaseEvent(QMouseEvent* event)
 {
     Q_UNUSED(event);
