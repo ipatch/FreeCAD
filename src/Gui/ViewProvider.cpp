@@ -47,6 +47,14 @@
 #include "Inventor/SoFCTransform.h"
 #include "ViewProvider.h"
 #include "ActionFunction.h"
+// #include <Gui/Application.h>
+#include <Gui/MainWindow.h>
+// #include <Gui/TaskView.h>
+#include <Gui/MainWindow.h>
+#include <Gui/Application.h>
+#include <Gui/Application.h>
+#include <Gui/TaskView/TaskView.h>
+#include <MainWindow.h>
 #include "Application.h"
 #include "BitmapFactory.h"
 #include "Document.h"
@@ -224,9 +232,53 @@ void ViewProvider::eventCallback(void* ud, SoEventCallback* node)
             auto ke = static_cast<const SoKeyboardEvent*>(ev);
             const SbBool press = ke->getState() == SoButtonEvent::DOWN ? true : false;
             switch (ke->getKey()) {
-                case SoKeyboardEvent::ESCAPE:
-                    if (self->keyPressed(press, ke->getKey())) {
-                        node->setHandled();
+            case SoKeyboardEvent::ESCAPE:
+                if (self->keyPressed (press, ke->getKey())) {
+                    node->setHandled();
+                }
+                else if(QApplication::mouseButtons()==Qt::NoButton) {
+                    // Because of a Coin bug (https://bitbucket.org/Coin3D/coin/pull-requests/119),
+                    // FC may crash if user hits ESC to cancel while still
+                    // holding the mouse button while using some SoDragger.
+                    // Therefore, we shall ignore ESC while any mouse button is
+                    // pressed, until this Coin bug is fixed.
+                  if (!press) {
+                    // Gui::MainWindow* mainWindow = Gui::getMainWindow();
+                    Gui::MainWindow* mainWindow = Gui::getMainWindow();
+
+                    if (mainWindow
+                        && mainWindow->TaskView
+                        && mainWindow->TaskView->isVisible())
+                    {
+                      return; // Event consumed (or ignored)
+                    }
+                      // if (Gui::Application::Instance && Gui::Application::Instance->getMainWindow()
+                      //     && Gui::Application::Instance->getMainWindow()->taskView()
+                      //     && Gui::Application::Instance->getMainWindow()->taskView()->isVisible())
+                      // {
+                      //   return; // Event consumed (or ignored)
+                      // }
+                        // if(Gui::TaskView::isActive()) {
+                        //   return;
+                        // }
+                        // react only on key release
+                        // Let first selection mode terminate
+                        Gui::Document* doc = Gui::Application::Instance->activeDocument();
+                        const auto view = qobject_cast<Gui::View3DInventor*>(doc->getActiveView());
+                        if (view) {
+                            Gui::View3DInventorViewer* viewer = view->getViewer();
+                            if (viewer->isSelecting()) {
+                                return;
+                            }
+                        }
+
+                        auto func = new Gui::TimerFunction();
+                        func->setAutoDelete(true);
+                        func->setFunction([doc]() {
+                            doc->resetEdit();
+                        });
+                        func->singleShot(0);
+>>>>>>> Stashed changes
                     }
                     else if (QApplication::mouseButtons() == Qt::NoButton) {
                         // Because of a Coin bug

@@ -24,6 +24,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <QAbstractItemView>
 #include <QContextMenuEvent>
+#include <QtWidgets/QDialog>
 #include <QLineEdit>
 #include <QMenu>
 #include <QTextBlock>
@@ -1228,6 +1229,9 @@ void ExpressionTextEdit::keyPressEvent(QKeyEvent* e)
             case Qt::Key_Enter:
             case Qt::Key_Return:
             case Qt::Key_Escape:
+              completer->popup()->hide();
+              e->accept();  // Prevent Task Panel from closing
+              return;
             case Qt::Key_Backtab:
                 // default action
                 e->ignore();
@@ -1261,8 +1265,27 @@ void ExpressionTextEdit::keyPressEvent(QKeyEvent* e)
         return;
     }
 
+    if (e->key() == Qt::Key_Escape) {
+      // QWidget* parentDialog = this->window();
+      // if (parentDialog && qobject_cast<QDialog*>(parentDialog)) {
+      //   parentDialog->close();
+      // }
+      // e->accept();  // Consume it
+      e->ignore();  // don't Consume it
+      return;       // Don't pass to QPlainTextEdit
+    }
+
     QPlainTextEdit::keyPressEvent(e);
 }
+// void ExpressionTextEdit::keyReleaseEvent(QKeyEvent* e)
+// {
+//     if (e->key() == Qt::Key_Escape) {
+//         // Prevent this from bubbling to the parent window
+//         e->accept();
+//         return;
+//     }
+//     QPlainTextEdit::keyReleaseEvent(e);
+// }
 
 void ExpressionTextEdit::contextMenuEvent(QContextMenuEvent* event)
 {

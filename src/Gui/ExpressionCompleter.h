@@ -159,6 +159,7 @@ public:
 protected:
     void keyPressEvent(QKeyEvent* event) override;
     void contextMenuEvent(QContextMenuEvent* event) override;
+    // void keyReleaseEvent(QKeyEvent * event) override;
 Q_SIGNALS:
     void textChanged2(QString text, int pos);
 public Q_SLOTS:
