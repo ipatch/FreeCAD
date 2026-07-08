@@ -1589,6 +1589,10 @@ std::optional<size_t> findPieceContainingPoint(
         double newGeoFirstParam = static_cast<const Part::GeomCurve*>(newGeos[i])->getFirstParameter();
         double newGeoLastParam = static_cast<const Part::GeomCurve*>(newGeos[i])->getLastParameter();
         // For periodic curves the point may need a full revolution
+
+        Base::Console().message("split POO piece %zu: first=%.4f last=%.4f conParam=%.4f\n",
+                                        i, newGeoFirstParam, newGeoLastParam, conParam);
+
         if ((newGeoFirstParam - conParam) > Precision::PApproximation() && obj->isClosedCurve(geo)) {
             conParam += (geoAsCurve->getLastParameter() - geoAsCurve->getFirstParameter());
         }
@@ -1623,6 +1627,10 @@ bool SketchObject::deriveConstraintsForPieces(
     std::vector<Constraint*>& newConstraints
 ) const
 {
+    Base::Console().message("derive: conType=%d First=%d Fpos=%d Second=%d Spos=%d oldId=%d\n",
+                        int(con->Type), con->First, int(con->FirstPos),
+                        con->Second, int(con->SecondPos), oldId);
+
     const Part::Geometry* geo = getGeometry(oldId);
     int conId = con->First;
     PointPos conPos = con->FirstPos;
@@ -1632,6 +1640,8 @@ bool SketchObject::deriveConstraintsForPieces(
     }
 
     bool newGeosLikelyNotCreated = std::ranges::find(newGeos, nullptr) != newGeos.end();
+    Base::Console().message(">>> 5-arg derive: newGeos.size=%zu notCreated=%d conType=%d\n",
+        newGeos.size(), newGeosLikelyNotCreated, int(con->Type));
 
     bool transferToAll = false;
     switch (con->Type) {
@@ -1734,8 +1744,10 @@ bool SketchObject::deriveConstraintsForPieces(
         case DistanceX:
         case DistanceY:
         case PointOnObject: {
+            Base::Console().message(">>> POO case entered, conId=%d newGeos.size=%zu\n", conId, newGeos.size());
             if (con->FirstPos == PointPos::none && con->SecondPos == PointPos::none
                 && newIds.size() > 1) {
+                Base::Console().message(">>> POO exit A (both none)\n");
                 Constraint* dist = con->copy();
                 dist->First = newIds.front();
                 dist->FirstPos = PointPos::start;
@@ -1746,6 +1758,8 @@ bool SketchObject::deriveConstraintsForPieces(
             }
 
             if (conId == GeoEnum::GeoUndef || newGeosLikelyNotCreated) {
+                                Base::Console().message(">>> POO exit B (conId=%d undef=%d notCreated=%d)\n",
+                                                            conId, conId == GeoEnum::GeoUndef, newGeosLikelyNotCreated);
                 // nothing further to do
                 return false;
             }
@@ -1754,6 +1768,8 @@ bool SketchObject::deriveConstraintsForPieces(
             double conParam;
             auto* geoAsCurve = static_cast<const Part::GeomCurve*>(geo);
             geoAsCurve->closestParameter(conPoint, conParam);
+            Base::Console().message(">>> POO reached loop, conParam=%.4f conPoint=(%.2f,%.2f)\n",
+                conParam, conPoint.x, conPoint.y);
             // Choose based on where the closest point lies
             // If it's not there, just leave this constraint out
             for (size_t i = 0; i < newIds.size(); ++i) {
@@ -1761,6 +1777,8 @@ bool SketchObject::deriveConstraintsForPieces(
                     = static_cast<const Part::GeomCurve*>(newGeos[i])->getFirstParameter();
                 double newGeoLastParam
                     = static_cast<const Part::GeomCurve*>(newGeos[i])->getLastParameter();
+                Base::Console().message(">>> POO piece %zu: first=%.4f last=%.4f conParam=%.4f\n",
+                    i, newGeoFirstParam, newGeoLastParam, conParam);
                 // For periodic curves the point may need a full revolution
                 if ((newGeoFirstParam - conParam) > Precision::PApproximation()
                     && isClosedCurve(geo)) {
@@ -1768,6 +1786,8 @@ bool SketchObject::deriveConstraintsForPieces(
                 }
                 if ((newGeoFirstParam - conParam) <= Precision::PApproximation()
                     && (conParam - newGeoLastParam) <= Precision::PApproximation()) {
+                    Base::Console().message(">>> POO MATCH piece %zu -> newId=%d, building trans First=%d Fpos=%d Second=%d\n",
+                        i, newIds[i], conId, int(conPos), newIds[i]);
                     Constraint* trans = con->copy();
                     trans->First = conId;
                     trans->FirstPos = conPos;

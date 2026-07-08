@@ -983,6 +983,8 @@ int SketchObject::split(int GeoId, const Base::Vector3d& point)
 {
     // No need to check input data validity as this is an sketchobject managed operation
 
+    Base::Console().message("### SPLIT MARKER v1 GeoId=%d ###\n", GeoId);
+
     Base::StateLocker lock(managedoperation, true);
 
     if (GeoId < 0 || GeoId > getHighestCurveIndex()) {
@@ -1041,9 +1043,15 @@ int SketchObject::split(int GeoId, const Base::Vector3d& point)
         return !allConstraints[i]->involvesGeoIdAndPosId(GeoId, PointPos::none);
     });
 
+    std::vector<const Part::Geometry*> newGeosConst(newGeos.begin(), newGeos.end());
+
+    for (size_t k = 0; k < newGeosConst.size(); ++k) {
+        Base::Console().message("### newGeos[%zu] = %s\n", k, newGeosConst[k] ? "OK" : "NULL");
+    }
+
     for (const auto& oldConstrId : idsOfOldConstraints) {
         Constraint* con = allConstraints[oldConstrId];
-        deriveConstraintsForPieces(GeoId, newIds, con, newConstraints);
+        deriveConstraintsForPieces(GeoId, newIds, newGeosConst, con, newConstraints);
     }
 
     // This also seems to reset SketchObject::Geometry.
@@ -1080,13 +1088,20 @@ int SketchObject::split(int GeoId, const Base::Vector3d& point)
         transferConstraints(GeoId, PointPos::mid, newIds.front(), PointPos::mid);
     }
 
+    Base::Console().message(">>> split: newConstraints has %zu\n", newConstraints.size());
+    for (auto* c : newConstraints)
+        Base::Console().message(">>>   newC type=%d First=%d Fpos=%d Second=%d Spos=%d\n",
+            int(c->Type), c->First, int(c->FirstPos), c->Second, int(c->SecondPos));
+
     delConstraints(std::move(idsOfOldConstraints), DeleteOption::NoSolve);
     replaceGeometries({GeoId}, newGeos);
     addConstraints(newConstraints);
+    Base::Console().message(">>> split: after addConstraints, total=%zu\n", Constraints.getValues().size());
 
     // `if (noRecomputes)` results in a failed test (`testPD_TNPSketchPadSketchSplit(self)`)
     // TODO: figure out why, and if that check must be used
     solve();
+    Base::Console().message(">>> split: after solve, total=%zu\n", Constraints.getValues().size());
 
     for (auto& cons : newConstraints) {
         delete cons;

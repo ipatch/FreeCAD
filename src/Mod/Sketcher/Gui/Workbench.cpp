@@ -176,6 +176,7 @@ inline const QStringList nonEditModeToolbarNames()
 
 void Workbench::activated()
 {
+    Base::Console().message("### SKETCHER WB BUILD MARKER v1 ###\n");
     /* When the workbench is activated, it may happen that we are in edit mode or not.
      * If we are not in edit mode, the function enterEditMode (called by the ViewProvider) takes
      * care to save the state of toolbars outside of edit mode. We cannot do it here, as we are
