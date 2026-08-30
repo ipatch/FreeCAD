@@ -344,3 +344,140 @@ class TestGuiDocument(unittest.TestCase):
 
         self.assertTrue(self._processEventsUntil(lambda: os.path.exists(self._recoveryArchive())))
         self._assertRecoveryArchiveContains(expected_label="AutoSaveBurst7")
+
+
+    def testSaveDispatchesToFocusedMacroEditor(self):
+        print("TEST: start", flush=True)
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            print("TEST: temp dir created", flush=True)
+
+            self.doc.saveAs(os.path.join(temp_dir, "TestDoc.FCStd"))
+            doc_path = self.doc.FileName
+            print(f"TEST: document saved: {doc_path}", flush=True)
+
+            macro_path = os.path.join(temp_dir, "test_macro.FCMacro")
+            with open(macro_path, "w", encoding="utf-8") as macro_file:
+                macro_file.write("# original\n")
+            print(f"TEST: macro written: {macro_path}", flush=True)
+
+            print("TEST: BEFORE FreeCADGui.open()", flush=True)
+            FreeCADGui.open(macro_path)
+            print("TEST: AFTER FreeCADGui.open()", flush=True)
+
+            print("TEST: BEFORE first processEventsUntil()", flush=True)
+            result = self._processEventsUntil(
+                lambda: "EditorView"
+                in (
+                    FreeCADGui.getMainWindow().getActiveWindow().getTypeId()
+                    if FreeCADGui.getMainWindow().getActiveWindow()
+                    else ""
+                )
+            )
+            print(f"TEST: AFTER first processEventsUntil(): {result}", flush=True)
+
+            editor = FreeCADGui.getMainWindow().getActiveWindow()
+            print(f"TEST: editor = {editor}", flush=True)
+
+            self.assertIn("EditorView", editor.getTypeId())
+            print("TEST: editor assertion passed", flush=True)
+
+            main_window = FreeCADGui.getMainWindow()
+            print("TEST: got main window", flush=True)
+
+            text_edits = [
+                widget
+                for widget in main_window.findChildren(QtWidgets.QPlainTextEdit)
+                if widget.toPlainText().startswith("# original")
+            ]
+            print(f"TEST: found {len(text_edits)} text edits", flush=True)
+
+            self.assertEqual(len(text_edits), 1)
+            print("TEST: text edit assertion passed", flush=True)
+
+            text_edit = text_edits[0]
+
+            print("TEST: BEFORE insertPlainText()", flush=True)
+            text_edit.insertPlainText("# modified\n")
+            print("TEST: AFTER insertPlainText()", flush=True)
+
+            print(
+                "TEST: document modified immediately:",
+                text_edit.document().isModified(),
+                flush=True,
+            )
+
+            print(
+                "TEST: editor.supportMessage('Save') immediately:",
+                editor.supportMessage("Save"),
+                flush=True,
+            )
+
+            print("TEST: BEFORE limited processEvents()", flush=True)
+            QtWidgets.QApplication.processEvents(
+                QtCore.QEventLoop.ProcessEventsFlag.AllEvents,
+                50,
+            )
+            print("TEST: AFTER limited processEvents()", flush=True)
+
+            print(
+                "TEST: document modified after events:",
+                text_edit.document().isModified(),
+                flush=True,
+            )
+
+            print(
+                "TEST: editor.supportMessage('Save') after events:",
+                editor.supportMessage("Save"),
+                flush=True,
+            )
+
+            self.assertTrue(editor.supportMessage("Save"))
+            print("TEST: Save support assertion passed", flush=True)
+
+            print("TEST: BEFORE getDocument()", flush=True)
+            gui_doc = FreeCADGui.getDocument(self.doc.Name)
+            print("TEST: AFTER getDocument()", flush=True)
+
+            print("TEST: BEFORE addObject()", flush=True)
+            self.doc.addObject("App::FeaturePython", "ModifiedObject")
+            print("TEST: AFTER addObject()", flush=True)
+
+            self.assertTrue(gui_doc.Modified)
+            print("TEST: Modified assertion passed", flush=True)
+
+            doc_mtime_before = os.stat(doc_path).st_mtime_ns
+            print(f"TEST: document mtime before Save: {doc_mtime_before}", flush=True)
+
+            try:
+                print("TEST: BEFORE Std_Save", flush=True)
+                FreeCADGui.runCommand("Std_Save", 0)
+                print("TEST: AFTER Std_Save", flush=True)
+
+                print("TEST: BEFORE reading macro", flush=True)
+                with open(macro_path, encoding="utf-8") as macro_file:
+                    macro_contents = macro_file.read()
+                print(f"TEST: macro contents: {macro_contents!r}", flush=True)
+
+                self.assertIn("# modified", macro_contents)
+                print("TEST: macro assertion passed", flush=True)
+
+                self.assertTrue(gui_doc.Modified)
+                print("TEST: Modified-after-save assertion passed", flush=True)
+
+                doc_mtime_after = os.stat(doc_path).st_mtime_ns
+                print(f"TEST: document mtime after Save: {doc_mtime_after}", flush=True)
+
+                self.assertEqual(doc_mtime_after, doc_mtime_before)
+                print("TEST: final assertion passed", flush=True)
+            finally:
+                print(
+                    "TEST: cleanup, editor modified:",
+                    text_edits[0].document().isModified(),
+                    flush=True,
+                )
+                text_edits[0].document().setModified(False)
+                print("TEST: editor buffer marked clean", flush=True)
+
+        print("TEST: end", flush=True)
+
